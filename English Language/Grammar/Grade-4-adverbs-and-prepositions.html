@@ -3,6 +3,63 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<<<<<<< codex/create-interactive-gamified-lesson-on-adverbs-and-prepositio-ybwlp7
+  <title>Grade 4: Adverbs & Prepositions Quest</title>
+  <style>
+    :root{--bg1:#6a4c93;--bg2:#00b4d8;--good:#2a9d8f;--bad:#e63946;--ink:#1d2240}
+    *{box-sizing:border-box} body{margin:0;font-family:"Comic Sans MS","Trebuchet MS",sans-serif;background:linear-gradient(130deg,var(--bg1),var(--bg2));color:var(--ink);overflow:hidden}
+    .app{height:100vh;display:grid;grid-template-rows:auto auto 1fr auto;gap:10px;padding:12px}.hud{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+    .bubble{background:#fff;border-radius:16px;padding:8px;text-align:center;font-weight:700;border:3px solid #fff}.barWrap{background:#ffffffaa;height:20px;border-radius:999px;overflow:hidden}.bar{height:100%;width:0;background:linear-gradient(90deg,#ffbe0b,#fb5607);transition:width .4s}
+    .stage{background:#ffffffeb;border:4px solid #fff;border-radius:22px;padding:14px;overflow:auto}.slide{display:none}.slide.active{display:block}
+    .card{background:#fff;border:3px dashed #c77dff;border-radius:14px;padding:10px;margin:8px 0;animation:slideIn .6s}
+    .clip{display:block;margin:8px auto;width:min(540px,100%);border-radius:12px;border:3px solid #fff}
+    .choices{display:grid;gap:8px} button{border:none;border-radius:12px;padding:10px;font-size:1rem;font-weight:700;cursor:pointer}.choice{background:#edf2ff;border:2px solid #b8c0ff}.choice.w{background:#ffe3e3;border-color:var(--bad);animation:shake .35s}.choice.c{background:#d8f3dc;border-color:var(--good)}
+    .nav{display:flex;gap:8px}.nav button{flex:1}.next{background:#ffd166;animation:pulse 1.3s infinite}.back{background:#bde0fe}.fb{min-height:24px;font-weight:700}
+    .hint{display:none;background:#f1f3f5;border-left:5px solid #f8961e;padding:8px;border-radius:8px}.hint.show{display:block}
+    .token{display:inline-block;padding:8px 10px;margin:4px;border-radius:999px;background:#e0fbfc;border:2px solid #98c1d9;cursor:pointer}.zone{min-height:50px;border:3px dashed #777;border-radius:10px;background:#fff;padding:8px;margin:6px 0}
+    #confetti{position:fixed;inset:0;pointer-events:none}
+    /* Fade animation supports chunking by revealing one concept at a time. */ .fade{animation:fade .7s ease}@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+    /* Slide-in builds curiosity by sequencing visual elements. */ @keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+    /* Pulse gently prompts active recall action on navigation. */ @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+    /* Shake provides immediate error feedback to guide correction. */ @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}50%{transform:translateX(4px)}75%{transform:translateX(-3px)}}
+  </style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+<div class="app">
+  <div class="hud"><div class="bubble">⭐ <span id="points">0</span></div><div class="bubble">🔥 <span id="streak">0</span></div><div class="bubble">🎖️ XP <span id="xp">0</span></div><div class="bubble">🏅 <span id="badges">None</span></div></div>
+  <div class="barWrap"><div class="bar" id="bar"></div></div>
+  <main class="stage" id="stage"></main>
+  <div class="nav"><button id="back" class="back">⬅️ Back</button><button id="music">🔇 Music Off</button><button id="next" class="next">Next ➡️</button></div>
+</div>
+<audio id="bgm" muted loop src="audio/background-music.mp3"></audio><audio id="ok" src="audio/correct.mp3"></audio><audio id="no" src="audio/wrong.mp3"></audio><audio id="lvl" src="audio/levelup.mp3"></audio>
+<script>
+const img1=`<img class="clip" alt="Cartoon rocket teaching adverb types" src="data:image/svg+xml;base64,${btoa(`<svg xmlns='http://www.w3.org/2000/svg' width='560' height='280'><rect width='100%' height='100%' fill='#f0f9ff'/><text x='20' y='40' font-size='26'>Adverbs: how, when, where, degree 🚀</text><rect x='180' y='120' width='220' height='90' rx='30' fill='#90e0ef'/><polygon points='400,165 500,130 500,200' fill='#00b4d8'/><text x='25' y='95' font-size='22'>quickly, yesterday, here, very</text></svg>`) }">`;
+const img2=`<img class="clip" alt="Cartoon boxes with cat for prepositions" src="data:image/svg+xml;base64,${btoa(`<svg xmlns='http://www.w3.org/2000/svg' width='560' height='280'><rect width='100%' height='100%' fill='#fff9db'/><text x='20' y='35' font-size='24'>Prepositions show relationships 📦</text><rect x='70' y='140' width='120' height='90' fill='#cdb4db'/><rect x='240' y='140' width='120' height='90' fill='#bde0fe'/><rect x='410' y='140' width='120' height='90' fill='#ffc8dd'/><text x='95' y='132'>on</text><text x='275' y='250'>under</text><text x='255' y='132'>in</text><text x='360' y='132'>between</text></svg>`) }">`;
+
+const slides=[];const S={i:0,p:0,s:0,x:0,l:1,b:new Set(),done:{}};
+const add=h=>slides.push(`<section class='slide fade'>${h}</section>`);
+const q=(t,qq,opts,c,e)=>{const id=Math.random().toString(36).slice(2);return `<h2>${t}</h2><p>${qq}</p><div class='choices'>${opts.map((o,i)=>`<button class='choice' data-id='${id}' data-i='${i}' data-c='${c}' data-e='${e}'>${o}</button>`).join('')}</div><div class='fb' id='f-${id}'></div>`};
+add(`<h1>🎮 Adverbs & Prepositions Quest</h1><p>Curiosity: Why is "quickly" different from "under"?</p>${img1}`);
+add(`<h2>Adverbs ✨</h2><div class='card'>Adverbs modify verbs, adjectives, or adverbs.</div><div class='card'>Example: She ran <b>quickly</b>.</div>`);
+add(q('Mini Quiz 1','Which word is an adverb?',['dog','ran','quickly'],2,'"quickly" tells how.'));
+add(`<h2>Prepositions 📘</h2><div class='card'>Prepositions connect nouns/pronouns to other words.</div>${img2}`);
+add(q('Mini Quiz 2','Pick the preposition: The cat is under the table.',['cat','under','table'],1,'"under" shows relationship.'));
+add(`<h2>Hint Station 💡</h2><button onclick="document.getElementById('h').classList.toggle('show')">Show Hint</button><div id='h' class='hint'>Prepositions are often followed by a noun: under <b>the table</b>.</div>`);
+add(`<h2>Sort It! 🧲</h2><p>Click token, then a zone.</p><div class='zone' id='za'>Adverb Zone</div><div class='zone' id='zp'>Preposition Zone</div><span class='token'>quickly</span><span class='token'>under</span><span class='token'>very</span><span class='token'>between</span><div id='dragFb' class='fb'></div>`);
+for(let i=1;i<=15;i++) add(i%2?q(`Final ${i}/15`,'Choose the adverb: He spoke softly.',['He','spoke','softly'],2,'"softly" modifies spoke.'):q(`Final ${i}/15`,'True/False: "between" is a preposition.',['True','False'],0,'Correct.'));
+add(`<h2>🎉 Celebration!</h2><p id='sum'></p><div id='bb'></div><button onclick='confetti()'>Celebrate Again 🎊</button>`);
+
+const stage=document.getElementById('stage');
+function render(){stage.innerHTML=slides.join('');stage.querySelectorAll('.slide')[S.i].classList.add('active');bar.style.width=((S.i+1)/slides.length*100)+'%';sum.textContent=`Score ${S.p} | XP ${S.x}`;bb.innerHTML=[...S.b].map(v=>`<span class='bubble'>${v}</span>`).join(' ')}
+function hud(){points.textContent=S.p;streak.textContent=S.s;xp.textContent=S.x;badges.textContent=S.b.size?[...S.b].join(', '):'None'}
+let pick=null;
+stage.addEventListener('click',e=>{if(e.target.classList.contains('choice')){const b=e.target,id=b.dataset.id;if(S.done[id])return;const okAns=+b.dataset.i===+b.dataset.c,fb=document.getElementById('f-'+id);if(okAns){b.classList.add('c');S.p+=10+(S.s>=2?5:0);S.s++;S.x+=12;fb.innerHTML=`✅ ${b.dataset.e}`;ok.play().catch(()=>{});if(S.s===3)S.b.add('🔥 Streak Star');if(S.p>=120)S.b.add('🏆 Quiz Champ')}else{b.classList.add('w');S.s=0;fb.innerHTML=`❌ ${b.dataset.e}`;no.play().catch(()=>{})}if(S.x>=S.l*100){S.l++;S.b.add('🎯 Level Up');lvl.play().catch(()=>{});confetti()}S.done[id]=1;hud();}if(e.target.classList.contains('token'))pick=e.target;if(e.target.classList.contains('zone')&&pick){e.target.appendChild(pick);const a=[...document.querySelectorAll('#za .token')].map(n=>n.textContent),p=[...document.querySelectorAll('#zp .token')].map(n=>n.textContent);if(a.includes('quickly')&&a.includes('very')&&p.includes('under')&&p.includes('between')){dragFb.innerHTML='✅ Perfect sort!';S.p+=20;S.b.add('🧲 Sort Master');hud();}}});
+back.onclick=()=>{if(S.i>0){S.i--;render()}};next.onclick=()=>{if(S.i<slides.length-1){S.i++;render()}};music.onclick=()=>{bgm.muted=!bgm.muted;if(bgm.paused)bgm.play().catch(()=>{});music.textContent=bgm.muted?'🔇 Music Off':'🔊 Music On'};
+function confetti(){const c=document.getElementById('confetti'),x=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;const a=[...Array(120)].map(()=>({x:Math.random()*c.width,y:-Math.random()*c.height,r:4+Math.random()*6,v:2+Math.random()*4,c:`hsl(${Math.random()*360},90%,60%)`}));let t=0;(function f(){x.clearRect(0,0,c.width,c.height);a.forEach(p=>{p.y+=p.v;p.x+=Math.sin(p.y/20);x.fillStyle=p.c;x.fillRect(p.x,p.y,p.r,p.r)});if(++t<120)requestAnimationFrame(f);})();}
+render();hud();
+</script>
+=======
   <title>Adverb & Preposition Quest</title>
   <style>
     :root {
@@ -308,5 +365,6 @@
 
     render(); refreshHud();
   </script>
+>>>>>>> main
 </body>
 </html>
