@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grade 4 Perimeter & Area Game Deck</title>
+  <style>
+    :root{--bg1:#5e60ce;--bg2:#00b4d8;--ink:#1f2340;--good:#2a9d8f;--bad:#d62839}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:"Comic Sans MS","Trebuchet MS",sans-serif;background:linear-gradient(130deg,var(--bg1),var(--bg2));color:var(--ink);overflow:hidden}
+    .app{height:100vh;display:grid;grid-template-rows:auto auto 1fr auto;gap:10px;padding:12px}
+    .hud{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.bubble{background:#fff;border:3px solid #fff;border-radius:16px;padding:8px;text-align:center;font-weight:700}
+    .barWrap{height:20px;background:#ffffffaa;border-radius:999px;overflow:hidden}.bar{height:100%;width:0;background:linear-gradient(90deg,#ffbe0b,#fb5607);transition:width .45s ease}
+    .stage{background:#ffffffec;border:4px solid #fff;border-radius:20px;padding:14px;overflow:auto}.slide{display:none}.slide.active{display:block}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}.card{background:#fff;border:3px dashed #c77dff;border-radius:14px;padding:10px;animation:slideIn .6s}
+    .clip{display:block;margin:8px auto;width:min(560px,100%);border-radius:12px;border:3px solid #fff}.choices{display:grid;gap:8px}
+    button{border:none;border-radius:12px;padding:10px;font-size:1rem;font-weight:700;cursor:pointer}.choice{background:#edf2ff;border:2px solid #b8c0ff}.choice.ok{background:#d8f3dc;border-color:var(--good)}.choice.no{background:#ffe3e3;border-color:var(--bad);animation:shake .35s}
+    .fb{min-height:24px;font-weight:700}.hint{display:none;background:#f1f3f5;border-left:5px solid #f8961e;padding:8px;border-radius:8px}.hint.show{display:block}
+    .token{display:inline-block;margin:4px;padding:8px 10px;border-radius:999px;background:#e0fbfc;border:2px solid #98c1d9;cursor:pointer}.zone{min-height:50px;border:3px dashed #777;border-radius:10px;background:#fff;padding:8px;margin:6px 0}
+    .nav{display:flex;gap:8px}.nav button{flex:1}.next{background:#ffd166;animation:pulse 1.4s infinite}.back{background:#bde0fe}
+    #confetti{position:fixed;inset:0;pointer-events:none}
+    /* Fade helps chunk concepts and keep focus on one idea at a time. */ .fade{animation:fade .7s ease}@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+    /* Slide-in reveals examples progressively to build curiosity. */ @keyframes slideIn{from{opacity:0;transform:translateX(22px)}to{opacity:1;transform:none}}
+    /* Pulse nudges learner action for active recall cadence. */ @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+    /* Shake marks incorrect response for immediate corrective feedback. */ @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-4px)}}
+  </style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+<div class="app">
+  <div class="hud"><div class="bubble">⭐ <span id="points">0</span></div><div class="bubble">🔥 <span id="streak">0</span></div><div class="bubble">🎖️ XP <span id="xp">0</span></div><div class="bubble">🧠 Lv <span id="lv">1</span></div><div class="bubble">🏅 <span id="badges">None</span></div></div>
+  <div class="barWrap"><div class="bar" id="bar"></div></div>
+  <main class="stage" id="stage"></main>
+  <div class="nav"><button class="back" id="back">⬅️ Back</button><button id="music">🔇 Music Off</button><button class="next" id="next">Next ➡️</button></div>
+</div>
+<audio id="bgm" muted loop src="audio/background-music.mp3"></audio><audio id="sOk" src="audio/correct.mp3"></audio><audio id="sNo" src="audio/wrong.mp3"></audio><audio id="sLv" src="audio/levelup.mp3"></audio>
+<script>
+const svgToUri = (svg) => 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+const artA=`<img class="clip" alt="Cartoon park rectangle with fence path and inside grass" src="${svgToUri(`<svg xmlns='http://www.w3.org/2000/svg' width='560' height='300'><rect width='100%' height='100%' fill='#f1f7ff'/><rect x='130' y='70' width='300' height='170' fill='#90e0ef' stroke='#0077b6' stroke-width='8' rx='12'/><text x='165' y='45' font-size='24'>Perimeter = around fence</text><text x='205' y='165' font-size='28'>Area = inside</text><text x='250' y='270' font-size='22'>Length 10 m</text><text x='60' y='170' font-size='22'>Width 6 m</text></svg>`)}">`;
+const artB=`<img class="clip" alt="Perimeter vs area comparison chart" src="${svgToUri(`<svg xmlns='http://www.w3.org/2000/svg' width='560' height='300'><rect width='100%' height='100%' fill='#fff5e6'/><rect x='40' y='40' width='220' height='220' rx='20' fill='#ffcad4'/><rect x='300' y='40' width='220' height='220' rx='20' fill='#caffbf'/><text x='90' y='80' font-size='28'>Perimeter</text><text x='75' y='130' font-size='22'>Add all sides</text><text x='75' y='170' font-size='22'>units: m</text><text x='380' y='80' font-size='28'>Area</text><text x='330' y='130' font-size='22'>L x W</text><text x='320' y='170' font-size='22'>units: m2</text></svg>`)}">`;
+
+const slides=[];const st={i:0,p:0,s:0,x:0,l:1,b:new Set(),done:{}};
+const add=h=>slides.push(`<section class='slide fade'>${h}</section>`);
+const quiz=(t,q,o,c,e)=>{const id=Math.random().toString(36).slice(2);return `<h2>${t}</h2><p>${q}</p><div class='choices'>${o.map((v,i)=>`<button class='choice' data-id='${id}' data-i='${i}' data-c='${c}' data-e='${e}'>${v}</button>`).join('')}</div><div id='f-${id}' class='fb'></div>`};
+
+add(`<h1>🎮 Perimeter & Area Quest</h1><p>Curiosity: Can two rectangles have the same perimeter but different area?</p>${artA}`);
+add(`<h2>Perimeter Rule 🔁</h2><div class='grid'><div class='card'><b>P = 2L + 2W</b></div><div class='card'>Walk around the edge to feel perimeter!</div></div>`);
+add(`<h2>Area Rule 🟦</h2>${artB}<div class='card'><b>A = L × W</b> (inside space)</div>`);
+add(`<h2>Unknown Width Mystery 🕵️</h2><p>Area=24 m², Length=6 m</p><p><b>24 = 6 × w</b> so <b>w = 4 m</b>.</p>`);
+
+const miniMath=[
+  ['Mini Quiz 1','Rectangle: L=7, W=4. Perimeter?',['11 m','22 m','28 m'],1,'2×7 + 2×4 = 22 m'],
+  ['Mini Quiz 2','Rectangle: L=6, W=3. Area?',['9 m²','18 m²','12 m²'],1,'6 × 3 = 18 m²'],
+  ['Mini Quiz 3','True/False: Area uses square units.',['True','False'],0,'Yes, m², cm², etc.'],
+  ['Mini Quiz 4','Perimeter of L=10, W=2?',['12 m','24 m','20 m'],1,'2(10)+2(2)=24'],
+  ['Mini Quiz 5','Area of L=9, W=4?',['36 m²','13 m²','26 m²'],0,'9×4=36'],
+  ['Mini Quiz 6','If A=20 and L=5, W=?',['4 m','5 m','15 m'],0,'20÷5=4'],
+  ['Mini Quiz 7','True/False: Perimeter measures inside space.',['True','False'],1,'That is area, not perimeter.'],
+  ['Mini Quiz 8','Rectangle 8 by 8 area?',['16 m²','64 m²','32 m²'],1,'8×8=64'],
+  ['Mini Quiz 9','Rectangle 8 by 8 perimeter?',['64 m','32 m','16 m'],1,'2(8)+2(8)=32'],
+  ['Mini Quiz 10','A=45, L=9. W=?',['5 m','4 m','6 m'],0,'45÷9=5'],
+  ['Mini Quiz 11','Pick area unit',['m','m²','m³'],1,'Area uses square units.'],
+  ['Mini Quiz 12','Pick perimeter unit',['m²','m','cm²'],1,'Perimeter is linear.'],
+  ['Mini Quiz 13','L=12, W=3. P=?',['30 m','36 m','15 m'],0,'24+6=30'],
+  ['Mini Quiz 14','L=12, W=3. A=?',['15 m²','36 m²','30 m²'],1,'12×3=36'],
+  ['Mini Quiz 15','True/False: width = area ÷ length',['True','False'],0,'Correct inverse relationship.']
+];
+miniMath.forEach((m,idx)=>{ if(idx%3===0) add(`<h2>Practice Checkpoint ${Math.floor(idx/3)+1}</h2><p>Quick brain boost before more challenge! ✨</p>`); add(quiz(m[0],m[1],m[2],m[3],m[4])); });
+add(`<h2>Hint Time 💡</h2><button onclick="document.getElementById('hint').classList.toggle('show')">Show Hint</button><div id='hint' class='hint'>If A and L are known: W = A ÷ L</div>`);
+add(`<h2>Sort It! 🧲</h2><p>Click token then zone.</p><div class='zone' id='zP'>Perimeter Zone</div><div class='zone' id='zA'>Area Zone</div><span class='token'>2L + 2W</span><span class='token'>L × W</span><span class='token'>square units</span><span class='token'>add all sides</span><div id='dragFb' class='fb'></div>`);
+for(let n=1;n<=15;n++){ if(n%3===0) add(quiz(`Final ${n}/15`,'True/False: P of 9m by 2m is 22m.',['True','False'],0,'2(9)+2(2)=22')); else if(n%2===0) add(quiz(`Final ${n}/15`,'Area of 8m by 5m?',['13 m²','40 m²','26 m²'],1,'8×5=40')); else add(quiz(`Final ${n}/15`,'Area=36 m², Length=9 m. Width?',['3 m','4 m','5 m'],1,'36÷9=4')); }
+add(`<h2>🎉 Celebration Slide</h2><p id='sum'>Great work!</p><div id='badgeList'></div><button onclick='confetti()'>Celebrate Again 🎊</button>`);
+
+const stage=document.getElementById('stage'),bar=document.getElementById('bar'),points=document.getElementById('points'),streak=document.getElementById('streak'),xp=document.getElementById('xp'),lv=document.getElementById('lv'),badges=document.getElementById('badges');
+function draw(){stage.innerHTML=slides.join('');const all=stage.querySelectorAll('.slide');if(all[st.i]) all[st.i].classList.add('active');bar.style.width=((st.i+1)/slides.length*100)+'%';const sum=stage.querySelector('#sum');if(sum) sum.textContent=`Final Score: ${st.p} | XP: ${st.x} | Level: ${st.l}`;const bl=stage.querySelector('#badgeList');if(bl) bl.innerHTML=[...st.b].map(v=>`<span class='bubble'>${v}</span>`).join(' ')}
+function hud(){points.textContent=st.p;streak.textContent=st.s;xp.textContent=st.x;lv.textContent=st.l;badges.textContent=st.b.size?[...st.b].join(', '):'None'}
+let picked=null;
+stage.addEventListener('click',e=>{if(e.target.classList.contains('choice')){const b=e.target,id=b.dataset.id;if(st.done[id])return;const ok=(+b.dataset.i===+b.dataset.c),f=stage.querySelector('#f-'+id);if(ok){b.classList.add('ok');st.p+=10+(st.s>=2?5:0);st.s++;st.x+=12;if(f)f.textContent='✅ '+b.dataset.e;document.getElementById('sOk').play().catch(()=>{});if(st.s===3)st.b.add('🔥 Streak Star');if(st.p>=180)st.b.add('🏆 Quiz Champ')}else{b.classList.add('no');st.s=0;if(f)f.textContent='❌ '+b.dataset.e;document.getElementById('sNo').play().catch(()=>{})}if(st.x>=st.l*100){st.l++;st.b.add('🎯 Level Up');document.getElementById('sLv').play().catch(()=>{});confetti()}st.done[id]=1;hud()}if(e.target.classList.contains('token'))picked=e.target;if(e.target.classList.contains('zone')&&picked){e.target.appendChild(picked);const p=[...stage.querySelectorAll('#zP .token')].map(x=>x.textContent),a=[...stage.querySelectorAll('#zA .token')].map(x=>x.textContent);const fb=stage.querySelector('#dragFb');if(p.includes('2L + 2W')&&p.includes('add all sides')&&a.includes('L × W')&&a.includes('square units')){if(fb)fb.textContent='✅ Perfect sorting!';st.p+=20;st.b.add('🧲 Sort Master');hud();}}});
+
+document.getElementById('back').onclick=()=>{if(st.i>0){st.i--;draw()}};document.getElementById('next').onclick=()=>{if(st.i<slides.length-1){st.i++;draw()}};
+document.getElementById('music').onclick=()=>{const bgm=document.getElementById('bgm');bgm.muted=!bgm.muted;if(bgm.paused)bgm.play().catch(()=>{});document.getElementById('music').textContent=bgm.muted?'🔇 Music Off':'🔊 Music On'};
+function confetti(){const c=document.getElementById('confetti'),x=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;const pcs=[...Array(140)].map(()=>({x:Math.random()*c.width,y:-Math.random()*c.height,r:4+Math.random()*5,v:2+Math.random()*4,c:`hsl(${Math.random()*360},90%,60%)`}));let t=0;(function loop(){x.clearRect(0,0,c.width,c.height);pcs.forEach(p=>{p.y+=p.v;p.x+=Math.sin(p.y/24);x.fillStyle=p.c;x.fillRect(p.x,p.y,p.r,p.r)});if(++t<130)requestAnimationFrame(loop);})();}
+
+draw();hud();
+</script>
+</body>
+</html>
