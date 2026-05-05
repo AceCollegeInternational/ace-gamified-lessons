@@ -42,9 +42,26 @@ const add=h=>slides.push(`<section class='slide fade'>${h}</section>`);
 const q=(t,qq,opts,c,e)=>{const id=Math.random().toString(36).slice(2);return `<h2>${t}</h2><p>${qq}</p><div class='choices'>${opts.map((o,i)=>`<button class='choice' data-id='${id}' data-i='${i}' data-c='${c}' data-e='${e}'>${o}</button>`).join('')}</div><div class='fb' id='f-${id}'></div>`};
 add(`<h1>🎮 Adverbs & Prepositions Quest</h1><p>Curiosity: Why is "quickly" different from "under"?</p>${img1}`);
 add(`<h2>Adverbs ✨</h2><div class='card'>Adverbs modify verbs, adjectives, or adverbs.</div><div class='card'>Example: She ran <b>quickly</b>.</div>`);
-add(q('Mini Quiz 1','Which word is an adverb?',['dog','ran','quickly'],2,'"quickly" tells how.'));
 add(`<h2>Prepositions 📘</h2><div class='card'>Prepositions connect nouns/pronouns to other words.</div>${img2}`);
-add(q('Mini Quiz 2','Pick the preposition: The cat is under the table.',['cat','under','table'],1,'"under" shows relationship.'));
+
+const miniELA=[
+['Mini Quiz 1','Which word is an adverb?',['dog','ran','quickly'],2,'"quickly" tells how.'],
+['Mini Quiz 2','Pick the preposition: The cat is under the table.',['cat','under','table'],1,'"under" shows relationship.'],
+['Mini Quiz 3','True/False: very can be an adverb.',['True','False'],0,'It modifies adjectives/adverbs.'],
+['Mini Quiz 4','Pick the preposition: We sat between friends.',['sat','between','friends'],1,'between links relationship.'],
+['Mini Quiz 5','Choose adverb: She sings beautifully.',['She','sings','beautifully'],2,'Adverb tells how.'],
+['Mini Quiz 6','True/False: under is an adverb.',['True','False'],1,'under is usually a preposition.'],
+['Mini Quiz 7','Choose preposition: book on table',['book','on','table'],1,'on shows position.'],
+['Mini Quiz 8','Choose adverb: He arrived early.',['He','arrived','early'],2,'early modifies arrived.'],
+['Mini Quiz 9','True/False: prepositions are followed by nouns/pronouns.',['True','False'],0,'Yes, often as phrases.'],
+['Mini Quiz 10','Choose adverb: They worked quietly.',['worked','quietly','They'],1,'quietly describes worked.'],
+['Mini Quiz 11','Choose preposition: through the tunnel',['through','tunnel','the'],0,'through links relation.'],
+['Mini Quiz 12','True/False: yesterday can be an adverb.',['True','False'],0,'It tells when.'],
+['Mini Quiz 13','Choose preposition: at noon',['at','noon','none'],0,'at is preposition.'],
+['Mini Quiz 14','Choose adverb: very cold',['very','cold','none'],0,'very modifies adjective cold.'],
+['Mini Quiz 15','True/False: Adverbs can modify other adverbs.',['True','False'],0,'Example: really slowly.']
+];
+miniELA.forEach((m,idx)=>{if(idx%3===0)add(`<h2>Practice Checkpoint ${Math.floor(idx/3)+1}</h2><p>Time for quick recall! 🎯</p>`);add(q(m[0],m[1],m[2],m[3],m[4]));});
 add(`<h2>Hint Station 💡</h2><button onclick="document.getElementById('h').classList.toggle('show')">Show Hint</button><div id='h' class='hint'>Prepositions are often followed by a noun: under <b>the table</b>.</div>`);
 add(`<h2>Sort It! 🧲</h2><p>Click token, then a zone.</p><div class='zone' id='za'>Adverb Zone</div><div class='zone' id='zp'>Preposition Zone</div><span class='token'>quickly</span><span class='token'>under</span><span class='token'>very</span><span class='token'>between</span><div id='dragFb' class='fb'></div>`);
 for(let i=1;i<=15;i++) add(i%2?q(`Final ${i}/15`,'Choose the adverb: He spoke softly.',['He','spoke','softly'],2,'"softly" modifies spoke.'):q(`Final ${i}/15`,'True/False: "between" is a preposition.',['True','False'],0,'Correct.'));

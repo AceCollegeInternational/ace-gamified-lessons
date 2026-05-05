@@ -45,11 +45,27 @@ const quiz=(t,q,o,c,e)=>{const id=Math.random().toString(36).slice(2);return `<h
 
 add(`<h1>🎮 Perimeter & Area Quest</h1><p>Curiosity: Can two rectangles have the same perimeter but different area?</p>${artA}`);
 add(`<h2>Perimeter Rule 🔁</h2><div class='grid'><div class='card'><b>P = 2L + 2W</b></div><div class='card'>Walk around the edge to feel perimeter!</div></div>`);
-add(quiz('Mini Quiz 1','Rectangle: L=7, W=4. Perimeter?',['11 m','22 m','28 m'],1,'2×7 + 2×4 = 22 m'));
 add(`<h2>Area Rule 🟦</h2>${artB}<div class='card'><b>A = L × W</b> (inside space)</div>`);
-add(quiz('Mini Quiz 2','Rectangle: L=6, W=3. Area?',['9 m²','18 m²','12 m²'],1,'6 × 3 = 18 m²'));
 add(`<h2>Unknown Width Mystery 🕵️</h2><p>Area=24 m², Length=6 m</p><p><b>24 = 6 × w</b> so <b>w = 4 m</b>.</p>`);
-add(quiz('Mini Quiz 3','True/False: Area uses square units.',['True','False'],0,'Yes, m², cm², etc.'));
+
+const miniMath=[
+  ['Mini Quiz 1','Rectangle: L=7, W=4. Perimeter?',['11 m','22 m','28 m'],1,'2×7 + 2×4 = 22 m'],
+  ['Mini Quiz 2','Rectangle: L=6, W=3. Area?',['9 m²','18 m²','12 m²'],1,'6 × 3 = 18 m²'],
+  ['Mini Quiz 3','True/False: Area uses square units.',['True','False'],0,'Yes, m², cm², etc.'],
+  ['Mini Quiz 4','Perimeter of L=10, W=2?',['12 m','24 m','20 m'],1,'2(10)+2(2)=24'],
+  ['Mini Quiz 5','Area of L=9, W=4?',['36 m²','13 m²','26 m²'],0,'9×4=36'],
+  ['Mini Quiz 6','If A=20 and L=5, W=?',['4 m','5 m','15 m'],0,'20÷5=4'],
+  ['Mini Quiz 7','True/False: Perimeter measures inside space.',['True','False'],1,'That is area, not perimeter.'],
+  ['Mini Quiz 8','Rectangle 8 by 8 area?',['16 m²','64 m²','32 m²'],1,'8×8=64'],
+  ['Mini Quiz 9','Rectangle 8 by 8 perimeter?',['64 m','32 m','16 m'],1,'2(8)+2(8)=32'],
+  ['Mini Quiz 10','A=45, L=9. W=?',['5 m','4 m','6 m'],0,'45÷9=5'],
+  ['Mini Quiz 11','Pick area unit',['m','m²','m³'],1,'Area uses square units.'],
+  ['Mini Quiz 12','Pick perimeter unit',['m²','m','cm²'],1,'Perimeter is linear.'],
+  ['Mini Quiz 13','L=12, W=3. P=?',['30 m','36 m','15 m'],0,'24+6=30'],
+  ['Mini Quiz 14','L=12, W=3. A=?',['15 m²','36 m²','30 m²'],1,'12×3=36'],
+  ['Mini Quiz 15','True/False: width = area ÷ length',['True','False'],0,'Correct inverse relationship.']
+];
+miniMath.forEach((m,idx)=>{ if(idx%3===0) add(`<h2>Practice Checkpoint ${Math.floor(idx/3)+1}</h2><p>Quick brain boost before more challenge! ✨</p>`); add(quiz(m[0],m[1],m[2],m[3],m[4])); });
 add(`<h2>Hint Time 💡</h2><button onclick="document.getElementById('hint').classList.toggle('show')">Show Hint</button><div id='hint' class='hint'>If A and L are known: W = A ÷ L</div>`);
 add(`<h2>Sort It! 🧲</h2><p>Click token then zone.</p><div class='zone' id='zP'>Perimeter Zone</div><div class='zone' id='zA'>Area Zone</div><span class='token'>2L + 2W</span><span class='token'>L × W</span><span class='token'>square units</span><span class='token'>add all sides</span><div id='dragFb' class='fb'></div>`);
 for(let n=1;n<=15;n++){ if(n%3===0) add(quiz(`Final ${n}/15`,'True/False: P of 9m by 2m is 22m.',['True','False'],0,'2(9)+2(2)=22')); else if(n%2===0) add(quiz(`Final ${n}/15`,'Area of 8m by 5m?',['13 m²','40 m²','26 m²'],1,'8×5=40')); else add(quiz(`Final ${n}/15`,'Area=36 m², Length=9 m. Width?',['3 m','4 m','5 m'],1,'36÷9=4')); }

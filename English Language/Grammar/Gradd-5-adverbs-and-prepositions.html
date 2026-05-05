@@ -214,12 +214,30 @@ const svgToUri = (svg) => "data:image/svg+xml;utf8," + encodeURIComponent(svg);
     makeSlide(`<h1>🎮 Grammar Quest: Adverbs & Prepositions</h1><p class='subtitle'>Can you level up by helping words do their jobs?</p>${adverbImg}<p>Curiosity Challenge: Which word tells <b>how</b> someone runs?</p>`);
     makeSlide(`<h2>What is an Adverb? ✨</h2><p>An adverb modifies a <b>verb</b>, <b>adjective</b>, or another <b>adverb</b>.</p><div class='card-grid'><div class='card'>She ran <b>quickly</b>. (modifies verb)</div><div class='card'>It is <b>very</b> bright. (modifies adjective)</div><div class='card'>He moved <b>really slowly</b>. (modifies adverb)</div></div>`);
     makeSlide(`<h2>Types of Adverbs 🧩</h2>${adverbImg}<div class='card-grid'><div class='card'>How? quickly</div><div class='card'>When? yesterday</div><div class='card'>Where? nearby</div><div class='card'>To what extent? very</div></div>`);
-    makeSlide(quiz("Mini Quiz 1","Which word is an adverb?","The turtle moved slowly.",["turtle","moved","slowly"],2,"'Slowly' tells HOW it moved."));
-    makeSlide(quiz("Mini Quiz 2","True or False: 'very' can be an adverb.",["True","False"],0,"Yes, it modifies adjectives/adverbs."));
     makeSlide(`<h2>What is a Preposition? 📘</h2><p>A preposition shows a relationship between a noun/pronoun and another word.</p>${prepImg}<p>Example: The book is <b>on</b> the desk.</p>`);
     makeSlide(`<h2>Common Prepositions 🚦</h2><div class='card-grid'><div class='card'>in, on, at</div><div class='card'>under, over, between</div><div class='card'>through, near, behind</div></div><p class='small'>Prepositional phrase: <b>under the table</b></p>`);
-    makeSlide(quiz("Mini Quiz 3","Pick the preposition: The dog slept under the chair.",["dog","slept","under"],2,"'Under' links dog to chair location."));
-    makeSlide(quiz("Mini Quiz 4","True/False: 'between' is a preposition.",["True","False"],0,"Correct! It shows relationship."));
+
+    const miniSet = [
+      ["Mini Quiz 1","Which word is an adverb?",["turtle","moved","slowly"],2,"'Slowly' tells HOW it moved."],
+      ["Mini Quiz 2","True or False: 'very' can be an adverb.",["True","False"],0,"Yes, it modifies adjectives/adverbs."],
+      ["Mini Quiz 3","Pick the preposition: The dog slept under the chair.",["dog","slept","under"],2,"'Under' links dog to chair location."],
+      ["Mini Quiz 4","True/False: 'between' is a preposition.",["True","False"],0,"Correct! It shows relationship."],
+      ["Mini Quiz 5","Choose adverb: He answered quickly.",["He","answered","quickly"],2,"quickly modifies answered."],
+      ["Mini Quiz 6","Choose preposition: We stood near the bus.",["stood","near","bus"],1,"near shows relation."],
+      ["Mini Quiz 7","True/False: Adverbs can modify adjectives.",["True","False"],0,"Example: very bright."],
+      ["Mini Quiz 8","Choose adverb: They arrived yesterday.",["They","arrived","yesterday"],2,"yesterday tells when."],
+      ["Mini Quiz 9","Choose preposition: The ball rolled through the gate.",["rolled","through","gate"],1,"through links words."],
+      ["Mini Quiz 10","True/False: in can be a preposition.",["True","False"],0,"Correct."],
+      ["Mini Quiz 11","Choose adverb: She whispered softly.",["She","whispered","softly"],2,"softly tells how."],
+      ["Mini Quiz 12","Choose preposition: at sunrise",["at","sunrise","none"],0,"at starts a prepositional phrase."],
+      ["Mini Quiz 13","True/False: very can modify an adverb.",["True","False"],0,"very slowly."],
+      ["Mini Quiz 14","Choose preposition: between two trees",["between","two","trees"],0,"between is preposition."],
+      ["Mini Quiz 15","Choose adverb: We looked everywhere.",["We","looked","everywhere"],2,"everywhere tells where."]
+    ];
+    miniSet.forEach((m, idx) => {
+      if (idx % 3 === 0) makeSlide(`<h2>Practice Checkpoint ${Math.floor(idx/3)+1}</h2><p>Quick spaced practice round! 🧠</p>`);
+      makeSlide(quiz(m[0], m[1], m[2], m[3], m[4]));
+    });
     makeSlide(`<h2>Adverb or Preposition? 🤔</h2><p>Adverbs describe action/quality. Prepositions connect nouns/pronouns to other words.</p><button onclick="document.getElementById('hint1').classList.toggle('show')">💡 Show Hint</button><div id='hint1' class='hint'>Look for a noun after a preposition: <b>under the desk</b>.</div>`);
     makeSlide(simDrop());
 
