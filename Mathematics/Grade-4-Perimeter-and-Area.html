@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Perimeter & Area Adventure</title>
+  <style>
+    :root{--bg1:#5a189a;--bg2:#00b4d8;--ink:#1f1f45;--card:#ffffff;--good:#1faa59;--bad:#d7263d;--gold:#ffbe0b}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:"Comic Sans MS","Trebuchet MS","Arial Rounded MT Bold",sans-serif;background:linear-gradient(140deg,var(--bg1),var(--bg2));color:var(--ink);overflow:hidden}
+    .app{height:100vh;display:grid;grid-template-rows:auto auto 1fr auto;gap:10px;padding:12px}
+    .hud{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+    .bubble{background:#ffffffee;border:3px solid #fff;border-radius:16px;padding:8px;text-align:center;font-weight:700;box-shadow:0 6px 14px #0002}
+    .progressWrap{height:20px;border-radius:999px;background:#fff8;border:2px solid #fff;overflow:hidden}
+    .progress{height:100%;width:0;background:linear-gradient(90deg,#ffbe0b,#fb5607);transition:width .5s ease}
+    .stage{background:#ffffffea;border-radius:24px;border:4px solid #fff;box-shadow:0 12px 24px #0003;padding:16px;overflow:auto}
+    .slide{display:none}.slide.active{display:block}
+    h1,h2{margin:6px 0}.sub{font-size:1.1rem}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+    .card{background:#fff;border:3px dashed #c77dff;border-radius:16px;padding:10px;animation:slideIn .6s ease}
+    .clip{width:min(560px,100%);display:block;margin:8px auto;border-radius:12px;border:3px solid #fff;box-shadow:0 8px 16px #0002}
+    .choices{display:grid;gap:8px}
+    button{border:none;border-radius:14px;padding:10px 12px;font-size:1rem;font-weight:700;cursor:pointer;transition:transform .2s,box-shadow .2s}
+    button:hover{transform:translateY(-2px);box-shadow:0 6px 12px #0002}
+    .choice{background:#edf2ff;border:2px solid #b8c0ff}.choice.correct{background:#d8f3dc;border-color:var(--good)}.choice.wrong{background:#ffe3e3;border-color:var(--bad);animation:shake .35s}
+    .feedback{min-height:24px;margin-top:8px;font-weight:700}.good{color:#107d39}.bad{color:#b21e35}
+    .hint{display:none;background:#f1f3f5;border-left:5px solid #f8961e;border-radius:8px;padding:8px}.hint.show{display:block}
+    .token{display:inline-block;margin:4px;padding:8px 10px;background:#e0fbfc;border:2px solid #98c1d9;border-radius:999px;cursor:pointer}
+    .zone{min-height:50px;padding:10px;border:3px dashed #777;border-radius:12px;background:#fff;margin-bottom:8px}
+    .nav{display:flex;gap:8px}.nav button{flex:1}.next{background:#ffd166;animation:pulse 1.4s infinite}.back{background:#bde0fe}
+    #confetti{position:fixed;inset:0;pointer-events:none}
+
+    /* Fade-in reveals one chunk at a time to reduce cognitive overload. */
+    .fade{animation:fade .7s ease}
+    @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+    /* Slide-in gives visual sequencing and supports curiosity pacing. */
+    @keyframes slideIn{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+    /* Pulse encourages active recall by highlighting the next action. */
+    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+    /* Shake provides immediate error signaling for rapid correction loops. */
+    @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-4px)}}
+  </style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+<div class="app">
+  <div class="hud">
+    <div class="bubble">⭐ Points: <span id="points">0</span></div>
+    <div class="bubble">🔥 Streak: <span id="streak">0</span></div>
+    <div class="bubble">🎖️ XP: <span id="xp">0</span></div>
+    <div class="bubble">🧠 Level: <span id="level">1</span></div>
+    <div class="bubble">🏅 Badges: <span id="badges">None</span></div>
+  </div>
+  <div class="progressWrap"><div class="progress" id="bar"></div></div>
+  <main class="stage" id="stage"></main>
+  <div class="nav">
+    <button id="back" class="back">⬅️ Back</button>
+    <button id="music">🔇 Music Off</button>
+    <button id="next" class="next">Next ➡️</button>
+  </div>
+</div>
+<audio id="bgm" muted loop src="audio/background-music.mp3"></audio>
+<audio id="okSfx" src="audio/correct.mp3"></audio>
+<audio id="noSfx" src="audio/wrong.mp3"></audio>
+<audio id="lvlSfx" src="audio/levelup.mp3"></audio>
+<script>
+const svg1 = `<img class="clip" alt="Cartoon rectangle garden with colorful fence showing perimeter path" src="data:image/svg+xml;base64,${btoa(`<svg xmlns='http://www.w3.org/2000/svg' width='560' height='300'><rect width='100%' height='100%' fill='#f1f7ff'/><rect x='120' y='70' width='320' height='170' rx='14' fill='#90e0ef' stroke='#0077b6' stroke-width='8'/><text x='225' y='160' font-size='28'>Area = inside 🌱</text><text x='150' y='45' font-size='24'>Perimeter = around fence 🧱</text><text x='255' y='265' font-size='22'>8 m</text><text x='70' y='165' font-size='22'>5 m</text></svg>`) }">`;
+const svg2 = `<img class="clip" alt="Comparison chart perimeter versus area with kid character" src="data:image/svg+xml;base64,${btoa(`<svg xmlns='http://www.w3.org/2000/svg' width='560' height='300'><rect width='100%' height='100%' fill='#fff6e6'/><rect x='40' y='40' width='220' height='220' rx='20' fill='#ffcad4'/><rect x='300' y='40' width='220' height='220' rx='20' fill='#caffbf'/><text x='95' y='80' font-size='28'>Perimeter</text><text x='85' y='130' font-size='24'>Add all sides</text><text x='80' y='170' font-size='24'>unit: meters</text><text x='365' y='80' font-size='28'>Area</text><text x='340' y='130' font-size='24'>length × width</text><text x='340' y='170' font-size='24'>unit: square m</text><circle cx='280' cy='230' r='24' fill='#ffd166'/><text x='268' y='238' font-size='24'>😄</text></svg>`) }">`;
+
+const slides=[];
+const s={i:0,points:0,streak:0,xp:0,level:1,badges:new Set(),done:{}};
+function add(html){slides.push(`<section class='slide fade'>${html}</section>`)}
+
+add(`<h1>🎮 Perimeter & Area Adventure</h1><p class='sub'>Curiosity: Two rectangles can have the same perimeter... but different area?!</p>${svg1}`);
+add(`<h2>Perimeter = Around the shape 🔁</h2><div class='grid'><div class='card'>Rectangle formula: <b>P = 2L + 2W</b></div><div class='card'>Think: walking around a playground fence.</div></div>`);
+add(quiz('Mini Quiz 1','A rectangle has sides 7m and 4m. Perimeter?',['11 m','22 m','28 m'],1,'P = 2(7)+2(4)=22 m'));
+add(`<h2>Area = Space inside 🟦</h2>${svg2}<div class='card'>Rectangle formula: <b>A = L × W</b></div>`);
+add(quiz('Mini Quiz 2','Length 6m, width 3m. Area?',['9 m²','18 m²','12 m²'],1,'A = 6 × 3 = 18 m²'));
+add(`<h2>Unknown Width Mystery 🕵️</h2><p>If area is 24 m² and length is 6 m, width is?</p><p><b>24 = 6 × w</b> so <b>w = 4</b>.</p>`);
+add(quiz('Mini Quiz 3','True/False: Area units can be m².',['True','False'],0,'Yes, area uses square units.'));
+add(`<h2>Click to Reveal Hint 💡</h2><p>How do you solve for unknown side when area is known?</p><button onclick="document.getElementById('h').classList.toggle('show')">Show Hint</button><div id='h' class='hint'>Use inverse operation: width = area ÷ length.</div>`);
+add(dragSim());
+
+for(let k=1;k<=15;k++){
+  if(k%3===0){ add(quiz(`Final Challenge ${k}/15`,`True/False: Perimeter of 9m by 2m rectangle is 22m.`,['True','False'],0,'2(9)+2(2)=22')) }
+  else if(k%2===0){ add(quiz(`Final Challenge ${k}/15`,`Area of 8m by 5m rectangle?`,['13 m²','40 m²','26 m²'],1,'8 × 5 = 40 m²')) }
+  else { add(quiz(`Final Challenge ${k}/15`,`Area is 36 m² and length is 9 m. Width?`,['3 m','4 m','5 m'],1,'36 ÷ 9 = 4 m')) }
+}
+add(`<h2>🎉 You Did It, Math Hero!</h2><p id='summary'></p><p>Perimeter = around. Area = inside. Unknown side? Use division! 🚀</p><div id='badgeBox'></div><button onclick='confetti()'>Celebrate Again 🎊</button>`);
+
+function quiz(t,q,opts,c,ex){const id=Math.random().toString(36).slice(2);return `<h2>${t}</h2><p>${q}</p><div class='choices'>${opts.map((o,i)=>`<button class='choice' data-id='${id}' data-i='${i}' data-c='${c}' data-ex='${ex}'>${o}</button>`).join('')}</div><div id='f-${id}' class='feedback'></div>`}
+function dragSim(){return `<h2>Sort It! (Drag-like) 🧲</h2><p>Click a token, then click the best zone.</p><div class='zone' id='zP'>Perimeter Zone</div><div class='zone' id='zA'>Area Zone</div><span class='token'>2L + 2W</span><span class='token'>L × W</span><span class='token'>square units</span><span class='token'>add all sides</span><div id='dragFb' class='feedback'></div>`}
+
+const stage=document.getElementById('stage');
+function render(){stage.innerHTML=slides.join('');stage.querySelectorAll('.slide')[s.i].classList.add('active');bar.style.width=((s.i+1)/slides.length*100)+'%';summary.textContent=`Final Score: ${s.points} | XP: ${s.xp} | Level: ${s.level}`;badgeBox.innerHTML=[...s.badges].map(b=>`<span class='bubble'>${b}</span>`).join(' ')}
+function hud(){points.textContent=s.points;streak.textContent=s.streak;xp.textContent=s.xp;level.textContent=s.level;badges.textContent=s.badges.size?[...s.badges].join(', '):'None'}
+
+let pick=null;
+stage.addEventListener('click',e=>{
+  if(e.target.classList.contains('choice')){
+    const b=e.target,id=b.dataset.id;if(s.done[id]) return;
+    const ok=+b.dataset.i===+b.dataset.c, fb=document.getElementById('f-'+id);
+    if(ok){b.classList.add('correct');s.points+=10+(s.streak>=2?5:0);s.streak++;s.xp+=12;fb.innerHTML=`<span class='good'>✅ ${b.dataset.ex}</span>`;okSfx.play().catch(()=>{});if(s.streak===3)s.badges.add('🔥 Streak Star');if(s.points>=180)s.badges.add('🏆 Quiz Champ')}
+    else{b.classList.add('wrong');s.streak=0;fb.innerHTML=`<span class='bad'>❌ ${b.dataset.ex}</span>`;noSfx.play().catch(()=>{})}
+    if(s.xp>=s.level*100){s.level++;s.badges.add('🎯 Level Up');lvlSfx.play().catch(()=>{});confetti()}
+    s.done[id]=1;hud();
+  }
+  if(e.target.classList.contains('token')) pick=e.target;
+  if(e.target.classList.contains('zone')&&pick){e.target.appendChild(pick);const p=[...document.querySelectorAll('#zP .token')].map(x=>x.textContent);const a=[...document.querySelectorAll('#zA .token')].map(x=>x.textContent);if(p.includes('2L + 2W')&&p.includes('add all sides')&&a.includes('L × W')&&a.includes('square units')){dragFb.innerHTML='<span class="good">✅ Perfect sorting!</span>';s.points+=20;s.badges.add('🧲 Sort Master');hud();}}
+});
+
+back.onclick=()=>{if(s.i>0){s.i--;render()}};
+next.onclick=()=>{if(s.i<slides.length-1){s.i++;render()}};
+music.onclick=()=>{bgm.muted=!bgm.muted;if(bgm.paused)bgm.play().catch(()=>{});music.textContent=bgm.muted?'🔇 Music Off':'🔊 Music On'};
+
+function confetti(){const c=document.getElementById('confetti'),x=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;const pcs=[...Array(140)].map(()=>({x:Math.random()*c.width,y:-Math.random()*c.height,r:4+Math.random()*6,v:2+Math.random()*4,c:`hsl(${Math.random()*360},90%,60%)`}));let t=0;(function a(){x.clearRect(0,0,c.width,c.height);pcs.forEach(p=>{p.y+=p.v;p.x+=Math.sin(p.y/25);x.fillStyle=p.c;x.fillRect(p.x,p.y,p.r,p.r)});t++;if(t<130)requestAnimationFrame(a);else x.clearRect(0,0,c.width,c.height)})()}
+
+render();hud();
+</script>
+</body>
+</html>
