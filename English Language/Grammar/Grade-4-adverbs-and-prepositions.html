@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<<<<<<< codex/create-interactive-gamified-lesson-on-adverbs-and-prepositio-ybwlp7
   <title>Grade 4: Adverbs & Prepositions Quest</title>
   <style>
     :root{--bg1:#6a4c93;--bg2:#00b4d8;--good:#2a9d8f;--bad:#e63946;--ink:#1d2240}
@@ -59,7 +58,6 @@ back.onclick=()=>{if(S.i>0){S.i--;render()}};next.onclick=()=>{if(S.i<slides.len
 function confetti(){const c=document.getElementById('confetti'),x=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;const a=[...Array(120)].map(()=>({x:Math.random()*c.width,y:-Math.random()*c.height,r:4+Math.random()*6,v:2+Math.random()*4,c:`hsl(${Math.random()*360},90%,60%)`}));let t=0;(function f(){x.clearRect(0,0,c.width,c.height);a.forEach(p=>{p.y+=p.v;p.x+=Math.sin(p.y/20);x.fillStyle=p.c;x.fillRect(p.x,p.y,p.r,p.r)});if(++t<120)requestAnimationFrame(f);})();}
 render();hud();
 </script>
-=======
   <title>Adverb & Preposition Quest</title>
   <style>
     :root {
@@ -235,136 +233,5 @@ render();hud();
 
     .small { font-size: .95rem; }
   </style>
-</head>
-<body>
-  <canvas id="confetti"></canvas>
-  <div class="app">
-    <div class="hud">
-      <div class="bubble">⭐ Points: <span id="points">0</span></div>
-      <div class="bubble">🔥 Streak: <span id="streak">0</span></div>
-      <div class="bubble">🎖️ XP: <span id="xp">0</span> / <span id="nextLevel">100</span></div>
-      <div class="bubble">🏅 Badges: <span id="badges">None yet</span></div>
-    </div>
-    <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
-    <main class="stage" id="stage"></main>
-    <div class="nav">
-      <button class="btn-back" id="backBtn">⬅️ Back</button>
-      <button id="audioToggle">🔇 Music Off</button>
-      <button class="btn-next" id="nextBtn">Next ➡️</button>
-    </div>
-  </div>
-
-  <audio id="bgm" loop muted src="audio/background-music.mp3"></audio>
-  <audio id="sfxCorrect" src="audio/correct.mp3"></audio>
-  <audio id="sfxWrong" src="audio/wrong.mp3"></audio>
-  <audio id="sfxLevel" src="audio/levelup.mp3"></audio>
-
-  <script>
-    const slides = [];
-    const state = { i:0, points:0, streak:0, xp:0, level:1, badges:new Set(), answered:{} };
-
-    const adverbImg = `<img class="clip" alt="Cartoon rocket showing adverbs for how, when, where, and degree" src="data:image/svg+xml;base64,${btoa(`<svg xmlns='http://www.w3.org/2000/svg' width='560' height='300'><rect width='100%' height='100%' fill='#f0f9ff'/><circle cx='90' cy='80' r='44' fill='#ffd166'/><rect x='140' y='130' width='300' height='100' rx='40' fill='#90e0ef'/><polygon points='440,180 520,150 520,230' fill='#00b4d8'/><text x='30' y='170' font-size='24'>HOW = quickly 🚀</text><text x='30' y='205' font-size='24'>WHEN = yesterday ⏰</text><text x='30' y='240' font-size='24'>WHERE = here 📍</text><text x='300' y='95' font-size='24'>DEGREE = very 💥</text></svg>`) }">`;
-    const prepImg = `<img class="clip" alt="Cartoon cat and boxes showing prepositions in, on, under, between, through" src="data:image/svg+xml;base64,${btoa(`<svg xmlns='http://www.w3.org/2000/svg' width='560' height='300'><rect width='100%' height='100%' fill='#fff9db'/><rect x='90' y='160' width='100' height='100' fill='#cdb4db'/><rect x='230' y='160' width='100' height='100' fill='#bde0fe'/><rect x='370' y='160' width='100' height='100' fill='#ffc8dd'/><text x='80' y='40' font-size='24'>in, on, under, between, through</text><text x='98' y='155'>on</text><text x='250' y='285'>under</text><text x='245' y='155'>in</text><text x='330' y='150'>between</text><circle cx='140' cy='145' r='14' fill='#ffafcc'/><circle cx='280' cy='210' r='14' fill='#ffafcc'/><circle cx='350' cy='145' r='14' fill='#ffafcc'/></svg>`) }">`;
-
-    function makeSlide(html){ slides.push(`<section class='slide fade-in'>${html}</section>`); }
-    makeSlide(`<h1>🎮 Grammar Quest: Adverbs & Prepositions</h1><p class='subtitle'>Can you level up by helping words do their jobs?</p>${adverbImg}<p>Curiosity Challenge: Which word tells <b>how</b> someone runs?</p>`);
-    makeSlide(`<h2>What is an Adverb? ✨</h2><p>An adverb modifies a <b>verb</b>, <b>adjective</b>, or another <b>adverb</b>.</p><div class='card-grid'><div class='card'>She ran <b>quickly</b>. (modifies verb)</div><div class='card'>It is <b>very</b> bright. (modifies adjective)</div><div class='card'>He moved <b>really slowly</b>. (modifies adverb)</div></div>`);
-    makeSlide(`<h2>Types of Adverbs 🧩</h2>${adverbImg}<div class='card-grid'><div class='card'>How? quickly</div><div class='card'>When? yesterday</div><div class='card'>Where? nearby</div><div class='card'>To what extent? very</div></div>`);
-    makeSlide(quiz("Mini Quiz 1","Which word is an adverb?","The turtle moved slowly.",["turtle","moved","slowly"],2,"'Slowly' tells HOW it moved."));
-    makeSlide(quiz("Mini Quiz 2","True or False: 'very' can be an adverb.",["True","False"],0,"Yes, it modifies adjectives/adverbs."));
-    makeSlide(`<h2>What is a Preposition? 📘</h2><p>A preposition shows a relationship between a noun/pronoun and another word.</p>${prepImg}<p>Example: The book is <b>on</b> the desk.</p>`);
-    makeSlide(`<h2>Common Prepositions 🚦</h2><div class='card-grid'><div class='card'>in, on, at</div><div class='card'>under, over, between</div><div class='card'>through, near, behind</div></div><p class='small'>Prepositional phrase: <b>under the table</b></p>`);
-    makeSlide(quiz("Mini Quiz 3","Pick the preposition: The dog slept under the chair.",["dog","slept","under"],2,"'Under' links dog to chair location."));
-    makeSlide(quiz("Mini Quiz 4","True/False: 'between' is a preposition.",["True","False"],0,"Correct! It shows relationship."));
-    makeSlide(`<h2>Adverb or Preposition? 🤔</h2><p>Adverbs describe action/quality. Prepositions connect nouns/pronouns to other words.</p><button onclick="document.getElementById('hint1').classList.toggle('show')">💡 Show Hint</button><div id='hint1' class='hint'>Look for a noun after a preposition: <b>under the desk</b>.</div>`);
-    makeSlide(simDrop());
-
-    for(let n=1;n<=15;n++){
-      const isTF=n%3===0;
-      if(isTF){
-        makeSlide(quiz(`Final Challenge ${n}/15`,`True/False: In "She sang beautifully", beautifully is an adverb.`,["True","False"],0,"It tells HOW she sang."));
-      } else {
-        makeSlide(quiz(`Final Challenge ${n}/15`, n%2?"Choose the preposition: We walked through the park.":"Choose the adverb: He spoke softly.", n%2?["walked","through","park"]:["He","spoke","softly"],2, n%2?"Through links relation." : "Softly modifies spoke."));
-      }
-    }
-
-    makeSlide(`<h2>🎉 Celebration Time!</h2><p>You completed the quest, word hero!</p><p id='finalScore'></p><p>Remember: adverbs add sparkle; prepositions add connections.</p><div id='badgeList'></div><button onclick='launchConfetti()'>🎊 Celebrate Again</button>`);
-
-    function quiz(title,q,opts,correct,ex){
-      const id = Math.random().toString(36).slice(2);
-      return `<h2>${title}</h2><p>${q}</p><div class='choices'>${opts.map((o,i)=>`<button class='choice' data-q='${id}' data-i='${i}' data-c='${correct}' data-ex='${ex}'>${o}</button>`).join('')}</div><div class='feedback' id='fb-${id}'></div>`;
-    }
-
-    function simDrop(){
-      return `<h2>Drag-like Builder 🧲</h2><p>Click a word, then click a zone.</p><div class='dropzone' id='adverbZone'>Adverb Zone:</div><div class='dropzone' id='prepZone'>Preposition Zone:</div><div><span class='token'>quickly</span><span class='token'>under</span><span class='token'>happy</span><span class='token'>between</span></div><div class='feedback' id='dragFb'></div>`;
-    }
-
-    const stage = document.getElementById('stage');
-    const progressBar = document.getElementById('progressBar');
-
-    function render(){
-      stage.innerHTML = slides.join('');
-      [...stage.querySelectorAll('.slide')][state.i].classList.add('active');
-      progressBar.style.width = ((state.i+1)/slides.length*100)+'%';
-      document.getElementById('finalScore').textContent = `Final Score: ${state.points} points | XP ${state.xp}`;
-      document.getElementById('badgeList').innerHTML = [...state.badges].map(b=>`<span class='badge'>${b}</span>`).join(' ');
-    }
-
-    function refreshHud(){
-      points.textContent = state.points; streak.textContent = state.streak; xp.textContent = state.xp; nextLevel.textContent = state.level*100;
-      badges.textContent = state.badges.size?[...state.badges].join(', '):'None yet';
-    }
-
-    stage.addEventListener('click', e=>{
-      if(e.target.classList.contains('choice')){
-        const btn=e.target; const q=btn.dataset.q;
-        if(state.answered[q]) return;
-        const correct = Number(btn.dataset.c)===Number(btn.dataset.i);
-        const fb=document.getElementById('fb-'+q);
-        if(correct){
-          btn.classList.add('correct');
-          state.points += 10 + (state.streak>=2?5:0);
-          state.streak++; state.xp += 12;
-          fb.innerHTML = `<span class='good'>✅ Correct! ${btn.dataset.ex}</span>`;
-          document.getElementById('sfxCorrect').play().catch(()=>{});
-          if(state.streak===3) state.badges.add('🔥 Streak Star');
-          if(state.points>=120) state.badges.add('🏆 Quiz Champ');
-        } else {
-          btn.classList.add('wrong'); state.streak=0; fb.innerHTML = `<span class='bad'>❌ Oops! ${btn.dataset.ex}</span>`;
-          document.getElementById('sfxWrong').play().catch(()=>{});
-        }
-        if(state.xp >= state.level*100){ state.level++; state.badges.add('🎯 Level Up'); launchConfetti(); document.getElementById('sfxLevel').play().catch(()=>{}); }
-        state.answered[q]=1; refreshHud();
-      }
-
-      if(e.target.classList.contains('token')){ selectedToken=e.target; }
-      if(e.target.classList.contains('dropzone') && selectedToken){
-        e.target.appendChild(selectedToken);
-        const adv=[...document.querySelectorAll('#adverbZone .token')].map(x=>x.textContent);
-        const prep=[...document.querySelectorAll('#prepZone .token')].map(x=>x.textContent);
-        const ok = adv.includes('quickly') && prep.includes('under') && prep.includes('between');
-        const fb=document.getElementById('dragFb');
-        if(ok){ fb.textContent='✅ Great sorting!'; fb.className='feedback good'; state.points+=15; refreshHud(); }
-      }
-    });
-
-    let selectedToken=null;
-    backBtn.onclick=()=>{ if(state.i>0){ state.i--; render(); }};
-    nextBtn.onclick=()=>{ if(state.i<slides.length-1){ state.i++; render(); }};
-    audioToggle.onclick=()=>{
-      const bgm=document.getElementById('bgm');
-      bgm.muted=!bgm.muted; if(!bgm.paused){} else bgm.play().catch(()=>{});
-      audioToggle.textContent = bgm.muted ? '🔇 Music Off':'🔊 Music On';
-    };
-
-    function launchConfetti(){
-      const c=document.getElementById('confetti'), ctx=c.getContext('2d'); c.width=innerWidth; c.height=innerHeight;
-      const bits=[...Array(120)].map(()=>({x:Math.random()*c.width,y:-20-Math.random()*c.height,r:4+Math.random()*6,v:2+Math.random()*4,color:`hsl(${Math.random()*360},90%,60%)`}));
-      let t=0; (function anim(){ ctx.clearRect(0,0,c.width,c.height); bits.forEach(b=>{b.y+=b.v; b.x+=Math.sin((b.y+b.r)/20); ctx.fillStyle=b.color; ctx.fillRect(b.x,b.y,b.r,b.r);}); t++; if(t<120) requestAnimationFrame(anim); else ctx.clearRect(0,0,c.width,c.height); })();
-    }
-
-    render(); refreshHud();
-  </script>
->>>>>>> main
 </body>
 </html>
