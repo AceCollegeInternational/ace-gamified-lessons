@@ -1,0 +1,2545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎮 MCAP Math Adventure – Grade 4</title>
+<style>
+/* ===== GOOGLE FONTS (embedded fallback) ===== */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap');
+
+/* ===== CSS VARIABLES ===== */
+:root {
+  --sky: #4FC3F7;
+  --sun: #FFD600;
+  --mint: #69F0AE;
+  --coral: #FF6E6E;
+  --purple: #CE93D8;
+  --navy: #1A237E;
+  --dark: #1B2130;
+  --white: #FFFFFF;
+  --card-bg: rgba(255,255,255,0.92);
+  --shadow: 0 8px 32px rgba(0,0,0,0.18);
+  --radius: 22px;
+  --font-head: 'Fredoka One', 'Comic Sans MS', cursive;
+  --font-body: 'Nunito', 'Segoe UI', sans-serif;
+}
+
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  font-family: var(--font-body);
+  background: linear-gradient(135deg, #1A237E 0%, #283593 40%, #1565C0 100%);
+}
+
+/* ===== ANIMATED STARFIELD BACKGROUND ===== */
+/* Purpose: Creates immersive game atmosphere */
+.starfield {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  overflow: hidden;
+}
+.star {
+  position: absolute; border-radius: 50%;
+  background: rgba(255,255,255,0.7);
+  animation: twinkle 2s ease-in-out infinite alternate;
+}
+@keyframes twinkle {
+  from { opacity: 0.2; transform: scale(0.8); }
+  to   { opacity: 1;   transform: scale(1.2); }
+}
+
+/* ===== FLOATING SHAPES (decorative) ===== */
+.floaty {
+  position: fixed; pointer-events: none; z-index: 0;
+  animation: floatUp 8s ease-in-out infinite;
+  opacity: 0.15;
+}
+@keyframes floatUp {
+  0%,100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-30px) rotate(10deg); }
+}
+
+/* ===== MAIN APP WRAPPER ===== */
+#app {
+  position: relative; z-index: 10;
+  width: 100vw; height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+
+/* ===== HUD (always-visible top bar) ===== */
+#hud {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; gap: 14px;
+  padding: 8px 20px;
+  background: rgba(10,10,40,0.85);
+  backdrop-filter: blur(10px);
+  border-bottom: 2px solid rgba(255,255,255,0.1);
+  font-family: var(--font-head);
+}
+#hud-title { color: var(--sun); font-size: 1.1rem; flex: 0 0 auto; }
+#progress-bar-wrap {
+  flex: 1; height: 14px; background: rgba(255,255,255,0.15);
+  border-radius: 10px; overflow: hidden;
+}
+/* Purpose: Animated progress bar gives sense of advancement */
+#progress-bar {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--mint), var(--sun));
+  border-radius: 10px;
+  transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: 0 0 10px var(--mint);
+}
+#hud-score {
+  color: var(--sun); font-size: 1rem; white-space: nowrap;
+}
+#hud-streak {
+  color: var(--coral); font-size: 1rem; white-space: nowrap;
+}
+#sound-btn {
+  background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25);
+  color: white; border-radius: 8px; padding: 3px 10px;
+  cursor: pointer; font-size: 1rem;
+  transition: background 0.2s;
+}
+#sound-btn:hover { background: rgba(255,255,255,0.25); }
+
+/* ===== SLIDE CONTAINER ===== */
+#slide-wrap {
+  margin-top: 56px;
+  width: 100%; height: calc(100vh - 56px);
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+  perspective: 1200px;
+}
+
+/* ===== SLIDE CARD ===== */
+.slide {
+  display: none;
+  width: min(860px, 96vw);
+  max-height: calc(100vh - 90px);
+  overflow-y: auto;
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow), 0 0 0 3px rgba(255,255,255,0.15);
+  padding: 30px 36px 24px;
+  position: relative;
+  scrollbar-width: thin;
+  scrollbar-color: var(--purple) transparent;
+}
+/* Purpose: Slide-in animation = spatial memory cue */
+.slide.active {
+  display: block;
+  animation: slideIn 0.45s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(60px) scale(0.97); }
+  to   { opacity: 1; transform: translateX(0)   scale(1); }
+}
+.slide.exit {
+  animation: slideOut 0.3s ease forwards;
+}
+@keyframes slideOut {
+  to { opacity: 0; transform: translateX(-60px) scale(0.96); }
+}
+
+/* ===== TYPOGRAPHY ===== */
+.slide-title {
+  font-family: var(--font-head); font-size: 1.9rem;
+  color: var(--navy); margin-bottom: 10px; line-height: 1.2;
+}
+.slide-subtitle {
+  font-size: 1rem; color: #555; margin-bottom: 16px;
+}
+.slide-body {
+  font-size: 1.05rem; color: #333; line-height: 1.7;
+}
+.big-emoji { font-size: 3rem; margin-bottom: 8px; display: block; text-align: center; }
+.highlight-box {
+  background: linear-gradient(135deg, #E3F2FD, #EDE7F6);
+  border-left: 5px solid var(--purple);
+  border-radius: 12px; padding: 14px 18px; margin: 14px 0;
+  font-size: 1rem;
+}
+.example-box {
+  background: linear-gradient(135deg, #E8F5E9, #F3E5F5);
+  border-left: 5px solid var(--mint);
+  border-radius: 12px; padding: 14px 18px; margin: 14px 0;
+  font-size: 1rem;
+}
+.tip-box {
+  background: linear-gradient(135deg, #FFF9C4, #FFF3E0);
+  border-left: 5px solid var(--sun);
+  border-radius: 12px; padding: 12px 16px; margin: 12px 0;
+  font-size: 0.95rem;
+}
+
+/* ===== NAVIGATION ===== */
+.nav-row {
+  display: flex; gap: 12px; align-items: center;
+  justify-content: center; margin-top: 22px; flex-wrap: wrap;
+}
+.btn {
+  font-family: var(--font-head); font-size: 1.1rem;
+  padding: 10px 28px; border-radius: 50px;
+  border: none; cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+  position: relative; overflow: hidden;
+}
+/* Purpose: Bounce encourages clicks = active participation */
+.btn:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 8px 20px rgba(0,0,0,0.22); }
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: linear-gradient(135deg, #1565C0, #7B1FA2); color: white; }
+.btn-next    { background: linear-gradient(135deg, #00C853, #1565C0); color: white; }
+.btn-back    { background: rgba(0,0,0,0.08); color: #444; }
+.btn-hint    { background: linear-gradient(135deg, var(--sun), #FF9800); color: white; font-size: 0.9rem; padding: 8px 20px; }
+.btn-retry   { background: linear-gradient(135deg, var(--coral), #E53935); color: white; }
+.slide-num   { font-size: 0.85rem; color: #888; text-align: center; margin-top: 8px; }
+
+/* ===== QUIZ STYLES ===== */
+.quiz-header {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 14px;
+}
+.quiz-badge {
+  background: linear-gradient(135deg, #1565C0, #7B1FA2);
+  color: white; font-family: var(--font-head);
+  border-radius: 50px; padding: 4px 14px; font-size: 0.85rem;
+}
+.question-text {
+  font-family: var(--font-body); font-size: 1.15rem;
+  font-weight: 700; color: var(--navy); margin-bottom: 16px;
+  line-height: 1.5;
+}
+.options-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; margin-bottom: 14px;
+}
+/* Purpose: Card-style options = tactile game feel */
+.option-btn {
+  font-family: var(--font-body); font-size: 1rem; font-weight: 600;
+  padding: 12px 16px; border-radius: 14px;
+  border: 2.5px solid #D0D0D0; background: white;
+  cursor: pointer; text-align: left;
+  transition: all 0.18s; color: #222;
+  display: flex; align-items: center; gap: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+.option-btn:hover:not(:disabled) {
+  border-color: #1565C0; background: #E3F2FD;
+  transform: scale(1.02);
+}
+/* Purpose: Green/red = immediate visual feedback loop */
+.option-btn.correct  { border-color: #00C853; background: #E8F5E9; color: #1B5E20; }
+.option-btn.wrong    { border-color: #F44336; background: #FFEBEE; color: #B71C1C; }
+.option-btn.selected { border-color: #1565C0; background: #BBDEFB; }
+.option-btn:disabled { cursor: default; }
+.option-letter {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: #EEE; font-size: 0.85rem; font-weight: 800; flex-shrink: 0;
+}
+.option-btn.correct .option-letter  { background: #A5D6A7; color: #1B5E20; }
+.option-btn.wrong   .option-letter  { background: #EF9A9A; color: #B71C1C; }
+.option-btn.selected .option-letter { background: #90CAF9; color: #1565C0; }
+
+/* Purpose: Shake = memorable wrong-answer feedback */
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20%      { transform: translateX(-8px); }
+  40%      { transform: translateX(8px); }
+  60%      { transform: translateX(-5px); }
+  80%      { transform: translateX(5px); }
+}
+.shake { animation: shake 0.45s ease; }
+
+/* Purpose: Pop = rewarding correct feedback */
+@keyframes pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+.pop { animation: pop 0.3s ease; }
+
+.feedback-box {
+  border-radius: 14px; padding: 12px 16px; margin-top: 10px;
+  font-size: 0.97rem; font-weight: 600; display: none;
+  animation: fadeSlideUp 0.3s ease forwards;
+}
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.feedback-box.show { display: block; }
+.feedback-correct  { background: #E8F5E9; border: 2px solid #66BB6A; color: #1B5E20; }
+.feedback-wrong    { background: #FFEBEE; border: 2px solid #EF5350; color: #B71C1C; }
+
+/* ===== HINT REVEAL ===== */
+.hint-text {
+  display: none; margin-top: 10px; padding: 10px 14px;
+  background: #FFF8E1; border: 2px dashed #FFB300;
+  border-radius: 12px; font-size: 0.9rem; color: #6D4C41;
+}
+.hint-text.show { display: block; animation: fadeSlideUp 0.3s ease; }
+
+/* ===== ILLUSTRATION ===== */
+.illus-wrap {
+  display: flex; justify-content: center; margin: 14px 0;
+}
+.illus-wrap svg { filter: drop-shadow(0 4px 12px rgba(0,0,0,0.12)); }
+
+/* ===== FRACTION VISUAL ===== */
+.fraction {
+  display: inline-flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  font-family: var(--font-head); font-size: 1.6rem; color: var(--navy);
+  line-height: 1; margin: 0 6px;
+}
+.fraction-line { width: 100%; height: 3px; background: var(--navy); margin: 3px 0; }
+
+/* ===== CONCEPT TABLE ===== */
+.concept-table {
+  width: 100%; border-collapse: collapse; margin: 12px 0;
+  font-size: 0.95rem;
+}
+.concept-table th {
+  background: linear-gradient(135deg, #1565C0, #7B1FA2);
+  color: white; padding: 9px 12px; text-align: left;
+  font-family: var(--font-head);
+}
+.concept-table td { padding: 8px 12px; border-bottom: 1px solid #EEE; }
+.concept-table tr:nth-child(even) td { background: #F5F5F5; }
+.concept-table tr:hover td { background: #E3F2FD; }
+
+/* ===== PLACE VALUE CHART ===== */
+.pv-chart {
+  display: flex; justify-content: center; gap: 6px;
+  flex-wrap: wrap; margin: 14px 0;
+}
+.pv-cell {
+  display: flex; flex-direction: column; align-items: center;
+  min-width: 68px;
+}
+.pv-label {
+  background: linear-gradient(135deg, #1565C0, #7B1FA2);
+  color: white; font-family: var(--font-head); font-size: 0.75rem;
+  padding: 4px 6px; border-radius: 8px 8px 0 0; text-align: center; width: 100%;
+}
+.pv-digit {
+  background: var(--sun); font-family: var(--font-head);
+  font-size: 1.8rem; padding: 8px; border-radius: 0 0 8px 8px;
+  text-align: center; width: 100%; color: var(--navy);
+  border: 2px solid rgba(0,0,0,0.1);
+}
+
+/* ===== BADGES ===== */
+.badges-wrap {
+  display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0;
+}
+.badge {
+  background: linear-gradient(135deg, var(--sun), #FF9800);
+  color: white; font-family: var(--font-head); font-size: 0.82rem;
+  padding: 6px 14px; border-radius: 50px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.18);
+  display: flex; align-items: center; gap: 5px;
+  animation: badgePop 0.5s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes badgePop {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+/* ===== SCORE SUMMARY ===== */
+.score-card {
+  background: linear-gradient(135deg, #1565C0, #7B1FA2);
+  border-radius: 18px; color: white; padding: 20px 24px;
+  text-align: center; margin: 14px 0;
+}
+.score-big {
+  font-family: var(--font-head); font-size: 4rem; color: var(--sun);
+  line-height: 1; margin: 8px 0;
+}
+.score-label { font-size: 1.1rem; opacity: 0.9; }
+
+/* ===== REVIEW LIST ===== */
+.review-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 8px 0; border-bottom: 1px solid #EEE;
+  font-size: 0.88rem;
+}
+.review-item .ri-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 2px; }
+
+/* ===== CONFETTI CANVAS ===== */
+#confetti-canvas {
+  position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+}
+
+/* ===== LEVEL UP TOAST ===== */
+#toast {
+  position: fixed; top: 70px; left: 50%; transform: translateX(-50%) translateY(-80px);
+  background: linear-gradient(135deg, #FF6D00, #DD2C00);
+  color: white; font-family: var(--font-head); font-size: 1.2rem;
+  padding: 10px 28px; border-radius: 50px; z-index: 9999;
+  box-shadow: var(--shadow);
+  transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.4s;
+  opacity: 0;
+}
+#toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* ===== HOOK SLIDE ===== */
+.hook-hero {
+  text-align: center; padding: 10px 0;
+}
+.hook-hero .hero-title {
+  font-family: var(--font-head); font-size: 2.8rem; color: var(--navy);
+  line-height: 1.15; margin-bottom: 10px;
+}
+.hero-emoji { font-size: 3.5rem; display: block; margin-bottom: 10px;
+  animation: bounce 1s ease infinite alternate;
+}
+@keyframes bounce {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-14px); }
+}
+/* Purpose: Animated text entrance = curiosity gap opener */
+.fade-in-word { display: inline-block; opacity: 0; animation: fadeWord 0.5s forwards; }
+@keyframes fadeWord { to { opacity: 1; } }
+
+/* ===== TRUE/FALSE BUTTONS ===== */
+.tf-row {
+  display: flex; gap: 14px; justify-content: center; margin: 14px 0;
+}
+.tf-btn {
+  font-family: var(--font-head); font-size: 1.3rem;
+  padding: 14px 40px; border-radius: 18px; border: 3px solid transparent;
+  cursor: pointer; transition: all 0.18s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.tf-btn.true-btn  { background: linear-gradient(135deg,#00C853,#1565C0); color:white; }
+.tf-btn.false-btn { background: linear-gradient(135deg,#F44336,#880E4F); color:white; }
+.tf-btn:hover:not(:disabled) { transform: scale(1.07); }
+.tf-btn:disabled { opacity: 0.7; cursor: default; }
+.tf-btn.selected-true  { border-color: #00C853; box-shadow: 0 0 0 4px rgba(0,200,83,0.35); }
+.tf-btn.selected-false { border-color: #F44336; box-shadow: 0 0 0 4px rgba(244,67,54,0.35); }
+
+/* ===== DRAG-AND-DROP MATCHING (simulated) ===== */
+.match-container {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0;
+}
+.match-item {
+  background: #EDE7F6; border: 2px solid #CE93D8;
+  border-radius: 12px; padding: 10px 14px;
+  font-weight: 700; font-size: 0.95rem; color: var(--navy);
+  cursor: pointer; transition: all 0.18s; text-align: center;
+}
+.match-item:hover { background: #D1C4E9; transform: scale(1.03); }
+.match-item.matched { background: #E8F5E9; border-color: #66BB6A; }
+.match-item.wrong-match { background: #FFEBEE; border-color: #F44336; }
+
+/* ===== CLOCK VISUAL ===== */
+.clock-svg { animation: clockTick 1s steps(1) infinite; }
+@keyframes clockTick { 50% { opacity: 0.6; } }
+
+/* ===== MULTIPLICATION TABLE MINI ===== */
+.mult-table {
+  display: grid; gap: 4px; margin: 12px auto;
+  justify-content: center;
+}
+.mt-cell {
+  width: 42px; height: 42px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 8px; font-family: var(--font-head); font-size: 1rem;
+  transition: transform 0.15s;
+}
+.mt-cell:hover { transform: scale(1.15); }
+.mt-header { background: linear-gradient(135deg,#1565C0,#7B1FA2); color:white; }
+.mt-body   { background: #EDE7F6; color: var(--navy); cursor: pointer; }
+.mt-body:hover { background: #CE93D8; color: white; }
+
+/* ===== NUMBER LINE ===== */
+.number-line-wrap {
+  overflow-x: auto; margin: 14px 0;
+}
+.number-line {
+  display: flex; align-items: center; gap: 0; min-width: 500px; margin: 0 auto;
+  justify-content: center;
+}
+.nl-tick {
+  display: flex; flex-direction: column; align-items: center;
+  position: relative;
+}
+.nl-mark {
+  width: 2px; height: 18px; background: #333;
+}
+.nl-num {
+  font-size: 0.8rem; font-weight: 700; color: #333;
+  margin-top: 3px;
+}
+.nl-line { height: 4px; background: #333; flex: 1; min-width: 30px; }
+.nl-frac { height: 30px; width: 3px; background: #1565C0; }
+.nl-frac-label {
+  font-size: 0.75rem; font-family: var(--font-head); color: #1565C0;
+  margin-top: 2px; white-space: nowrap;
+}
+
+/* ===== SPINNER (loading) ===== */
+.spinner {
+  width: 40px; height: 40px; border: 4px solid #EEE;
+  border-top-color: #1565C0; border-radius: 50%;
+  animation: spin 0.7s linear infinite; margin: 20px auto;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== QUIZ SECTION TITLE ===== */
+.section-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: linear-gradient(135deg, var(--coral), #880E4F);
+  color: white; font-family: var(--font-head); font-size: 0.95rem;
+  padding: 5px 16px; border-radius: 50px; margin-bottom: 12px;
+}
+
+/* ===== FINAL CHALLENGE TIMER ===== */
+#fc-timer {
+  font-family: var(--font-head); font-size: 1.5rem; color: var(--coral);
+  text-align: center; margin-bottom: 8px;
+}
+#fc-progress {
+  height: 10px; background: #EEE; border-radius: 6px; overflow: hidden; margin-bottom: 16px;
+}
+#fc-bar {
+  height: 100%; background: linear-gradient(90deg, #00C853, var(--coral));
+  border-radius: 6px; transition: width 0.3s linear;
+}
+
+/* ===== STARS RATING ===== */
+.stars-row {
+  display: flex; justify-content: center; gap: 6px; margin: 10px 0;
+}
+.star-icon {
+  font-size: 2.5rem;
+  animation: starSpin 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards;
+  opacity: 0;
+}
+@keyframes starSpin {
+  from { transform: rotate(-180deg) scale(0); opacity: 0; }
+  to   { transform: rotate(0deg) scale(1);   opacity: 1; }
+}
+
+/* ===== DRAG SORT (simulated click-to-order) ===== */
+.sort-list { display: flex; flex-direction: column; gap: 8px; margin: 12px 0; }
+.sort-item {
+  background: #E3F2FD; border: 2px solid #90CAF9; border-radius: 12px;
+  padding: 10px 14px; cursor: grab; font-weight: 700; font-size: 0.95rem;
+  color: var(--navy); transition: all 0.18s; display: flex;
+  align-items: center; gap: 10px;
+}
+.sort-item:hover { background: #BBDEFB; transform: scale(1.01); }
+.sort-item.dragging { opacity: 0.5; }
+
+/* ===== AREA/PERIMETER GRID ===== */
+.grid-area {
+  display: inline-grid; gap: 3px; margin: 10px auto; display: flex;
+  flex-direction: column; align-items: center;
+}
+.grid-row { display: flex; gap: 3px; }
+.grid-cell {
+  width: 36px; height: 36px; border-radius: 5px;
+  background: #BBDEFB; border: 2px solid #1565C0;
+  font-size: 0.7rem; display: flex; align-items: center; justify-content: center;
+  color: var(--navy); font-weight: 800;
+}
+.grid-cell.border-cell { background: #1565C0; color: white; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 600px) {
+  .slide { padding: 18px 14px 16px; }
+  .options-grid { grid-template-columns: 1fr; }
+  .hook-hero .hero-title { font-size: 2rem; }
+  .pv-cell { min-width: 52px; }
+  .match-container { grid-template-columns: 1fr; }
+}
+
+/* ===== SCROLLBAR STYLE ===== */
+.slide::-webkit-scrollbar { width: 6px; }
+.slide::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 6px; }
+
+/* ===== CELEBRATION OVERLAY ===== */
+#celebration {
+  display: none; position: fixed; inset: 0; z-index: 9998;
+  background: rgba(0,0,0,0.6);
+  align-items: center; justify-content: center;
+}
+#celebration.show { display: flex; }
+.celebrate-card {
+  background: white; border-radius: 24px; padding: 30px 40px;
+  text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  max-width: 400px; width: 90%;
+}
+@keyframes popIn {
+  from { transform: scale(0.5); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+.celebrate-card h2 {
+  font-family: var(--font-head); font-size: 2rem;
+  color: var(--navy); margin: 10px 0;
+}
+.celebrate-card p { font-size: 1.1rem; color: #555; }
+
+/* ===== INTRO ANIMATION for concept words ===== */
+.concept-word {
+  font-family: var(--font-head); font-size: 1.4rem;
+  color: #1565C0; background: #E3F2FD;
+  padding: 4px 14px; border-radius: 8px; display: inline-block;
+}
+
+/* ===== LEVEL TAG ===== */
+.level-tag {
+  position: absolute; top: 16px; right: 20px;
+  background: linear-gradient(135deg, var(--sun), #FF9800);
+  color: white; font-family: var(--font-head); font-size: 0.82rem;
+  padding: 4px 14px; border-radius: 50px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.18);
+}
+
+/* ===== MATH CARD FLIP (concept cards) ===== */
+.flip-card {
+  width: 100%; height: 120px; perspective: 800px; margin: 10px 0; cursor: pointer;
+}
+.flip-card-inner {
+  width: 100%; height: 100%; transition: transform 0.5s;
+  transform-style: preserve-3d; position: relative;
+}
+.flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
+.flip-front, .flip-back {
+  position: absolute; inset: 0;
+  backface-visibility: hidden; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 14px; text-align: center;
+}
+.flip-front {
+  background: linear-gradient(135deg, #1565C0, #7B1FA2);
+  color: white; font-family: var(--font-head); font-size: 1.2rem;
+}
+.flip-back {
+  background: linear-gradient(135deg, #00C853, #1565C0);
+  color: white; font-family: var(--font-body); font-size: 0.95rem; font-weight: 700;
+  transform: rotateY(180deg);
+}
+
+/* ===== PULSE on correct ===== */
+@keyframes pulse-correct {
+  0%,100% { box-shadow: 0 0 0 0 rgba(0,200,83,0.4); }
+  50%      { box-shadow: 0 0 0 10px rgba(0,200,83,0); }
+}
+.pulse-correct { animation: pulse-correct 0.5s ease; }
+</style>
+</head>
+<body>
+
+<!-- ===== STARFIELD BACKGROUND ===== -->
+<div class="starfield" id="starfield"></div>
+
+<!-- ===== CONFETTI CANVAS ===== -->
+<canvas id="confetti-canvas"></canvas>
+
+<!-- ===== LEVEL UP TOAST ===== -->
+<div id="toast">🎊 Level Up! Amazing work!</div>
+
+<!-- ===== CELEBRATION OVERLAY ===== -->
+<div id="celebration">
+  <div class="celebrate-card">
+    <div style="font-size:3rem" id="cel-emoji">🎉</div>
+    <h2 id="cel-title">Awesome!</h2>
+    <p id="cel-msg">Keep going, Math Star!</p>
+    <button class="btn btn-next" onclick="closeCelebration()" style="margin-top:14px">
+      Continue 🚀
+    </button>
+  </div>
+</div>
+
+<!-- ===== HUD ===== -->
+<div id="hud">
+  <div id="hud-title">🎮 MCAP Math</div>
+  <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+  <div id="hud-score">⭐ 0 pts</div>
+  <div id="hud-streak">🔥 0</div>
+  <button id="sound-btn" onclick="toggleSound()">🔊</button>
+</div>
+
+<!-- ===== MAIN APP ===== -->
+<div id="app">
+  <div id="slide-wrap">
+
+    <!-- ════════════════════════════════════════
+         SLIDE 1 – HOOK / CURIOSITY OPENER
+    ════════════════════════════════════════ -->
+    <div class="slide" id="slide-0">
+      <div class="hook-hero">
+        <span class="hero-emoji">🚀</span>
+        <h1 class="hero-title">Welcome to the<br>
+          <span style="color:#1565C0">MCAP Math</span><br>
+          <span style="color:#7B1FA2">Adventure!</span>
+        </h1>
+        <p style="font-size:1.1rem;color:#555;margin:12px 0">
+          Grade 4 · Baltimore, Maryland 🦀
+        </p>
+        <!-- SVG rocket illustration -->
+        <div class="illus-wrap">
+          <svg viewBox="0 0 300 200" width="280" height="180" xmlns="http://www.w3.org/2000/svg">
+            <!-- Space background -->
+            <rect width="300" height="200" rx="18" fill="#0D1B4B"/>
+            <!-- Stars -->
+            <circle cx="20" cy="20" r="2" fill="white" opacity="0.8"/>
+            <circle cx="60" cy="45" r="1.5" fill="white" opacity="0.6"/>
+            <circle cx="100" cy="15" r="2" fill="white" opacity="0.9"/>
+            <circle cx="150" cy="35" r="1.5" fill="white" opacity="0.7"/>
+            <circle cx="200" cy="20" r="2" fill="white" opacity="0.8"/>
+            <circle cx="250" cy="40" r="1.5" fill="white" opacity="0.6"/>
+            <circle cx="280" cy="18" r="2" fill="white" opacity="0.9"/>
+            <circle cx="40" cy="70" r="1.5" fill="white" opacity="0.5"/>
+            <circle cx="220" cy="60" r="2" fill="white" opacity="0.7"/>
+            <circle cx="270" cy="80" r="1.5" fill="white" opacity="0.6"/>
+            <!-- Planet -->
+            <circle cx="250" cy="120" r="40" fill="#CE93D8" opacity="0.7"/>
+            <ellipse cx="250" cy="120" rx="55" ry="10" fill="none" stroke="#FFD600" stroke-width="3" opacity="0.8"/>
+            <!-- Rocket body -->
+            <ellipse cx="130" cy="110" rx="18" ry="40" fill="#E8EAF6"/>
+            <!-- Rocket nose -->
+            <path d="M112 75 Q130 40 148 75Z" fill="#F44336"/>
+            <!-- Rocket window -->
+            <circle cx="130" cy="100" r="10" fill="#4FC3F7" stroke="#1565C0" stroke-width="2"/>
+            <circle cx="130" cy="100" r="5" fill="white" opacity="0.6"/>
+            <!-- Rocket fins -->
+            <path d="M112 130 L90 155 L112 145Z" fill="#FF9800"/>
+            <path d="M148 130 L170 155 L148 145Z" fill="#FF9800"/>
+            <!-- Rocket flame -->
+            <ellipse cx="125" cy="155" rx="6" ry="12" fill="#FFD600" opacity="0.9"/>
+            <ellipse cx="130" cy="157" rx="5" ry="15" fill="#FF6D00" opacity="0.8"/>
+            <ellipse cx="135" cy="155" rx="6" ry="12" fill="#FFD600" opacity="0.9"/>
+            <!-- Math symbols -->
+            <text x="30" y="150" fill="#69F0AE" font-size="22" font-family="Arial" font-weight="bold">+</text>
+            <text x="60" y="130" fill="#FFD600" font-size="20" font-family="Arial" font-weight="bold">×</text>
+            <text x="200" y="160" fill="#4FC3F7" font-size="22" font-family="Arial" font-weight="bold">÷</text>
+            <text x="230" y="175" fill="#CE93D8" font-size="18" font-family="Arial" font-weight="bold">½</text>
+            <text x="15" y="180" fill="#FF6E6E" font-size="18" font-family="Arial" font-weight="bold">=</text>
+          </svg>
+        </div>
+        <div class="highlight-box">
+          <strong>🤔 Brain Teaser:</strong> If you have 6 rows of 8 seats in a movie theater, how many seats are there in <em>total</em>? Think… then let's discover together! 🍿
+        </div>
+        <p style="font-size:0.95rem;color:#666;margin-top:10px">
+          🕐 ~45 minutes · 5 topics · 30+ questions · Win badges & points!
+        </p>
+      </div>
+      <div class="nav-row">
+        <button class="btn btn-next" onclick="goNext()">Let's Go! 🚀</button>
+      </div>
+      <div class="slide-num">Slide 1 of <span id="total-slides">?</span></div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 2 – HOW TO PLAY
+    ════════════════════════════════════════ -->
+    <div class="slide" id="slide-1">
+      <div class="level-tag">📖 How to Play</div>
+      <span class="big-emoji">🎯</span>
+      <h2 class="slide-title">Your Mission!</h2>
+      <div class="slide-body">
+        <!-- SVG game controller illustration -->
+        <div class="illus-wrap">
+          <svg viewBox="0 0 280 160" width="260" height="150" xmlns="http://www.w3.org/2000/svg">
+            <rect width="280" height="160" rx="16" fill="#E8EAF6"/>
+            <!-- Trophy -->
+            <rect x="115" y="100" width="50" height="12" rx="4" fill="#FFD600"/>
+            <rect x="125" y="110" width="30" height="8" rx="3" fill="#FF9800"/>
+            <path d="M100 40 Q100 90 140 90 Q180 90 180 40Z" fill="#FFD600"/>
+            <rect x="120" y="40" width="40" height="5" rx="2" fill="#FF9800"/>
+            <!-- Stars around trophy -->
+            <text x="70" y="65" font-size="20">⭐</text>
+            <text x="190" y="65" font-size="20">⭐</text>
+            <text x="130" y="35" font-size="16">✨</text>
+          </svg>
+        </div>
+        <table class="concept-table">
+          <tr>
+            <th>🎮 Action</th><th>🏆 Reward</th>
+          </tr>
+          <tr><td>✅ Correct answer</td><td>+10 points</td></tr>
+          <tr><td>🔥 3 in a row correct</td><td>+15 bonus points!</td></tr>
+          <tr><td>⚡ Answer on 1st try</td><td>Keep your streak alive!</td></tr>
+          <tr><td>🏁 Finish a section</td><td>Earn a badge!</td></tr>
+          <tr><td>🎯 Perfect score</td><td>🌟 Math Star badge!</td></tr>
+        </table>
+        <div class="tip-box">
+          💡 <strong>Tip:</strong> Use the <strong>Hint</strong> button if you're stuck — but try first for max points!
+        </div>
+      </div>
+      <div class="nav-row">
+        <button class="btn btn-back" onclick="goBack()">← Back</button>
+        <button class="btn btn-next" onclick="goNext()">Start Learning! 📚</button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 3 – CONCEPT: PLACE VALUE
+    ════════════════════════════════════════ -->
+    <div class="slide" id="slide-2">
+      <div class="level-tag">📍 Topic 1</div>
+      <span class="big-emoji">🔢</span>
+      <h2 class="slide-title">Place Value</h2>
+      <p class="slide-subtitle">Understanding the value of each digit in a number</p>
+      <div class="slide-body">
+        <div class="highlight-box">
+          <strong>Key Idea:</strong> Every digit in a number has a <em>place</em> and a <em>value</em>.
+          The same digit can mean different things depending on where it sits! 🏠
+        </div>
+        <!-- Place value chart for 3,482,750 -->
+        <p style="font-weight:700;color:#333;margin-bottom:6px;font-size:0.95rem">
+          Let's look at the number: <strong style="font-size:1.2rem;color:#1565C0">348,275</strong>
+        </p>
+        <div class="pv-chart">
+          <div class="pv-cell"><div class="pv-label">Hundred<br>Thousands</div><div class="pv-digit">3</div></div>
+          <div class="pv-cell"><div class="pv-label">Ten<br>Thousands</div><div class="pv-digit">4</div></div>
+          <div class="pv-cell"><div class="pv-label">Thousands</div><div class="pv-digit">8</div></div>
+          <div class="pv-cell"><div class="pv-label">Hundreds</div><div class="pv-digit">2</div></div>
+          <div class="pv-cell"><div class="pv-label">Tens</div><div class="pv-digit">7</div></div>
+          <div class="pv-cell"><div class="pv-label">Ones</div><div class="pv-digit">5</div></div>
+        </div>
+        <div class="example-box">
+          📌 The digit <strong>8</strong> is in the <strong>thousands</strong> place, so its value is <strong>8,000</strong>.<br>
+          📌 The digit <strong>4</strong> is in the <strong>ten-thousands</strong> place, so its value is <strong>40,000</strong>.
+        </div>
+        <!-- Flip cards for active recall -->
+        <p style="font-weight:700;margin:10px 0 5px;font-size:0.95rem">👆 Click each card to see the place value!</p>
+        <div class="flip-card" onclick="this.classList.toggle('flipped')">
+          <div class="flip-card-inner">
+            <div class="flip-front">What is the value of the <strong>2</strong> in 348,<strong>2</strong>75?</div>
+            <div class="flip-back">✅ The 2 is in the <strong>hundreds</strong> place. Its value = <strong>200</strong></div>
+          </div>
+        </div>
+        <div class="flip-card" onclick="this.classList.toggle('flipped')" style="margin-top:8px">
+          <div class="flip-card-inner">
+            <div class="flip-front">How do you say 348,275 in words?</div>
+            <div class="flip-back">✅ Three hundred forty-eight thousand, two hundred seventy-five</div>
+          </div>
+        </div>
+        <div class="tip-box">💡 <strong>Memory Trick:</strong> "Homes Have Tiny Hopeful Oranges" → Hundred-thousands, Hundred-thousands, Ten-thousands, Hundreds, Ones!</div>
+      </div>
+      <div class="nav-row">
+        <button class="btn btn-back" onclick="goBack()">← Back</button>
+        <button class="btn btn-next" onclick="goNext()">Mini Quiz Time! 🧠</button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 4 – MINI QUIZ 1A (Place Value Q1)
+    ════════════════════════════════════════ -->
+    <div class="slide" id="slide-3">
+      <div class="section-tag">🧠 Mini Quiz – Place Value</div>
+      <div class="quiz-header">
+        <span class="quiz-badge">Q 1 of 3</span>
+        <span style="font-size:0.85rem;color:#888">Place Value · +10 pts</span>
+      </div>
+      <p class="question-text">
+        In the number <strong>52,469</strong>, what is the value of the digit <strong>5</strong>?
+      </p>
+      <div class="options-grid" id="q1-opts">
+        <button class="option-btn" onclick="checkAnswer(this,'q1','A')">
+          <span class="option-letter">A</span> 5
+        </button>
+        <button class="option-btn" onclick="checkAnswer(this,'q1','B')">
+          <span class="option-letter">B</span> 500
+        </button>
+        <button class="option-btn" onclick="checkAnswer(this,'q1','C')">
+          <span class="option-letter">C</span> 5,000
+        </button>
+        <button class="option-btn" onclick="checkAnswer(this,'q1','D')">
+          <span class="option-letter">D</span> 50,000
+        </button>
+      </div>
+      <button class="btn btn-hint" onclick="showHint('hint1')">💡 Hint</button>
+      <div id="hint1" class="hint-text">
+        Count the digits from the right: ones(9), tens(6), hundreds(4), thousands(2), <strong>ten-thousands(5)</strong>. What place is 5 in?
+      </div>
+      <div id="fb-q1" class="feedback-box"></div>
+      <div class="nav-row" id="nav-q1" style="display:none">
+        <button class="btn btn-next" onclick="goNext()">Next Question →</button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 5 – MINI QUIZ 1B (Place Value Q2)
+    ════════════════════════════════════════ -->
+    <div class="slide" id="slide-4">
+      <div class="section-tag">🧠 Mini Quiz – Place Value</div>
+      <div class="quiz-header">
+        <span class="quiz-badge">Q 2 of 3</span>
+        <span style="font-size:0.85rem;color:#888">Place Value · +10 pts</span>
+      </div>
+      <p class="question-text">
+        Which number has the digit <strong>7</strong> in the <strong>thousands</strong> place?
+      </p>
+      <div class="options-grid" id="q2-opts">
+        <button class="option-btn" onclick="checkAnswer(this,'q2','A')">
+          <span class="option-letter">A</span> 70,431
+        </button>
+        <button class="option-btn" onclick="checkAnswer(this,'q2','B')">
+          <span class="option-letter">B</span> 47,205
+        </button>
+        <button class="option-btn" onclick="checkAnswer(this,'q2','C')">
+          <span class="option-letter">C</span> 37,810
+        </button>
+        <button class="option-btn" onclick="checkAnswer(this,'q2','D')">
+          <span class="option-letter">D</span> 20,074
+        </button>
+      </div>
+      <button class="btn btn-hint" onclick="showHint('hint2')">💡 Hint</button>
+      <div id="hint2" class="hint-text">The thousands place is the 4th digit from the right. In 37,810 → 3(ten-th), 7(thousands), 8(hundreds), 1(tens), 0(ones).</div>
+      <div id="fb-q2" class="feedback-box"></div>
+      <div class="nav-row" id="nav-q2" style="display:none">
+        <button class="btn btn-next" onclick="goNext()">Next Question →</button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 6 – MINI QUIZ 1C (Place Value Q3)
+    ════════════════════════════════════════ -->
+    <div class="slide" id="slide-5">
+      <div class="section-tag">🧠 Mini Quiz – Place Value</div>
+      <div class="quiz-header">
+        <span class="quiz-badge">Q 3 of 3</span>
+        <span style="font-size:0.85rem;color:#888">Place Value · +10 pts</span>
+      </div>
+      <p class="question-text">
+        What is the standard form of:<br>
+        <em>Forty thousand, three hundred twelve</em>?
+      </p>
+      <div class="options-grid" id="q3-opts">
+        <button class="option-btn" onclick="checkAnswer(this,'q3','A')">
+          <span class="option-letter">A</span> 4,312
+        </button>
+        <button class="option-btn" onclick="checkAnswer(this,'q3','B')">
+          <span class="option-letter">B</span> 40,312
+        </button>
+        <button class="option-btn" onclick="checkAnswer(this,'q3','C')">
+          <span class="option-letter">C</span> 43,120
+        </button>
+        <button class="option-btn" onclick="checkAnswer(this,'q3','D')">
+          <span class="option-letter">D</span> 403,120
+        </button>
+      </div>
+      <button class="btn btn-hint" onclick="showHint('hint3')">💡 Hint</button>
+      <div id="hint3" class="hint-text">Forty thousand = 40,000. Three hundred twelve = 312. Put them together: 40,000 + 312 = ?</div>
+      <div id="fb-q3" class="feedback-box"></div>
+      <div class="nav-row" id="nav-q3" style="display:none">
+        <button class="btn btn-next" onclick="goNext()">Great! Next Topic 🎉</button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 7 – CONCEPT: MULTIPLICATION
+    ════════════════════════════════════════ -->
+    <div class="slide" id="slide-6">
+      <div class="level-tag">📍 Topic 2</div>
+      <span class="big-emoji">✖️</span>
+      <h2 class="slide-title">Multiplication & Division</h2>
+      <p class="slide-subtitle">Mastering operations with multi-digit numbers</p>
+      <div class="slide-body">
+        <div class="highlight-box">
+          <strong>Multiplication</strong> is repeated addition! 6 × 8 means "6 groups of 8".<br>
+          <strong>Division</strong> is splitting into equal groups. 48 ÷ 6 means "48 split into 6 equal groups."
+        </div>
+        <!-- Mini multiplication chart -->
+        <p style="font-weight:700;margin:10px 0 6px;font-size:0.95rem">🎯 Times Table Spotlight — Click a cell!</p>
+        <div id="mult-grid" class="mult-table" style="display:grid;grid-template-columns:repeat(7,42px)"></div>
+        <div class="example-box">
+          <strong>📐 Area Model for 24 × 3:</strong><br>
+          Break apart: 24 = 20 + 4<br>
+          (20 × 3) + (4 × 3) = 60 + 12 = <strong>72</strong> ✅
+        </div>
+        <!-- SVG area model -->
+        <div class="illus-wrap">
+          <svg viewBox="0 0 300 130" width="280" height="120" xmlns="http://www.w3.org/2000/svg">
+            <rect width="300" height="130" rx="12" fill="#F3E5F5"/>
+            <!-- Area model boxes -->
+            <rect x="20" y="30" width="160" height="60" fill="#BBDEFB" stroke="#1565C0" stroke-width="2" rx="6"/>
+            <rect x="190" y="30" width="80" height="60" fill="#C8E6C9" stroke="#2E7D32" stroke-width="2" rx="6"/>
+            <!-- Labels -->
+            <text x="100" y="22" text-anchor="middle" font-family="Arial" font-size="13" font-weight="bold" fill="#1565C0">20</text>
+            <text x="230" y="22" text-anchor="middle" font-family="Arial" font-size="13" font-weight="bold" fill="#2E7D32">4</text>
+            <text x="12" y="64" text-anchor="middle" font-family="Arial" font-size="13" font-weight="bold" fill="#7B1FA2">3</text>
+            <!-- Products -->
+            <text x="100" y="64" text-anchor="middle" font-family="Arial" font-size="16" font-weight="bold" fill="#1565C0">60</text>
+            <text x="230" y="64" text-anchor="middle" font-family="Arial" font-size="16" font-weight="bold" fill="#2E7D32">12</text>
+            <!-- Plus sign -->
+            <text x="178" y="68" font-family="Arial" font-size="18" font-weight="bold" fill="#7B1FA2">+</text>
+            <!-- Total -->
+            <text x="150" y="112" text-anchor="middle" font-family="Arial" font-size="15" font-weight="bold" fill="#4A148C">60 + 12 = 72 ✓</text>
+          </svg>
+        </div>
+        <div class="tip-box">
+          💡 <strong>Division Check:</strong> If 24 × 3 = 72, then 72 ÷ 3 = 24. Multiplication and division are FACT FAMILIES! 👨‍👩‍👧‍👦
+        </div>
+      </div>
+      <div class="nav-row">
+        <button class="btn btn-back" onclick="goBack()">← Back</button>
+        <button class="btn btn-next" onclick="goNext()">Mini Quiz! 🧠</button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 8 – MINI QUIZ 2A (Multiplication Q1)
+    ════════════════════════════════════════ -->
+    <div class="slide" id="slide-7">
+      <div class="section-tag">🧠 Mini Quiz – Multiplication & Division</div>
+      <div class="quiz-header">
+        <span class="quiz-badge">Q 1 of 3</span>
+        <span style="font-size:0.85rem;color:#888">Mult/Div · +10 pts</span>
+      </div>
+      <p class="question-text">
+        A bookshelf has <strong>6 shelves</strong>. Each shelf holds <strong>27 books</strong>. How many books are there <strong>in all</strong>?
+      </p>
+      <div class="illus-wrap">
+        <svg viewBox="0 0 280 100" width="260" height="90" xmlns="http://www.w3.org/2000/svg">
+          <rect width="280" height="100" rx="12" fill="#FFF9C4"/>
+          <rect x="20" y="20" width="240" height="12" rx="4" fill="#8D6E63"/>
+          <rect x="20" y="38" width="240" height="12" rx="4" fill="#8D6E63"/>
+          <rect x="20" y="56" width="240" height="12" rx="4" fill="#8D6E63"/>
+          <rect x="20" y="74" width="240" height="12" rx="4" fill="#8D6E63"/>
+          <text x="140" y="95" text-anchor="middle" font-family="Arial" font-size="11" fill="#555">6 shelves × 27 books each = ?</text>
+        </svg>
+      </div>
+      <div class="options-grid" id="q4-opts">
+        <button class="option-btn" onclick="checkAnswer(this,'q4','A')"><span class="option-letter">A</span> 144</button>
+        <button class="option-btn" onclick="checkAnswer(this,'q4','B')"><span class="option-letter">B</span> 152</button>
+        <button class="option-btn" onclick="checkAnswer(this,'q4','C')"><span class="option-letter">C</span> 162</button>
+        <button class="option-btn" onclick="checkAnswer(this,'q4','D')"><span class="option-letter">D</span> 180</button>
+      </div>
+      <button class="btn btn-hint" onclick="showHint('hint4')">💡 Hint</button>
+      <div id="hint4" class="hint-text">Use area model: 27 = 20 + 7. Then 6×20=120 and 6×7=42. Add them together!</div>
+      <div id="fb-q4" class="feedback-box"></div>
+      <div class="nav-row" id="nav-q4" style="display:none">
+        <button class="btn btn-next" onclick="goNext()">Next Question →</button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 9 – MINI QUIZ 2B (Division Q2)
+    ════════════════════════════════════════ -->
+    <div class="slide" id="slide-8">
+      <div class="section-tag">🧠 Mini Quiz – Multiplication & Division</div>
+      <div class="quiz-header">
+        <span class="quiz-badge">Q 2 of 3</span>
+        <span style="font-size:0.85rem;color:#888">Mult/Div · +10 pts</span>
+      </div>
+      <p class="question-text">
+        There are <strong>84 stickers</strong> to share equally among <strong>7 friends</strong>. How many stickers does each friend get?
+      </p>
+      <div class="options-grid" id="q5-opts">
+        <button class="option-btn" onclick="checkAnswer(this,'q5','A')"><span class="option-letter">A</span> 9</button>
+        <button class="option-btn" onclick="checkAnswer(this,'q5','B')"><span class="option-letter">B</span> 11</button>
+        <button class="option-btn" onclick="checkAnswer(this,'q5','C')"><span class="option-letter">C</span> 12</button>
+        <button class="option-btn" onclick="checkAnswer(this,'q5','D')"><span class="option-letter">D</span> 14</button>
+      </div>
+      <button class="btn btn-hint" onclick="showHint('hint5')">💡 Hint</button>
+      <div id="hint5" class="hint-text">7 × ? = 84. Think: 7×10=70, 7×2=14, 70+14=84. So 7×12=84!</div>
+      <div id="fb-q5" class="feedback-box"></div>
+      <div class="nav-row" id="nav-q5" style="display:none">
+        <button class="btn btn-next" onclick="goNext()">Next Question →</button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 10 – MINI QUIZ 2C (Patterns Q3)
+    ════════════════════════════════════════ -->
+    <div class="slide" id="slide-9">
+      <div class="section-tag">🧠 Mini Quiz – Patterns</div>
+      <div class="quiz-header">
+        <span class="quiz-badge">Q 3 of 3</span>
+        <span style="font-size:0.85rem;color:#888">Patterns · +10 pts</span>
+      </div>
+      <p class="question-text">
+        Look at the pattern: <strong>5, 10, 20, 40, …</strong><br>
+        What is the next number in the pattern?
+      </p>
+      <div class="options-grid" id="q6-opts">
+        <button class="option-btn" onclick="checkAnswer(this,'q6','A')"><span class="option-letter">A</span> 50</button>
+        <button class="option-btn" onclick="checkAnswer(this,'q6','B')"><span class="option-letter">B</span> 60</button>
+        <button class="option-btn" onclick="checkAnswer(this,'q6','C')"><span class="option-letter">C</span> 75</button>
+        <button class="option-btn" onclick="checkAnswer(this,'q6','D')"><span class="option-letter">D</span> 80</button>
+      </div>
+      <button class="btn btn-hint" onclick="showHint('hint6')">💡 Hint</button>
+      <div id="hint6" class="hint-text">What operation turns 5→10, 10→20, 20→40? Each number is multiplied by 2! So 40 × 2 = ?</div>
+      <div id="fb-q6" class="feedback-box"></div>
+      <div class="nav-row" id="nav-q6" style="display:none">
+        <button class="btn btn-next" onclick="goNext()">On to Fractions! 🍕</button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 11 – CONCEPT: FRACTIONS
+    ════════════════════════════════════════ -->
+    <div class="slide" id="slide-10">
+      <div class="level-tag">📍 Topic 3</div>
+      <span class="big-emoji">🍕</span>
+      <h2 class="slide-title">Fractions</h2>
+      <p class="slide-subtitle">Parts of a whole, equivalent fractions & comparing</p>
+      <div class="slide-body">
+        <div class="highlight-box">
+          A <strong>fraction</strong> names part of a whole or part of a group.<br>
+          The <strong>denominator</strong> (bottom) = total equal parts.<br>
+          The <strong>numerator</strong> (top) = parts you have.
+        </div>
+        <!-- Fraction pizza SVG illustration -->
+        <div class="illus-wrap">
+          <svg viewBox="0 0 320 150" width="300" height="140" xmlns="http://www.w3.org/2000/svg">
+            <rect width="320" height="150" rx="14" fill="#FFF9C4"/>
+            <!-- Pizza 3/4 shaded -->
+            <circle cx="80" cy="75" r="55" fill="#FFA726" stroke="#E65100" stroke-width="2"/>
+            <!-- Pizza slices dividers -->
+            <line x1="80" y1="20" x2="80" y2="130" stroke="#E65100" stroke-width="2"/>
+            <line x1="25" y1="75" x2="135" y2="75" stroke="#E65100" stroke-width="2"/>
+            <!-- Shaded 3 quarters -->
+            <path d="M80 75 L80 20 A55 55 0 0 1 135 75Z" fill="#FF5722" opacity="0.7"/>
+            <path d="M80 75 L135 75 A55 55 0 0 1 80 130Z" fill="#FF5722" opacity="0.7"/>
+            <path d="M80 75 L80 130 A55 55 0 0 1 25 75Z" fill="#FF5722" opacity="0.7"/>
+            <!-- Label -->
+            <text x="80" y="145" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="13" fill="#4A148C">3/4 eaten!</text>
+            <!-- Equivalent fractions diagram -->
+            <rect x="165" y="25" width="140" height="30" rx="6" fill="#BBDEFB" stroke="#1565C0" stroke-width="1.5"/>
+            <line x1="235" y1="25" x2="235" y2="55" stroke="#1565C0" stroke-width="1.5"/>
+            <text x="195" y="46" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="14" fill="#1565C0">1/2</text>
+            <text x="270" y="46" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="14" fill="#1565C0">1/2</text>
+            <text x="235" y="70" text-anchor="middle" font-family="Arial" font-size="11" fill="#555">= 2 equal parts</text>
+            <rect x="165" y="80" width="140" height="30" rx="6" fill="#C8E6C9" stroke="#2E7D32" stroke-width="1.5"/>
+            <line x1="200" y1="80" x2="200" y2="110" stroke="#2E7D32" stroke-width="1.5"/>
+            <line x1="235" y1="80" x2="235" y2="110" stroke="#2E7D32" stroke-width="1.5"/>
+            <line x1="270" y1="80" x2="270" y2="110" stroke="#2E7D32" stroke-width="1.5"/>
+            <text x="182" y="100" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="12" fill="#1B5E20">1/4</text>
+            <text x="217" y="100" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="12" fill="#1B5E20">1/4</text>
+            <text x="252" y="100" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="12" fill="#1B5E20">1/4</text>
+            <text x="287" y="100" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="12" fill="#1B5E20">1/4</text>
+            <text x="235" y="125" text-anchor="middle" font-family="Arial" font-size="11" fill="#555">= 4 equal parts</text>
+            <text x="235" y="140" text-anchor="middle" font-family="Arial" font-size="12" font-weight="bold" fill="#7B1FA2">So ½ = 2/4!</text>
+          </svg>
+        </div>
+        <div class="example-box">
+          <strong>Comparing Fractions with same denominator:</strong><br>
+          <span style="font-size:1.1rem">3/8 &lt; 5/8</span> — bigger numerator means bigger fraction!<br><br>
+          <strong>Comparing with same numerator:</strong><br>
+          <span style="font-size:1.1rem">1/3 &gt; 1/8</span> — smaller denominator = BIGGER pieces!
+        </div>
+        <div class="tip-box">💡 <strong>Equivalent Fractions:</strong> Multiply or divide top AND bottom by the same number. ½ = 2/4 = 3/6 = 4/8. They all name the same amount!</div>
+      </div>
+      <div class="nav-row">
+        <button class="btn btn-back" onclick="goBack()">← Back</button>
+        <button class="btn btn-next" onclick="goNext()">Mini Quiz! 🧠</button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 12 – MINI QUIZ 3A (Fractions Q1)
+    ════════════════════════════════════════ -->
+    <div class="slide" id="slide-11">
+      <div class="section-tag">🧠 Mini Quiz – Fractions</div>
+      <div class="quiz-header">
+        <span class="quiz-badge">Q 1 of 3</span>
+        <span style="font-size:0.85rem;color:#888">Fractions · +10 pts</span>
+      </div>
+      <p class="question-text">
+        Which fraction is <strong>equivalent</strong> to <strong>2/3</strong>?
+      </p>
+      <!-- Fraction visual -->
+      <div style="text-align:center;margin:10px 0;font-size:1.3rem">
+        <span class="fraction">
+          <span>2</span>
+          <div class="fraction-line" style="width:30px"></div>
+          <span>3</span>
+        </span>
+        <span style="margin:0 10px;font-size:1.5rem;color:#7B1FA2"> = </span>
+        <span style="font-size:1.5rem;color:#888">?</span>
+      </div>
+      <div class="options-grid" id="q7-opts">
+        <button class="option-btn" onclick="checkAnswer(this,'q7','A')"><span class="option-letter">A</span> 3/6</button>
+        <button class="option-btn" onclick="checkAnswer(this,'q7','B')"><span class="option-letter">B</span> 4/6</button>
+        <button class="option-btn" onclick="checkAnswer(this,'q7','C')"><span class="option-letter">C</span> 3/4</button>
+        <button class="option-btn" onclick="checkAnswer(this,'q7','D')"><span class="option-letter">D</span> 2/6</button>
+      </div>
+      <button class="btn btn-hint" onclick="showHint('hint7')">💡 Hint</button>
+      <div id="hint7" class="hint-text">Multiply BOTH top and bottom by 2: 2×2=4, 3×2=6. So 2/3 = 4/6!</div>
+      <div id="fb-q7" class="feedback-box"></div>
+      <div class="nav-row" id="nav-q7" style="display:none">
+        <button class="btn btn-next" onclick="goNext()">Next →</button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 13 – MINI QUIZ 3B (Fractions Q2)
+    ════════════════════════════════════════ -->
+    <div class="slide" id="slide-12">
+      <div class="section-tag">🧠 Mini Quiz – Fractions</div>
+      <div class="quiz-header">
+        <span class="quiz-badge">Q 2 of 3</span>
+        <span style="font-size:0.85rem;color:#888">Fractions · +10 pts</span>
+      </div>
+      <p class="question-text">
+        Which fraction is <strong>greater</strong>?  <strong>3/4</strong> or <strong>5/8</strong>?
+      </p>
+      <!-- Number line visual -->
+      <div class="illus-wrap">
+        <svg viewBox="0 0 300 80" width="280" height="70" xmlns="http://www.w3.org/2000/svg">
+          <rect width="300" height="80" rx="10" fill="#F3E5F5"/>
+          <!-- Number line -->
+          <line x1="20" y1="40" x2="280" y2="40" stroke="#333" stroke-width="3"/>
+          <!-- Ticks at 0, 1/4, 1/2, 3/4, 1 -->
+          <line x1="20" y1="32" x2="20" y2="48" stroke="#333" stroke-width="2"/>
+          <line x1="80" y1="35" x2="80" y2="45" stroke="#555" stroke-width="1.5"/>
+          <line x1="150" y1="32" x2="150" y2="48" stroke="#333" stroke-width="2"/>
+          <line x1="215" y1="35" x2="215" y2="45" stroke="#555" stroke-width="1.5"/>
+          <line x1="280" y1="32" x2="280" y2="48" stroke="#333" stroke-width="2"/>
+          <!-- Labels -->
+          <text x="20" y="60" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">0</text>
+          <text x="150" y="60" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">1/2</text>
+          <text x="280" y="60" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">1</text>
+          <!-- 3/4 marker -->
+          <circle cx="215" cy="40" r="7" fill="#1565C0"/>
+          <text x="215" y="22" text-anchor="middle" font-size="11" font-weight="bold" fill="#1565C0">3/4</text>
+          <!-- 5/8 marker (5/8 = 0.625, so 20+0.625×260≈182.5) -->
+          <circle cx="183" cy="40" r="7" fill="#CE93D8"/>
+          <text x="183" y="22" text-anchor="middle" font-size="11" font-weight="bold" fill="#7B1FA2">5/8</text>
+        </svg>
+      </div>
+      <div class="tf-row">
+        <button class="tf-btn true-btn" onclick="checkTF(this,'q8',true)">3/4 is greater ✓</button>
+        <button class="tf-btn false-btn" onclick="checkTF(this,'q8',false)">5/8 is greater ✓</button>
+      </div>
+      <button class="btn btn-hint" onclick="showHint('hint8')">💡 Hint</button>
+      <div id="hint8" class="hint-text">Convert to same denominator: 3/4 = 6/8. Now compare 6/8 vs 5/8. Which numerator is bigger?</div>
+      <div id="fb-q8" class="feedback-box"></div>
+      <div class="nav-row" id="nav-q8" style="display:none">
+        <button class="btn btn-next" onclick="goNext()">Next →</button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 14 – MINI QUIZ 3C (Fractions Q3)
+    ════════════════════════════════════════ -->
+    <div class="slide" id="slide-13">
+      <div class="section-tag">🧠 Mini Quiz – Fractions</div>
+      <div class="quiz-header">
+        <span class="quiz-badge">Q 3 of 3</span>
+        <span style="font-size:0.85rem;color:#888">Fractions · +10 pts</span>
+      </div>
+      <p class="question-text">
+        Maria ate <strong>1/4</strong> of a pizza. Tom ate <strong>2/4</strong> of the same pizza.<br>
+        How much of the pizza did they eat <strong>together</strong>?
+      </p>
+      <div class="options-grid" id="q9-opts">
+        <button class="option-btn" onclick="checkAnswer(this,'q9','A')"><span class="option-letter">A</span> 3/8</button>
+        <button class="option-btn" onclick="checkAnswer(this,'q9','B')"><span class="option-letter">B</span> 3/4</button>
+        <button class="option-btn" onclick="checkAnswer(this,'q9','C')"><span class="option-letter">C</span> 1/2</button>
+        <button class="option-btn" onclick="checkAnswer(this,'q9','D')"><span class="option-letter">D</span> 2/8</button>
+      </div>
+      <button class="btn btn-hint" onclick="showHint('hint9')">💡 Hint</button>
+      <div id="hint9" class="hint-text">Same denominator → add just the numerators! 1/4 + 2/4 = (1+2)/4 = 3/4</div>
+      <div id="fb-q9" class="feedback-box"></div>
+      <div class="nav-row" id="nav-q9" style="display:none">
+        <button class="btn btn-next" onclick="goNext()">Next Topic! 📏</button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 15 – CONCEPT: MEASUREMENT
+    ════════════════════════════════════════ -->
+    <div class="slide" id="slide-14">
+      <div class="level-tag">📍 Topic 4</div>
+      <span class="big-emoji">📏</span>
+      <h2 class="slide-title">Measurement & Data</h2>
+      <p class="slide-subtitle">Area, Perimeter, Angles & Unit Conversions</p>
+      <div class="slide-body">
+        <div class="highlight-box">
+          <strong>Perimeter</strong> = distance AROUND a shape (add all sides) 🏃<br>
+          <strong>Area</strong> = space INSIDE a shape (length × width) 🏠<br>
+          Units: inches (in), feet (ft), centimeters (cm), meters (m)
+        </div>
+        <!-- Area/perimeter visual -->
+        <div class="illus-wrap">
+          <svg viewBox="0 0 300 160" width="280" height="150" xmlns="http://www.w3.org/2000/svg">
+            <rect width="300" height="160" rx="14" fill="#E3F2FD"/>
+            <!-- Rectangle -->
+            <rect x="40" y="30" width="130" height="80" fill="#BBDEFB" stroke="#1565C0" stroke-width="2.5" rx="4"/>
+            <!-- Grid lines inside -->
+            <line x1="66" y1="30" x2="66" y2="110" stroke="#90CAF9" stroke-width="1" stroke-dasharray="3"/>
+            <line x1="92" y1="30" x2="92" y2="110" stroke="#90CAF9" stroke-width="1" stroke-dasharray="3"/>
+            <line x1="118" y1="30" x2="118" y2="110" stroke="#90CAF9" stroke-width="1" stroke-dasharray="3"/>
+            <line x1="144" y1="30" x2="144" y2="110" stroke="#90CAF9" stroke-width="1" stroke-dasharray="3"/>
+            <line x1="40" y1="57" x2="170" y2="57" stroke="#90CAF9" stroke-width="1" stroke-dasharray="3"/>
+            <line x1="40" y1="84" x2="170" y2="84" stroke="#90CAF9" stroke-width="1" stroke-dasharray="3"/>
+            <!-- Dimension labels -->
+            <text x="105" y="125" text-anchor="middle" font-size="13" font-weight="bold" fill="#1565C0">5 cm</text>
+            <text x="25" y="73" text-anchor="middle" font-size="13" font-weight="bold" fill="#1565C0">3 cm</text>
+            <!-- Arrows -->
+            <line x1="40" y1="122" x2="170" y2="122" stroke="#1565C0" stroke-width="1.5" marker-end="url(#arrow)"/>
+            <!-- Formulas -->
+            <rect x="195" y="25" width="95" height="55" rx="8" fill="#C8E6C9" stroke="#2E7D32" stroke-width="1.5"/>
+            <text x="242" y="42" text-anchor="middle" font-size="11" font-weight="bold" fill="#1B5E20">Area</text>
+            <text x="242" y="58" text-anchor="middle" font-size="11" fill="#1B5E20">5 × 3 = 15 cm²</text>
+            <rect x="195" y="90" width="95" height="55" rx="8" fill="#F8BBD0" stroke="#880E4F" stroke-width="1.5"/>
+            <text x="242" y="107" text-anchor="middle" font-size="11" font-weight="bold" fill="#880E4F">Perimeter</text>
+            <text x="242" y="123" text-anchor="middle" font-size="10" fill="#880E4F">2×(5+3)</text>
+            <text x="242" y="138" text-anchor="middle" font-size="11" font-weight="bold" fill="#880E4F">= 16 cm</text>
+          </svg>
+        </div>
+        <div class="example-box">
+          <strong>📐 Angles:</strong><br>
+          • <strong>Right angle</strong> = exactly 90° (like a corner of a book 📖)<br>
+          • <strong>Acute angle</strong> = less than 90° (sharp! like a pizza slice 🍕)<br>
+          • <strong>Obtuse angle</strong> = greater than 90° but less than 180°<br>
+          • A full circle = 360°
+        </div>
+        <div class="tip-box">💡 <strong>Unit Conversion:</strong> 1 foot = 12 inches · 1 yard = 3 feet · 1 meter ≈ 100 cm · 1 km = 1,000 m</div>
+      </div>
+      <div class="nav-row">
+        <button class="btn btn-back" onclick="goBack()">← Back</button>
+        <button class="btn btn-next" onclick="goNext()">Mini Quiz! 🧠</button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 16 – MINI QUIZ 4A (Measurement Q1)
+    ════════════════════════════════════════ -->
+    <div class="slide" id="slide-15">
+      <div class="section-tag">🧠 Mini Quiz – Measurement</div>
+      <div class="quiz-header">
+        <span class="quiz-badge">Q 1 of 3</span>
+        <span style="font-size:0.85rem;color:#888">Measurement · +10 pts</span>
+      </div>
+      <p class="question-text">
+        A rectangular garden is <strong>9 feet long</strong> and <strong>4 feet wide</strong>.<br>
+        What is the <strong>area</strong> of the garden?
+      </p>
+      <div class="options-grid" id="q10-opts">
+        <button class="option-btn" onclick="checkAnswer(this,'q10','A')"><span class="option-letter">A</span> 13 square feet</button>
+        <button class="option-btn" onclick="checkAnswer(this,'q10','B')"><span class="option-letter">B</span> 26 square feet</button>
+        <button class="option-btn" onclick="checkAnswer(this,'q10','C')"><span class="option-letter">C</span> 36 square feet</button>
+        <button class="option-btn" onclick="checkAnswer(this,'q10','D')"><span class="option-letter">D</span> 45 square feet</button>
+      </div>
+      <button class="btn btn-hint" onclick="showHint('hint10')">💡 Hint</button>
+      <div id="hint10" class="hint-text">Area = length × width = 9 × 4 = ?</div>
+      <div id="fb-q10" class="feedback-box"></div>
+      <div class="nav-row" id="nav-q10" style="display:none">
+        <button class="btn btn-next" onclick="goNext()">Next →</button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 17 – MINI QUIZ 4B (Perimeter Q2)
+    ════════════════════════════════════════ -->
+    <div class="slide" id="slide-16">
+      <div class="section-tag">🧠 Mini Quiz – Measurement</div>
+      <div class="quiz-header">
+        <span class="quiz-badge">Q 2 of 3</span>
+        <span style="font-size:0.85rem;color:#888">Measurement · +10 pts</span>
+      </div>
+      <p class="question-text">
+        A square has a side length of <strong>7 inches</strong>.<br>
+        What is the <strong>perimeter</strong>?
+      </p>
+      <div class="options-grid" id="q11-opts">
+        <button class="option-btn" onclick="checkAnswer(this,'q11','A')"><span class="option-letter">A</span> 14 inches</button>
+        <button class="option-btn" onclick="checkAnswer(this,'q11','B')"><span class="option-letter">B</span> 21 inches</button>
+        <button class="option-btn" onclick="checkAnswer(this,'q11','C')"><span class="option-letter">C</span> 28 inches</button>
+        <button class="option-btn" onclick="checkAnswer(this,'q11','D')"><span class="option-letter">D</span> 49 inches</button>
+      </div>
+      <button class="btn btn-hint" onclick="showHint('hint11')">💡 Hint</button>
+      <div id="hint11" class="hint-text">A square has 4 equal sides. Perimeter = 4 × side length = 4 × 7 = ?</div>
+      <div id="fb-q11" class="feedback-box"></div>
+      <div class="nav-row" id="nav-q11" style="display:none">
+        <button class="btn btn-next" onclick="goNext()">Next →</button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 18 – MINI QUIZ 4C (Angles Q3)
+    ════════════════════════════════════════ -->
+    <div class="slide" id="slide-17">
+      <div class="section-tag">🧠 Mini Quiz – Angles</div>
+      <div class="quiz-header">
+        <span class="quiz-badge">Q 3 of 3</span>
+        <span style="font-size:0.85rem;color:#888">Angles · +10 pts</span>
+      </div>
+      <p class="question-text">
+        An angle measures <strong>125°</strong>. What type of angle is it?
+      </p>
+      <!-- Angle illustration -->
+      <div class="illus-wrap">
+        <svg viewBox="0 0 260 120" width="240" height="110" xmlns="http://www.w3.org/2000/svg">
+          <rect width="260" height="120" rx="12" fill="#EDE7F6"/>
+          <!-- Angle at point (50,80) -->
+          <line x1="50" y1="80" x2="200" y2="80" stroke="#1565C0" stroke-width="3"/>
+          <line x1="50" y1="80" x2="120" y2="20" stroke="#1565C0" stroke-width="3"/>
+          <!-- Arc showing obtuse angle -->
+          <path d="M90 80 A40 40 0 0 0 70 48" fill="none" stroke="#F44336" stroke-width="2.5"/>
+          <!-- Label -->
+          <text x="100" y="72" font-size="16" font-weight="bold" fill="#F44336">125°</text>
+          <!-- Reference for right angle -->
+          <text x="170" y="110" font-size="11" fill="#555">Greater than 90°</text>
+        </svg>
+      </div>
+      <div class="options-grid" id="q12-opts">
+        <button class="option-btn" onclick="checkAnswer(this,'q12','A')"><span class="option-letter">A</span> Acute angle</button>
+        <button class="option-btn" onclick="checkAnswer(this,'q12','B')"><span class="option-letter">B</span> Right angle</button>
+        <button class="option-btn" onclick="checkAnswer(this,'q12','C')"><span class="option-letter">C</span> Obtuse angle</button>
+        <button class="option-btn" onclick="checkAnswer(this,'q12','D')"><span class="option-letter">D</span> Straight angle</button>
+      </div>
+      <button class="btn btn-hint" onclick="showHint('hint12')">💡 Hint</button>
+      <div id="hint12" class="hint-text">Acute &lt; 90°. Right = 90°. Obtuse is between 90° and 180°. Where does 125° fit?</div>
+      <div id="fb-q12" class="feedback-box"></div>
+      <div class="nav-row" id="nav-q12" style="display:none">
+        <button class="btn btn-next" onclick="goNext()">Geometry Time! 📐</button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 19 – CONCEPT: GEOMETRY
+    ════════════════════════════════════════ -->
+    <div class="slide" id="slide-18">
+      <div class="level-tag">📍 Topic 5</div>
+      <span class="big-emoji">📐</span>
+      <h2 class="slide-title">Geometry</h2>
+      <p class="slide-subtitle">Lines, angles, and 2D shapes</p>
+      <div class="slide-body">
+        <div class="highlight-box">
+          <strong>Lines:</strong><br>
+          • <strong>Parallel lines</strong> = never meet, always same distance apart ═<br>
+          • <strong>Perpendicular lines</strong> = meet at exactly 90° ⊥<br>
+          • <strong>Intersecting lines</strong> = cross each other at any angle ✕
+        </div>
+        <!-- Geometry shapes SVG -->
+        <div class="illus-wrap">
+          <svg viewBox="0 0 320 160" width="300" height="150" xmlns="http://www.w3.org/2000/svg">
+            <rect width="320" height="160" rx="14" fill="#E8F5E9"/>
+            <!-- Parallel lines -->
+            <line x1="20" y1="30" x2="90" y2="30" stroke="#1565C0" stroke-width="2.5"/>
+            <line x1="20" y1="50" x2="90" y2="50" stroke="#1565C0" stroke-width="2.5"/>
+            <text x="55" y="68" text-anchor="middle" font-size="10" fill="#1565C0" font-weight="bold">Parallel</text>
+            <!-- Perpendicular lines -->
+            <line x1="130" y1="20" x2="130" y2="70" stroke="#7B1FA2" stroke-width="2.5"/>
+            <line x1="105" y1="45" x2="155" y2="45" stroke="#7B1FA2" stroke-width="2.5"/>
+            <rect x="130" y="45" width="8" height="8" fill="none" stroke="#7B1FA2" stroke-width="1.5"/>
+            <text x="130" y="82" text-anchor="middle" font-size="10" fill="#7B1FA2" font-weight="bold">Perpendicular</text>
+            <!-- Shapes -->
+            <!-- Square -->
+            <rect x="195" y="20" width="40" height="40" fill="#BBDEFB" stroke="#1565C0" stroke-width="2" rx="2"/>
+            <text x="215" y="75" text-anchor="middle" font-size="10" fill="#1565C0" font-weight="bold">Square</text>
+            <!-- Triangle -->
+            <path d="M255 60 L280 20 L305 60Z" fill="#C8E6C9" stroke="#2E7D32" stroke-width="2"/>
+            <text x="280" y="75" text-anchor="middle" font-size="10" fill="#2E7D32" font-weight="bold">Triangle</text>
+            <!-- Quadrilaterals bottom row -->
+            <rect x="20" y="100" width="60" height="35" fill="#F8BBD0" stroke="#880E4F" stroke-width="2" rx="2"/>
+            <text x="50" y="148" text-anchor="middle" font-size="10" fill="#880E4F" font-weight="bold">Rectangle</text>
+            <!-- Rhombus -->
+            <path d="M130 100 L155 120 L130 140 L105 120Z" fill="#FFF9C4" stroke="#F57F17" stroke-width="2"/>
+            <text x="130" y="152" text-anchor="middle" font-size="10" fill="#F57F17" font-weight="bold">Rhombus</text>
+            <!-- Trapezoid -->
+            <path d="M195 140 L215 100 L275 100 L295 140Z" fill="#E1F5FE" stroke="#0277BD" stroke-width="2"/>
+            <text x="245" y="155" text-anchor="middle" font-size="10" fill="#0277BD" font-weight="bold">Trapezoid</text>
+          </svg>
+        </div>
+        <table class="concept-table">
+          <tr><th>Shape</th><th>Sides</th><th>Special Property</th></tr>
+          <tr><td>Square</td><td>4 equal</td><td>All angles = 90°</td></tr>
+          <tr><td>Rectangle</td><td>4 (2 pairs)</td><td>All angles = 90°</td></tr>
+          <tr><td>Rhombus</td><td>4 equal</td><td>Opposite angles equal</td></tr>
+          <tr><td>Trapezoid</td><td>4 (1 pair parallel)</td><td>Exactly 1 pair of parallel sides</td></tr>
+          <tr><td>Triangle</td><td>3</td><td>Angles add up to 180°</td></tr>
+        </table>
+        <div class="tip-box">💡 A square is a special rectangle! ALL squares are rectangles, but NOT all rectangles are squares. 🤯</div>
+      </div>
+      <div class="nav-row">
+        <button class="btn btn-back" onclick="goBack()">← Back</button>
+        <button class="btn btn-next" onclick="goNext()">Mini Quiz! 🧠</button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 20 – MINI QUIZ 5A (Geometry Q1)
+    ════════════════════════════════════════ -->
+    <div class="slide" id="slide-19">
+      <div class="section-tag">🧠 Mini Quiz – Geometry</div>
+      <div class="quiz-header">
+        <span class="quiz-badge">Q 1 of 3</span>
+        <span style="font-size:0.85rem;color:#888">Geometry · +10 pts</span>
+      </div>
+      <p class="question-text">
+        Which of the following <strong>always</strong> has 4 right angles?
+      </p>
+      <div class="options-grid" id="q13-opts">
+        <button class="option-btn" onclick="checkAnswer(this,'q13','A')"><span class="option-letter">A</span> Rhombus</button>
+        <button class="option-btn" onclick="checkAnswer(this,'q13','B')"><span class="option-letter">B</span> Trapezoid</button>
+        <button class="option-btn" onclick="checkAnswer(this,'q13','C')"><span class="option-letter">C</span> Rectangle</button>
+        <button class="option-btn" onclick="checkAnswer(this,'q13','D')"><span class="option-letter">D</span> Triangle</button>
+      </div>
+      <button class="btn btn-hint" onclick="showHint('hint13')">💡 Hint</button>
+      <div id="hint13" class="hint-text">A right angle is exactly 90°. Think about which shape ALWAYS has all corners as perfect right angles...</div>
+      <div id="fb-q13" class="feedback-box"></div>
+      <div class="nav-row" id="nav-q13" style="display:none">
+        <button class="btn btn-next" onclick="goNext()">Next →</button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 21 – MINI QUIZ 5B (Geometry Q2)
+    ════════════════════════════════════════ -->
+    <div class="slide" id="slide-20">
+      <div class="section-tag">🧠 Mini Quiz – Geometry</div>
+      <div class="quiz-header">
+        <span class="quiz-badge">Q 2 of 3</span>
+        <span style="font-size:0.85rem;color:#888">Geometry · +10 pts</span>
+      </div>
+      <p class="question-text">
+        Two lines that cross each other at a <strong>right angle</strong> are called:
+      </p>
+      <div class="options-grid" id="q14-opts">
+        <button class="option-btn" onclick="checkAnswer(this,'q14','A')"><span class="option-letter">A</span> Parallel lines</button>
+        <button class="option-btn" onclick="checkAnswer(this,'q14','B')"><span class="option-letter">B</span> Perpendicular lines</button>
+        <button class="option-btn" onclick="checkAnswer(this,'q14','C')"><span class="option-letter">C</span> Intersecting lines</button>
+        <button class="option-btn" onclick="checkAnswer(this,'q14','D')"><span class="option-letter">D</span> Diagonal lines</button>
+      </div>
+      <div id="fb-q14" class="feedback-box"></div>
+      <div class="nav-row" id="nav-q14" style="display:none">
+        <button class="btn btn-next" onclick="goNext()">Next →</button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 22 – MINI QUIZ 5C (Geometry Q3 TF)
+    ════════════════════════════════════════ -->
+    <div class="slide" id="slide-21">
+      <div class="section-tag">🧠 Mini Quiz – Geometry</div>
+      <div class="quiz-header">
+        <span class="quiz-badge">Q 3 of 3</span>
+        <span style="font-size:0.85rem;color:#888">Geometry True/False · +10 pts</span>
+      </div>
+      <p class="question-text">
+        True or False: <strong>All squares are rectangles.</strong>
+      </p>
+      <div class="illus-wrap">
+        <svg viewBox="0 0 260 100" width="240" height="90" xmlns="http://www.w3.org/2000/svg">
+          <rect width="260" height="100" rx="12" fill="#E3F2FD"/>
+          <!-- Venn-like diagram -->
+          <ellipse cx="130" cy="55" rx="100" ry="38" fill="#BBDEFB" stroke="#1565C0" stroke-width="2" opacity="0.7"/>
+          <text x="130" y="25" text-anchor="middle" font-size="12" font-weight="bold" fill="#1565C0">RECTANGLES</text>
+          <ellipse cx="130" cy="58" rx="55" ry="22" fill="#90CAF9" stroke="#0D47A1" stroke-width="2" opacity="0.8"/>
+          <text x="130" y="61" text-anchor="middle" font-size="11" font-weight="bold" fill="#0D47A1">SQUARES</text>
+          <text x="130" y="90" text-anchor="middle" font-size="10" fill="#555">Squares are inside Rectangles!</text>
+        </svg>
+      </div>
+      <div class="tf-row">
+        <button class="tf-btn true-btn" onclick="checkTF(this,'q15',true)">TRUE ✓</button>
+        <button class="tf-btn false-btn" onclick="checkTF(this,'q15',false)">FALSE ✗</button>
+      </div>
+      <div id="fb-q15" class="feedback-box"></div>
+      <div class="nav-row" id="nav-q15" style="display:none">
+        <button class="btn btn-next" onclick="goNext()">🏁 Final Challenge!</button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 23 – FINAL CHALLENGE INTRO
+    ════════════════════════════════════════ -->
+    <div class="slide" id="slide-22">
+      <div class="hook-hero" style="padding:10px 0">
+        <span style="font-size:4rem;display:block;animation:bounce 1s ease infinite alternate">🏆</span>
+        <h2 class="hero-title" style="font-size:2.2rem">
+          FINAL CHALLENGE!
+        </h2>
+        <p style="font-size:1.05rem;color:#555;margin:10px 0">
+          15 questions across all topics.<br>
+          Show what you know, Math Star! ⭐
+        </p>
+        <div class="score-card">
+          <div class="score-label">Your score so far</div>
+          <div class="score-big" id="fc-current-score">0</div>
+          <div class="score-label">points</div>
+        </div>
+        <div class="badges-wrap" id="earned-badges-preview" style="justify-content:center;margin-top:10px"></div>
+        <div class="tip-box" style="margin-top:12px">
+          💪 You've got this! Remember:<br>
+          • Take your time to read each question<br>
+          • Use what you learned in each section<br>
+          • Hints are still available!
+        </div>
+      </div>
+      <div class="nav-row">
+        <button class="btn btn-back" onclick="goBack()">← Review</button>
+        <button class="btn btn-next" style="font-size:1.2rem;padding:12px 36px" onclick="goNext()">
+          Begin Final! 🚀
+        </button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         FINAL CHALLENGE Q1
+    ════════════════════════════════════════ -->
+    <div class="slide" id="slide-23">
+      <div class="section-tag">🏆 Final Challenge</div>
+      <div id="fc-timer">⏱️ Take your time!</div>
+      <div id="fc-progress"><div id="fc-bar" style="width:6.67%"></div></div>
+      <div class="quiz-header">
+        <span class="quiz-badge">FC Q1/15</span>
+        <span style="font-size:0.85rem;color:#888">+10 pts</span>
+      </div>
+      <p class="question-text">
+        In the number <strong>706,342</strong>, the digit <strong>6</strong> is in which place?
+      </p>
+      <div class="options-grid" id="fcq1-opts">
+        <button class="option-btn" onclick="checkAnswer(this,'fcq1','A')"><span class="option-letter">A</span> Thousands</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq1','B')"><span class="option-letter">B</span> Ten-thousands</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq1','C')"><span class="option-letter">C</span> Hundreds</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq1','D')"><span class="option-letter">D</span> Tens</button>
+      </div>
+      <div id="fb-fcq1" class="feedback-box"></div>
+      <div class="nav-row" id="nav-fcq1" style="display:none">
+        <button class="btn btn-next" onclick="goNext()">Next →</button>
+      </div>
+    </div>
+
+    <!-- FC Q2 -->
+    <div class="slide" id="slide-24">
+      <div class="section-tag">🏆 Final Challenge</div>
+      <div id="fc-progress2"><div style="width:13.34%;height:10px;background:linear-gradient(90deg,#00C853,coral);border-radius:6px"></div></div>
+      <div class="quiz-header"><span class="quiz-badge">FC Q2/15</span></div>
+      <p class="question-text">
+        What is <strong>348 × 4</strong>?
+      </p>
+      <div class="options-grid" id="fcq2-opts">
+        <button class="option-btn" onclick="checkAnswer(this,'fcq2','A')"><span class="option-letter">A</span> 1,292</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq2','B')"><span class="option-letter">B</span> 1,392</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq2','C')"><span class="option-letter">C</span> 1,452</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq2','D')"><span class="option-letter">D</span> 1,300</button>
+      </div>
+      <button class="btn btn-hint" onclick="showHint('hintfc2')">💡 Hint</button>
+      <div id="hintfc2" class="hint-text">Break apart: 300×4=1200, 40×4=160, 8×4=32. Add: 1200+160+32=?</div>
+      <div id="fb-fcq2" class="feedback-box"></div>
+      <div class="nav-row" id="nav-fcq2" style="display:none"><button class="btn btn-next" onclick="goNext()">Next →</button></div>
+    </div>
+
+    <!-- FC Q3 -->
+    <div class="slide" id="slide-25">
+      <div class="section-tag">🏆 Final Challenge</div>
+      <div class="quiz-header"><span class="quiz-badge">FC Q3/15</span></div>
+      <p class="question-text">
+        Which of the following numbers is <strong>GREATEST</strong>?
+      </p>
+      <div class="options-grid" id="fcq3-opts">
+        <button class="option-btn" onclick="checkAnswer(this,'fcq3','A')"><span class="option-letter">A</span> 82,450</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq3','B')"><span class="option-letter">B</span> 82,504</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq3','C')"><span class="option-letter">C</span> 82,405</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq3','D')"><span class="option-letter">D</span> 82,045</button>
+      </div>
+      <button class="btn btn-hint" onclick="showHint('hintfc3')">💡 Hint</button>
+      <div id="hintfc3" class="hint-text">All have 82,000+. Compare hundreds: 450 vs 504 vs 405 vs 045. Which is biggest?</div>
+      <div id="fb-fcq3" class="feedback-box"></div>
+      <div class="nav-row" id="nav-fcq3" style="display:none"><button class="btn btn-next" onclick="goNext()">Next →</button></div>
+    </div>
+
+    <!-- FC Q4 -->
+    <div class="slide" id="slide-26">
+      <div class="section-tag">🏆 Final Challenge</div>
+      <div class="quiz-header"><span class="quiz-badge">FC Q4/15</span></div>
+      <p class="question-text">
+        A farmer has <strong>96 apples</strong> to pack equally into <strong>8 boxes</strong>. How many apples go in each box?
+      </p>
+      <div class="options-grid" id="fcq4-opts">
+        <button class="option-btn" onclick="checkAnswer(this,'fcq4','A')"><span class="option-letter">A</span> 10</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq4','B')"><span class="option-letter">B</span> 11</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq4','C')"><span class="option-letter">C</span> 12</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq4','D')"><span class="option-letter">D</span> 13</button>
+      </div>
+      <div id="fb-fcq4" class="feedback-box"></div>
+      <div class="nav-row" id="nav-fcq4" style="display:none"><button class="btn btn-next" onclick="goNext()">Next →</button></div>
+    </div>
+
+    <!-- FC Q5 -->
+    <div class="slide" id="slide-27">
+      <div class="section-tag">🏆 Final Challenge</div>
+      <div class="quiz-header"><span class="quiz-badge">FC Q5/15</span></div>
+      <p class="question-text">
+        Which fraction is equivalent to <strong>3/4</strong>?
+      </p>
+      <div class="options-grid" id="fcq5-opts">
+        <button class="option-btn" onclick="checkAnswer(this,'fcq5','A')"><span class="option-letter">A</span> 6/10</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq5','B')"><span class="option-letter">B</span> 6/8</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq5','C')"><span class="option-letter">C</span> 9/16</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq5','D')"><span class="option-letter">D</span> 12/20</button>
+      </div>
+      <button class="btn btn-hint" onclick="showHint('hintfc5')">💡 Hint</button>
+      <div id="hintfc5" class="hint-text">3×2=6, 4×2=8 → 6/8. Check: both numerator and denominator multiplied by same number?</div>
+      <div id="fb-fcq5" class="feedback-box"></div>
+      <div class="nav-row" id="nav-fcq5" style="display:none"><button class="btn btn-next" onclick="goNext()">Next →</button></div>
+    </div>
+
+    <!-- FC Q6 -->
+    <div class="slide" id="slide-28">
+      <div class="section-tag">🏆 Final Challenge</div>
+      <div class="quiz-header"><span class="quiz-badge">FC Q6/15</span></div>
+      <p class="question-text">
+        A rectangle has a <strong>length of 12 cm</strong> and a <strong>width of 5 cm</strong>. What is its <strong>perimeter</strong>?
+      </p>
+      <div class="options-grid" id="fcq6-opts">
+        <button class="option-btn" onclick="checkAnswer(this,'fcq6','A')"><span class="option-letter">A</span> 17 cm</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq6','B')"><span class="option-letter">B</span> 34 cm</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq6','C')"><span class="option-letter">C</span> 60 cm</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq6','D')"><span class="option-letter">D</span> 24 cm</button>
+      </div>
+      <button class="btn btn-hint" onclick="showHint('hintfc6')">💡 Hint</button>
+      <div id="hintfc6" class="hint-text">Perimeter = 2×(length+width) = 2×(12+5) = 2×17 = 34</div>
+      <div id="fb-fcq6" class="feedback-box"></div>
+      <div class="nav-row" id="nav-fcq6" style="display:none"><button class="btn btn-next" onclick="goNext()">Next →</button></div>
+    </div>
+
+    <!-- FC Q7 -->
+    <div class="slide" id="slide-29">
+      <div class="section-tag">🏆 Final Challenge</div>
+      <div class="quiz-header"><span class="quiz-badge">FC Q7/15</span></div>
+      <p class="question-text">
+        How many <strong>feet</strong> are in <strong>3 yards</strong>?
+      </p>
+      <div class="options-grid" id="fcq7-opts">
+        <button class="option-btn" onclick="checkAnswer(this,'fcq7','A')"><span class="option-letter">A</span> 6 feet</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq7','B')"><span class="option-letter">B</span> 9 feet</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq7','C')"><span class="option-letter">C</span> 12 feet</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq7','D')"><span class="option-letter">D</span> 15 feet</button>
+      </div>
+      <button class="btn btn-hint" onclick="showHint('hintfc7')">💡 Hint</button>
+      <div id="hintfc7" class="hint-text">1 yard = 3 feet. So 3 yards = 3 × 3 feet = ?</div>
+      <div id="fb-fcq7" class="feedback-box"></div>
+      <div class="nav-row" id="nav-fcq7" style="display:none"><button class="btn btn-next" onclick="goNext()">Next →</button></div>
+    </div>
+
+    <!-- FC Q8 -->
+    <div class="slide" id="slide-30">
+      <div class="section-tag">🏆 Final Challenge</div>
+      <div class="quiz-header"><span class="quiz-badge">FC Q8/15</span></div>
+      <p class="question-text">
+        True or False: <strong>A trapezoid has exactly ONE pair of parallel sides.</strong>
+      </p>
+      <div class="tf-row">
+        <button class="tf-btn true-btn" onclick="checkTF(this,'fcq8',true)">TRUE ✓</button>
+        <button class="tf-btn false-btn" onclick="checkTF(this,'fcq8',false)">FALSE ✗</button>
+      </div>
+      <div id="fb-fcq8" class="feedback-box"></div>
+      <div class="nav-row" id="nav-fcq8" style="display:none"><button class="btn btn-next" onclick="goNext()">Next →</button></div>
+    </div>
+
+    <!-- FC Q9 -->
+    <div class="slide" id="slide-31">
+      <div class="section-tag">🏆 Final Challenge</div>
+      <div class="quiz-header"><span class="quiz-badge">FC Q9/15</span></div>
+      <p class="question-text">
+        What is the <strong>area</strong> of a square with a side of <strong>8 inches</strong>?
+      </p>
+      <div class="options-grid" id="fcq9-opts">
+        <button class="option-btn" onclick="checkAnswer(this,'fcq9','A')"><span class="option-letter">A</span> 16 sq in</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq9','B')"><span class="option-letter">B</span> 32 sq in</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq9','C')"><span class="option-letter">C</span> 64 sq in</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq9','D')"><span class="option-letter">D</span> 48 sq in</button>
+      </div>
+      <div id="fb-fcq9" class="feedback-box"></div>
+      <div class="nav-row" id="nav-fcq9" style="display:none"><button class="btn btn-next" onclick="goNext()">Next →</button></div>
+    </div>
+
+    <!-- FC Q10 -->
+    <div class="slide" id="slide-32">
+      <div class="section-tag">🏆 Final Challenge</div>
+      <div class="quiz-header"><span class="quiz-badge">FC Q10/15</span></div>
+      <p class="question-text">
+        Sam read <strong>3/8</strong> of his book on Monday and <strong>2/8</strong> on Tuesday.<br>
+        How much of the book has he read in total?
+      </p>
+      <div class="options-grid" id="fcq10-opts">
+        <button class="option-btn" onclick="checkAnswer(this,'fcq10','A')"><span class="option-letter">A</span> 5/16</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq10','B')"><span class="option-letter">B</span> 1/2</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq10','C')"><span class="option-letter">C</span> 5/8</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq10','D')"><span class="option-letter">D</span> 6/8</button>
+      </div>
+      <div id="fb-fcq10" class="feedback-box"></div>
+      <div class="nav-row" id="nav-fcq10" style="display:none"><button class="btn btn-next" onclick="goNext()">Next →</button></div>
+    </div>
+
+    <!-- FC Q11 -->
+    <div class="slide" id="slide-33">
+      <div class="section-tag">🏆 Final Challenge</div>
+      <div class="quiz-header"><span class="quiz-badge">FC Q11/15</span></div>
+      <p class="question-text">
+        A number pattern starts at <strong>3</strong> and each number is <strong>multiplied by 3</strong>. What are the first 4 numbers?
+      </p>
+      <div class="options-grid" id="fcq11-opts">
+        <button class="option-btn" onclick="checkAnswer(this,'fcq11','A')"><span class="option-letter">A</span> 3, 6, 9, 12</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq11','B')"><span class="option-letter">B</span> 3, 9, 27, 81</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq11','C')"><span class="option-letter">C</span> 3, 9, 18, 27</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq11','D')"><span class="option-letter">D</span> 3, 6, 12, 24</button>
+      </div>
+      <div id="fb-fcq11" class="feedback-box"></div>
+      <div class="nav-row" id="nav-fcq11" style="display:none"><button class="btn btn-next" onclick="goNext()">Next →</button></div>
+    </div>
+
+    <!-- FC Q12 -->
+    <div class="slide" id="slide-34">
+      <div class="section-tag">🏆 Final Challenge</div>
+      <div class="quiz-header"><span class="quiz-badge">FC Q12/15</span></div>
+      <p class="question-text">
+        Which fraction is <strong>less than</strong> <strong>1/2</strong>?
+      </p>
+      <div class="options-grid" id="fcq12-opts">
+        <button class="option-btn" onclick="checkAnswer(this,'fcq12','A')"><span class="option-letter">A</span> 3/4</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq12','B')"><span class="option-letter">B</span> 5/8</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq12','C')"><span class="option-letter">C</span> 3/8</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq12','D')"><span class="option-letter">D</span> 4/6</button>
+      </div>
+      <button class="btn btn-hint" onclick="showHint('hintfc12')">💡 Hint</button>
+      <div id="hintfc12" class="hint-text">1/2 = 4/8. Which of the answers is less than 4/8? Compare numerators when denominators are the same!</div>
+      <div id="fb-fcq12" class="feedback-box"></div>
+      <div class="nav-row" id="nav-fcq12" style="display:none"><button class="btn btn-next" onclick="goNext()">Next →</button></div>
+    </div>
+
+    <!-- FC Q13 -->
+    <div class="slide" id="slide-35">
+      <div class="section-tag">🏆 Final Challenge</div>
+      <div class="quiz-header"><span class="quiz-badge">FC Q13/15</span></div>
+      <p class="question-text">
+        An angle of <strong>90°</strong> is found at the corner of which shape?
+      </p>
+      <div class="options-grid" id="fcq13-opts">
+        <button class="option-btn" onclick="checkAnswer(this,'fcq13','A')"><span class="option-letter">A</span> Equilateral Triangle</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq13','B')"><span class="option-letter">B</span> Rectangle</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq13','C')"><span class="option-letter">C</span> Rhombus</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq13','D')"><span class="option-letter">D</span> Pentagon</button>
+      </div>
+      <div id="fb-fcq13" class="feedback-box"></div>
+      <div class="nav-row" id="nav-fcq13" style="display:none"><button class="btn btn-next" onclick="goNext()">Next →</button></div>
+    </div>
+
+    <!-- FC Q14 -->
+    <div class="slide" id="slide-36">
+      <div class="section-tag">🏆 Final Challenge</div>
+      <div class="quiz-header"><span class="quiz-badge">FC Q14/15</span></div>
+      <p class="question-text">
+        A class of <strong>32 students</strong> is divided into groups of <strong>4</strong>. How many groups are there?
+      </p>
+      <div class="options-grid" id="fcq14-opts">
+        <button class="option-btn" onclick="checkAnswer(this,'fcq14','A')"><span class="option-letter">A</span> 6</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq14','B')"><span class="option-letter">B</span> 7</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq14','C')"><span class="option-letter">C</span> 8</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq14','D')"><span class="option-letter">D</span> 9</button>
+      </div>
+      <div id="fb-fcq14" class="feedback-box"></div>
+      <div class="nav-row" id="nav-fcq14" style="display:none"><button class="btn btn-next" onclick="goNext()">Last Question! 💪</button></div>
+    </div>
+
+    <!-- FC Q15 (FINAL) -->
+    <div class="slide" id="slide-37">
+      <div class="section-tag">🏆 Final Challenge – LAST ONE!</div>
+      <div class="quiz-header"><span class="quiz-badge">FC Q15/15 🌟</span></div>
+      <p class="question-text">
+        A room is <strong>6 meters long</strong> and <strong>4 meters wide</strong>.<br>
+        New tiles are needed to cover the <em>entire</em> floor.<br>
+        How many <strong>square meters</strong> of tile are needed?
+      </p>
+      <div class="options-grid" id="fcq15-opts">
+        <button class="option-btn" onclick="checkAnswer(this,'fcq15','A')"><span class="option-letter">A</span> 10 sq m</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq15','B')"><span class="option-letter">B</span> 20 sq m</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq15','C')"><span class="option-letter">C</span> 24 sq m</button>
+        <button class="option-btn" onclick="checkAnswer(this,'fcq15','D')"><span class="option-letter">D</span> 48 sq m</button>
+      </div>
+      <button class="btn btn-hint" onclick="showHint('hintfc15')">💡 Hint</button>
+      <div id="hintfc15" class="hint-text">Area of a rectangle = length × width = 6 × 4 = ?</div>
+      <div id="fb-fcq15" class="feedback-box"></div>
+      <div class="nav-row" id="nav-fcq15" style="display:none">
+        <button class="btn btn-next" style="background:linear-gradient(135deg,#FF6D00,#7B1FA2);font-size:1.1rem;padding:12px 30px" onclick="goNext()">
+          🎊 See My Results!
+        </button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         FINAL RESULTS SLIDE
+    ════════════════════════════════════════ -->
+    <div class="slide" id="slide-38">
+      <div style="text-align:center">
+        <div class="stars-row" id="stars-row"></div>
+        <h2 class="slide-title" style="text-align:center;font-size:2.2rem" id="result-title">🎉 Amazing Work!</h2>
+        <p id="result-msg" style="font-size:1rem;color:#555;margin-bottom:14px"></p>
+        <div class="score-card">
+          <div class="score-label">Final Score</div>
+          <div class="score-big" id="final-score-display">0</div>
+          <div class="score-label">/ 300 points</div>
+        </div>
+        <!-- Stats -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:14px 0">
+          <div style="background:#E3F2FD;border-radius:12px;padding:12px;text-align:center">
+            <div style="font-size:1.8rem;font-family:var(--font-head);color:#1565C0" id="stat-correct">0</div>
+            <div style="font-size:0.8rem;color:#555">Correct ✅</div>
+          </div>
+          <div style="background:#FFEBEE;border-radius:12px;padding:12px;text-align:center">
+            <div style="font-size:1.8rem;font-family:var(--font-head);color:#C62828" id="stat-wrong">0</div>
+            <div style="font-size:0.8rem;color:#555">Incorrect ❌</div>
+          </div>
+          <div style="background:#E8F5E9;border-radius:12px;padding:12px;text-align:center">
+            <div style="font-size:1.8rem;font-family:var(--font-head);color:#2E7D32" id="stat-pct">0%</div>
+            <div style="font-size:0.8rem;color:#555">Score %</div>
+          </div>
+        </div>
+        <!-- Badges earned -->
+        <h3 style="font-family:var(--font-head);color:var(--navy);margin:12px 0 6px">🏅 Badges Earned</h3>
+        <div class="badges-wrap" id="final-badges" style="justify-content:center"></div>
+        <!-- Review wrong answers -->
+        <h3 style="font-family:var(--font-head);color:var(--navy);margin:12px 0 6px;text-align:left">📝 Review</h3>
+        <div id="review-list"></div>
+      </div>
+      <div class="nav-row" style="margin-top:18px">
+        <button class="btn btn-retry" onclick="restartLesson()">🔄 Play Again!</button>
+        <button class="btn btn-primary" onclick="window.print()">🖨️ Print Results</button>
+      </div>
+    </div>
+
+  </div><!-- end slide-wrap -->
+</div><!-- end app -->
+
+<!-- ===== JAVASCRIPT ===== -->
+<script>
+// ══════════════════════════════════════════
+// GAME STATE
+// ══════════════════════════════════════════
+let currentSlide = 0;
+const TOTAL_SLIDES = 39; // 0-indexed
+
+let score = 0;
+let streak = 0;
+let maxStreak = 0;
+let soundOn = false; // muted by default per spec
+let audioCtx = null;
+
+// Track all questions for review
+const questionLog = {};
+
+// ══════════════════════════════════════════
+// ANSWER KEY  (questionId -> correct option)
+// ══════════════════════════════════════════
+const ANSWERS = {
+  // Mini Quiz 1 – Place Value
+  q1:  { correct: 'D', explanation: "5 is in the ten-thousands place. In 52,469 → 5×10,000 = 50,000. ✅" },
+  q2:  { correct: 'C', explanation: "In 37,810: 3(ten-th), 7(thousands). Yes, 7 is in the thousands place! ✅" },
+  q3:  { correct: 'B', explanation: "Forty thousand = 40,000. Three hundred twelve = 312. Together: 40,312 ✅" },
+  // Mini Quiz 2 – Mult/Div
+  q4:  { correct: 'C', explanation: "6 × 27 = 6×20 + 6×7 = 120 + 42 = 162 books ✅" },
+  q5:  { correct: 'C', explanation: "84 ÷ 7: 7×12=84. Each friend gets 12 stickers ✅" },
+  q6:  { correct: 'D', explanation: "Pattern rule: ×2. So 40 × 2 = 80 ✅" },
+  // Mini Quiz 3 – Fractions
+  q7:  { correct: 'B', explanation: "2/3 × (2/2) = 4/6. Both top and bottom multiplied by 2 ✅" },
+  // q8 is TF → true means 3/4 is greater
+  q8:  { correct: true, explanation: "Convert 3/4 = 6/8. Compare 6/8 vs 5/8 → 6/8 is bigger ✅" },
+  q9:  { correct: 'B', explanation: "1/4 + 2/4 = 3/4. Same denominator → add numerators only ✅" },
+  // Mini Quiz 4 – Measurement
+  q10: { correct: 'C', explanation: "Area = 9 × 4 = 36 square feet ✅" },
+  q11: { correct: 'C', explanation: "Perimeter of square = 4 × 7 = 28 inches ✅" },
+  q12: { correct: 'C', explanation: "125° is between 90° and 180° → Obtuse angle ✅" },
+  // Mini Quiz 5 – Geometry
+  q13: { correct: 'C', explanation: "A rectangle ALWAYS has four 90° right angles ✅" },
+  q14: { correct: 'B', explanation: "Lines that meet at exactly 90° are called perpendicular ✅" },
+  // q15 is TF → true (all squares ARE rectangles)
+  q15: { correct: true, explanation: "TRUE! Squares have 4 right angles AND 4 equal sides, meeting the definition of rectangles ✅" },
+  // Final Challenge
+  fcq1:  { correct: 'A', explanation: "706,342 → 7(hundred-th), 0(ten-th), 6(thousands), 3(hundreds), 4(tens), 2(ones). 6 = thousands ✅" },
+  fcq2:  { correct: 'B', explanation: "348×4: 300×4=1200, 40×4=160, 8×4=32 → 1200+160+32=1,392 ✅" },
+  fcq3:  { correct: 'B', explanation: "82,504 > 82,450 > 82,405 > 82,045. Compare hundreds: 5>4>4>0 ✅" },
+  fcq4:  { correct: 'C', explanation: "96 ÷ 8 = 12. Check: 8×12=96 ✅" },
+  fcq5:  { correct: 'B', explanation: "3/4 × (2/2) = 6/8 ✅" },
+  fcq6:  { correct: 'B', explanation: "Perimeter = 2×(12+5) = 2×17 = 34 cm ✅" },
+  fcq7:  { correct: 'B', explanation: "1 yard = 3 feet → 3 yards = 3×3 = 9 feet ✅" },
+  fcq8:  { correct: true, explanation: "TRUE! By definition, a trapezoid has exactly ONE pair of parallel sides ✅" },
+  fcq9:  { correct: 'C', explanation: "Area = 8×8 = 64 square inches ✅" },
+  fcq10: { correct: 'C', explanation: "3/8 + 2/8 = 5/8 (same denominator, add numerators) ✅" },
+  fcq11: { correct: 'B', explanation: "Start at 3, multiply by 3: 3→9→27→81 ✅" },
+  fcq12: { correct: 'C', explanation: "1/2 = 4/8. 3/8 < 4/8, so 3/8 is less than 1/2 ✅" },
+  fcq13: { correct: 'B', explanation: "Rectangles have four 90° angles at their corners ✅" },
+  fcq14: { correct: 'C', explanation: "32 ÷ 4 = 8 groups ✅" },
+  fcq15: { correct: 'C', explanation: "Area = length × width = 6 × 4 = 24 square meters ✅" },
+};
+
+// ══════════════════════════════════════════
+// BADGES
+// ══════════════════════════════════════════
+const badgeDefinitions = [
+  { id: 'first_blood',  icon: '🎯', label: 'First Answer!',  condition: () => Object.keys(questionLog).length >= 1 },
+  { id: 'hot_streak',   icon: '🔥', label: 'On Fire! (3 streak)', condition: () => maxStreak >= 3 },
+  { id: 'place_champ',  icon: '🏅', label: 'Place Value Pro', condition: () => ['q1','q2','q3'].every(k => questionLog[k]?.correct) },
+  { id: 'math_wizard',  icon: '🧙', label: 'Math Wizard',    condition: () => ['q4','q5','q6'].every(k => questionLog[k]?.correct) },
+  { id: 'frac_master',  icon: '🍕', label: 'Fraction Master', condition: () => ['q7','q8','q9'].every(k => questionLog[k]?.correct) },
+  { id: 'measure_pro',  icon: '📏', label: 'Measurement Pro', condition: () => ['q10','q11','q12'].every(k => questionLog[k]?.correct) },
+  { id: 'geo_star',     icon: '📐', label: 'Geometry Star',  condition: () => ['q13','q14','q15'].every(k => questionLog[k]?.correct) },
+  { id: 'quiz_champ',   icon: '🏆', label: 'Quiz Champ',     condition: () => score >= 150 },
+  { id: 'math_star',    icon: '🌟', label: 'Math Star!',     condition: () => {
+    const fcQs = ['fcq1','fcq2','fcq3','fcq4','fcq5','fcq6','fcq7','fcq8','fcq9','fcq10','fcq11','fcq12','fcq13','fcq14','fcq15'];
+    return fcQs.every(k => questionLog[k]?.correct);
+  }},
+  { id: 'fast_thinker', icon: '⚡', label: 'Fast Thinker',   condition: () => streak >= 5 },
+];
+
+let earnedBadges = new Set();
+
+function checkBadges() {
+  badgeDefinitions.forEach(b => {
+    if (!earnedBadges.has(b.id) && b.condition()) {
+      earnedBadges.add(b.id);
+      showBadgeToast(b);
+    }
+  });
+}
+
+function showBadgeToast(badge) {
+  const toast = document.getElementById('toast');
+  toast.textContent = `${badge.icon} Badge Earned: ${badge.label}!`;
+  toast.classList.add('show');
+  playSound('levelup');
+  setTimeout(() => toast.classList.remove('show'), 2800);
+}
+
+// ══════════════════════════════════════════
+// AUDIO (Web Audio API – no external files)
+// ══════════════════════════════════════════
+function getAudioCtx() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+  }
+  return audioCtx;
+}
+
+function playSound(type) {
+  if (!soundOn) return;
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  if (type === 'correct') {
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(523, ctx.currentTime); // C5
+    osc.frequency.setValueAtTime(659, ctx.currentTime + 0.1); // E5
+    osc.frequency.setValueAtTime(784, ctx.currentTime + 0.2); // G5
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.5);
+  } else if (type === 'wrong') {
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(220, ctx.currentTime);
+    osc.frequency.setValueAtTime(180, ctx.currentTime + 0.15);
+    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.4);
+  } else if (type === 'levelup') {
+    osc.type = 'sine';
+    [523,587,659,698,784].forEach((freq, i) => {
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + i*0.1);
+    });
+    gain.gain.setValueAtTime(0.25, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.7);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.7);
+  } else if (type === 'click') {
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(440, ctx.currentTime);
+    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.1);
+  }
+}
+
+function toggleSound() {
+  soundOn = !soundOn;
+  document.getElementById('sound-btn').textContent = soundOn ? '🔊' : '🔇';
+  if (soundOn) { getAudioCtx(); playSound('click'); }
+}
+
+// ══════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════
+function showSlide(idx) {
+  const slides = document.querySelectorAll('.slide');
+  slides.forEach((s, i) => {
+    s.classList.remove('active', 'exit');
+    if (i === idx) s.classList.add('active');
+  });
+  currentSlide = idx;
+  updateHUD();
+  // Update final challenge score preview
+  if (idx === 22) {
+    document.getElementById('fc-current-score').textContent = score;
+    updateBadgesPreview();
+  }
+  // Scroll to top
+  const activeSlide = document.querySelector('.slide.active');
+  if (activeSlide) activeSlide.scrollTop = 0;
+}
+
+function goNext() {
+  playSound('click');
+  if (currentSlide < TOTAL_SLIDES - 1) showSlide(currentSlide + 1);
+}
+function goBack() {
+  playSound('click');
+  if (currentSlide > 0) showSlide(currentSlide - 1);
+}
+
+function updateHUD() {
+  // Progress bar (Purpose: visual progress = motivation to continue)
+  const pct = Math.round((currentSlide / (TOTAL_SLIDES - 1)) * 100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('hud-score').textContent = `⭐ ${score} pts`;
+  document.getElementById('hud-streak').textContent = `🔥 ${streak}`;
+  document.getElementById('total-slides').textContent = TOTAL_SLIDES;
+}
+
+// ══════════════════════════════════════════
+// ANSWER CHECKING
+// ══════════════════════════════════════════
+function checkAnswer(btn, qId, selected) {
+  const answer = ANSWERS[qId];
+  if (!answer) return;
+  const opts = btn.parentElement.querySelectorAll('.option-btn');
+  opts.forEach(b => b.disabled = true);
+
+  const isCorrect = (selected === answer.correct);
+  questionLog[qId] = { correct: isCorrect, selected, explanation: answer.explanation };
+
+  if (isCorrect) {
+    btn.classList.add('correct', 'pop');
+    handleCorrect(qId);
+  } else {
+    btn.classList.add('wrong', 'shake');
+    // Highlight correct answer
+    opts.forEach(b => {
+      const ltr = b.querySelector('.option-letter').textContent;
+      if (ltr === answer.correct) b.classList.add('correct');
+    });
+    handleWrong(qId);
+  }
+
+  // Show feedback
+  const fb = document.getElementById(`fb-${qId}`);
+  if (fb) {
+    fb.textContent = isCorrect ? '✅ ' + answer.explanation : '❌ ' + answer.explanation;
+    fb.className = `feedback-box show ${isCorrect ? 'feedback-correct' : 'feedback-wrong'}`;
+  }
+  // Show nav
+  const nav = document.getElementById(`nav-${qId}`);
+  if (nav) nav.style.display = 'flex';
+  checkBadges();
+}
+
+function checkTF(btn, qId, selected) {
+  const answer = ANSWERS[qId];
+  if (!answer) return;
+  const tfBtns = btn.parentElement.querySelectorAll('.tf-btn');
+  tfBtns.forEach(b => b.disabled = true);
+
+  const isCorrect = (selected === answer.correct);
+  questionLog[qId] = { correct: isCorrect, selected, explanation: answer.explanation };
+
+  btn.classList.add(selected ? 'selected-true' : 'selected-false');
+
+  if (isCorrect) {
+    btn.style.boxShadow = '0 0 0 4px rgba(0,200,83,0.5)';
+    handleCorrect(qId);
+  } else {
+    btn.classList.add('shake');
+    // Highlight correct
+    tfBtns.forEach(b => {
+      const isTrue = b.classList.contains('true-btn');
+      if (isTrue === answer.correct) b.style.boxShadow = '0 0 0 4px rgba(0,200,83,0.5)';
+    });
+    handleWrong(qId);
+  }
+
+  const fb = document.getElementById(`fb-${qId}`);
+  if (fb) {
+    fb.textContent = isCorrect ? '✅ ' + answer.explanation : '❌ ' + answer.explanation;
+    fb.className = `feedback-box show ${isCorrect ? 'feedback-correct' : 'feedback-wrong'}`;
+  }
+  const nav = document.getElementById(`nav-${qId}`);
+  if (nav) nav.style.display = 'flex';
+  checkBadges();
+}
+
+function handleCorrect(qId) {
+  streak++;
+  if (streak > maxStreak) maxStreak = streak;
+  let earned = 10;
+  // Bonus for streaks
+  if (streak >= 3) { earned += 15; showStreakBonus(); }
+  score += earned;
+  playSound('correct');
+  updateHUD();
+  // Milestone celebrations
+  if ([30, 90, 150, 210, 270].includes(score)) triggerConfetti();
+}
+
+function handleWrong() {
+  streak = 0;
+  playSound('wrong');
+  updateHUD();
+}
+
+function showStreakBonus() {
+  const toast = document.getElementById('toast');
+  toast.textContent = `🔥 ${streak} Streak! +15 Bonus Points!`;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+// ══════════════════════════════════════════
+// HINT REVEAL
+// ══════════════════════════════════════════
+function showHint(hintId) {
+  const h = document.getElementById(hintId);
+  if (h) h.classList.toggle('show');
+}
+
+// ══════════════════════════════════════════
+// CONFETTI (CSS/JS canvas-based)
+// Purpose: Celebration = positive reinforcement
+// ══════════════════════════════════════════
+let confettiParticles = [];
+let confettiAnimId = null;
+
+function triggerConfetti() {
+  const canvas = document.getElementById('confetti-canvas');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const ctx2 = canvas.getContext('2d');
+  const colors = ['#FFD600','#FF6E6E','#4FC3F7','#69F0AE','#CE93D8','#FF9800','#E91E63'];
+
+  for (let i = 0; i < 120; i++) {
+    confettiParticles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height - canvas.height,
+      r: Math.random() * 8 + 4,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      speed: Math.random() * 4 + 2,
+      spin: Math.random() * 0.3 - 0.15,
+      angle: Math.random() * Math.PI * 2,
+      gravity: 0.15,
+      vx: Math.random() * 4 - 2,
+      vy: Math.random() * 3 + 2,
+    });
+  }
+
+  function drawConfetti() {
+    ctx2.clearRect(0, 0, canvas.width, canvas.height);
+    confettiParticles.forEach(p => {
+      ctx2.save();
+      ctx2.translate(p.x, p.y);
+      ctx2.rotate(p.angle);
+      ctx2.fillStyle = p.color;
+      ctx2.beginPath();
+      ctx2.rect(-p.r/2, -p.r/2, p.r, p.r * 0.5);
+      ctx2.fill();
+      ctx2.restore();
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += p.gravity;
+      p.angle += p.spin;
+    });
+    confettiParticles = confettiParticles.filter(p => p.y < canvas.height + 50);
+    if (confettiParticles.length > 0) {
+      confettiAnimId = requestAnimationFrame(drawConfetti);
+    } else {
+      ctx2.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+  if (confettiAnimId) cancelAnimationFrame(confettiAnimId);
+  confettiAnimId = requestAnimationFrame(drawConfetti);
+}
+
+// ══════════════════════════════════════════
+// CELEBRATION OVERLAY
+// ══════════════════════════════════════════
+function showCelebration(emoji, title, msg) {
+  document.getElementById('cel-emoji').textContent = emoji;
+  document.getElementById('cel-title').textContent = title;
+  document.getElementById('cel-msg').textContent = msg;
+  document.getElementById('celebration').classList.add('show');
+  triggerConfetti();
+  playSound('levelup');
+}
+function closeCelebration() {
+  document.getElementById('celebration').classList.remove('show');
+}
+
+// ══════════════════════════════════════════
+// BADGES PREVIEW
+// ══════════════════════════════════════════
+function updateBadgesPreview() {
+  const wrap = document.getElementById('earned-badges-preview');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  earnedBadges.forEach(bid => {
+    const def = badgeDefinitions.find(b => b.id === bid);
+    if (def) {
+      const el = document.createElement('div');
+      el.className = 'badge';
+      el.textContent = `${def.icon} ${def.label}`;
+      wrap.appendChild(el);
+    }
+  });
+}
+
+// ══════════════════════════════════════════
+// RESULTS SLIDE BUILD
+// ══════════════════════════════════════════
+function buildResults() {
+  checkBadges();
+  triggerConfetti();
+
+  const total = 30; // 15 mini + 15 final
+  const correct = Object.values(questionLog).filter(q => q.correct).length;
+  const wrong = Object.keys(questionLog).length - correct;
+  const pct = Math.round((correct / total) * 100);
+
+  document.getElementById('final-score-display').textContent = score;
+  document.getElementById('stat-correct').textContent = correct;
+  document.getElementById('stat-wrong').textContent = wrong;
+  document.getElementById('stat-pct').textContent = pct + '%';
+
+  // Stars
+  const starsRow = document.getElementById('stars-row');
+  starsRow.innerHTML = '';
+  const numStars = pct >= 90 ? 5 : pct >= 70 ? 4 : pct >= 50 ? 3 : pct >= 30 ? 2 : 1;
+  for (let i = 0; i < 5; i++) {
+    const s = document.createElement('span');
+    s.className = 'star-icon';
+    s.textContent = i < numStars ? '⭐' : '☆';
+    s.style.animationDelay = (i * 0.2) + 's';
+    starsRow.appendChild(s);
+  }
+
+  // Title & message
+  const titleEl = document.getElementById('result-title');
+  const msgEl = document.getElementById('result-msg');
+  if (pct >= 90)      { titleEl.textContent = '🌟 You\'re a Math Star!'; msgEl.textContent = 'Incredible! Outstanding MCAP performance! 🎊'; }
+  else if (pct >= 70) { titleEl.textContent = '🎉 Amazing Work!'; msgEl.textContent = 'You\'re really good at this! Keep practicing and you\'ll ace the MCAP! 💪'; }
+  else if (pct >= 50) { titleEl.textContent = '👍 Good Job!'; msgEl.textContent = 'You\'re on your way! Review the topics you missed and try again!'; }
+  else                { titleEl.textContent = '💪 Keep Practicing!'; msgEl.textContent = 'Every practice makes you better! Review the lessons and try again!'; }
+
+  // Badges
+  const badgesWrap = document.getElementById('final-badges');
+  badgesWrap.innerHTML = '';
+  if (earnedBadges.size === 0) {
+    badgesWrap.innerHTML = '<span style="color:#888;font-size:0.9rem">Keep answering questions to earn badges! 🏅</span>';
+  } else {
+    earnedBadges.forEach(bid => {
+      const def = badgeDefinitions.find(b => b.id === bid);
+      if (def) {
+        const el = document.createElement('div');
+        el.className = 'badge';
+        el.textContent = `${def.icon} ${def.label}`;
+        badgesWrap.appendChild(el);
+      }
+    });
+  }
+
+  // Review list
+  const reviewList = document.getElementById('review-list');
+  reviewList.innerHTML = '';
+  const qLabels = {
+    q1:'Place Value Q1',q2:'Place Value Q2',q3:'Place Value Q3',
+    q4:'Multiplication Q1',q5:'Division Q2',q6:'Patterns Q3',
+    q7:'Fractions Q1',q8:'Fractions Q2',q9:'Fractions Q3',
+    q10:'Measurement Q1',q11:'Measurement Q2',q12:'Angles Q3',
+    q13:'Geometry Q1',q14:'Geometry Q2',q15:'Geometry Q3',
+    fcq1:'FC Q1',fcq2:'FC Q2',fcq3:'FC Q3',fcq4:'FC Q4',fcq5:'FC Q5',
+    fcq6:'FC Q6',fcq7:'FC Q7',fcq8:'FC Q8',fcq9:'FC Q9',fcq10:'FC Q10',
+    fcq11:'FC Q11',fcq12:'FC Q12',fcq13:'FC Q13',fcq14:'FC Q14',fcq15:'FC Q15',
+  };
+  Object.entries(questionLog).forEach(([k, v]) => {
+    const item = document.createElement('div');
+    item.className = 'review-item';
+    item.innerHTML = `<span class="ri-icon">${v.correct ? '✅' : '❌'}</span>
+      <div><strong>${qLabels[k] || k}</strong>: ${v.explanation}</div>`;
+    reviewList.appendChild(item);
+  });
+}
+
+// ══════════════════════════════════════════
+// RESTART
+// ══════════════════════════════════════════
+function restartLesson() {
+  score = 0; streak = 0; maxStreak = 0;
+  earnedBadges.clear();
+  Object.keys(questionLog).forEach(k => delete questionLog[k]);
+  // Reset all option buttons
+  document.querySelectorAll('.option-btn').forEach(b => {
+    b.disabled = false;
+    b.classList.remove('correct','wrong','selected','pop','shake');
+  });
+  document.querySelectorAll('.tf-btn').forEach(b => {
+    b.disabled = false; b.style.boxShadow = '';
+    b.classList.remove('selected-true','selected-false','shake');
+  });
+  document.querySelectorAll('.feedback-box').forEach(f => {
+    f.classList.remove('show'); f.textContent = '';
+  });
+  document.querySelectorAll('[id^="nav-"]').forEach(n => n.style.display = 'none');
+  document.querySelectorAll('.hint-text').forEach(h => h.classList.remove('show'));
+  document.querySelectorAll('.flip-card').forEach(f => f.classList.remove('flipped'));
+  updateHUD();
+  showSlide(0);
+}
+
+// ══════════════════════════════════════════
+// MULTIPLICATION GRID (interactive)
+// Purpose: active recall + visual discovery
+// ══════════════════════════════════════════
+function buildMultGrid() {
+  const grid = document.getElementById('mult-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  const nums = [1,2,3,4,5,6,7];
+  // Header row
+  const emptyCell = document.createElement('div');
+  emptyCell.className = 'mt-cell mt-header';
+  emptyCell.textContent = '×';
+  grid.appendChild(emptyCell);
+  nums.forEach(n => {
+    const c = document.createElement('div');
+    c.className = 'mt-cell mt-header';
+    c.textContent = n;
+    grid.appendChild(c);
+  });
+  nums.forEach(row => {
+    const hc = document.createElement('div');
+    hc.className = 'mt-cell mt-header';
+    hc.textContent = row;
+    grid.appendChild(hc);
+    nums.forEach(col => {
+      const c = document.createElement('div');
+      c.className = 'mt-cell mt-body';
+      c.textContent = '?';
+      c.dataset.answer = row * col;
+      c.onclick = function() {
+        if (this.textContent === '?') {
+          this.textContent = this.dataset.answer;
+          this.style.background = '#A5D6A7';
+          this.style.color = '#1B5E20';
+          playSound('correct');
+        } else {
+          this.textContent = '?';
+          this.style.background = '';
+          this.style.color = '';
+        }
+      };
+      grid.appendChild(c);
+    });
+  });
+}
+
+// ══════════════════════════════════════════
+// STARFIELD BACKGROUND
+// Purpose: Immersive game environment
+// ══════════════════════════════════════════
+function buildStarfield() {
+  const sf = document.getElementById('starfield');
+  for (let i = 0; i < 80; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    const size = Math.random() * 3 + 1;
+    star.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${Math.random()*100}%; top:${Math.random()*100}%;
+      animation-delay:${Math.random()*3}s;
+      animation-duration:${1.5+Math.random()*2}s;
+    `;
+    sf.appendChild(star);
+  }
+}
+
+// ══════════════════════════════════════════
+// WATCH FOR RESULTS SLIDE
+// ══════════════════════════════════════════
+const _origGoNext = goNext;
+// We override showSlide to trigger results build
+const _origShowSlide = showSlide;
+// Override to catch slide 38 (results)
+function showSlide(idx) {
+  const slides = document.querySelectorAll('.slide');
+  slides.forEach((s, i) => {
+    s.classList.remove('active', 'exit');
+    if (i === idx) s.classList.add('active');
+  });
+  currentSlide = idx;
+  updateHUD();
+  if (idx === 22) {
+    document.getElementById('fc-current-score').textContent = score;
+    updateBadgesPreview();
+  }
+  if (idx === 38) {
+    buildResults();
+  }
+  const activeSlide = document.querySelector('.slide.active');
+  if (activeSlide) activeSlide.scrollTop = 0;
+}
+
+// ══════════════════════════════════════════
+// KEYBOARD NAVIGATION
+// ══════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goNext();
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goBack();
+});
+
+// ══════════════════════════════════════════
+// SECTION CELEBRATION CHECK
+// ══════════════════════════════════════════
+// Trigger celebrations after completing each mini-quiz section
+const sectionCelebrations = {
+  5:  { emoji: '🎯', title: 'Place Value Complete!', msg: 'You mastered place value! +3 slides done!' },
+  9:  { emoji: '✖️', title: 'Multiplication Mastered!', msg: 'Great job with numbers! Keep it up!' },
+  13: { emoji: '🍕', title: 'Fraction Finished!', msg: 'You crushed fractions! Pizza for everyone! 🍕' },
+  17: { emoji: '📏', title: 'Measurement Pro!', msg: 'You measured up! Area and perimeter = no problem!' },
+  21: { emoji: '📐', title: 'Geometry Genius!', msg: 'Shapes and lines? Easy for you! 🌟' },
+};
+
+// Wrap goNext to fire celebrations at key points
+function goNext() {
+  playSound('click');
+  const nextSlide = currentSlide + 1;
+  if (currentSlide < TOTAL_SLIDES - 1) {
+    const cel = sectionCelebrations[currentSlide];
+    if (cel) {
+      showCelebration(cel.emoji, cel.title, cel.msg);
+      setTimeout(() => { closeCelebration(); showSlide(nextSlide); }, 100);
+    } else {
+      showSlide(nextSlide);
+    }
+  }
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+buildStarfield();
+buildMultGrid();
+showSlide(0);
+</script>
+</body>
+</html>
