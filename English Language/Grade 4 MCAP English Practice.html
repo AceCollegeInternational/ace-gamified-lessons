@@ -1,0 +1,2396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📚 MCAP ELA Adventure – Grade 4</title>
+<style>
+/* ─────────────────────────────────────────
+   FONTS  (Google Fonts inline import)
+   Baloo 2 = warm, rounded display
+   Quicksand = friendly, legible body
+───────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Quicksand:wght@400;600;700&display=swap');
+
+/* ─────────────────────────────────────────
+   DESIGN TOKENS
+   Theme: Enchanted Forest Library
+   Palette: deep forest + amber + cream
+───────────────────────────────────────── */
+:root {
+  --forest:   #1B4332;
+  --moss:     #2D6A4F;
+  --fern:     #52B788;
+  --amber:    #F4A261;
+  --gold:     #E9C46A;
+  --clay:     #E76F51;
+  --cream:    #FAF3E0;
+  --parchment:#F2E8D0;
+  --ink:      #1A1A2E;
+  --lavender: #CDB4DB;
+  --sky:      #ADE8F4;
+  --rose:     #FFAFCC;
+
+  --card-bg:  rgba(250,243,224,0.97);
+  --shadow:   0 8px 40px rgba(27,67,50,0.22);
+  --radius:   22px;
+
+  --font-head: 'Baloo 2', 'Comic Sans MS', cursive;
+  --font-body: 'Quicksand', 'Segoe UI', sans-serif;
+}
+
+/* ─────────────────────────────────────────
+   RESET & BASE
+───────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{
+  width:100%;height:100%;overflow:hidden;
+  font-family:var(--font-body);
+  background:linear-gradient(160deg,#0d2b1a 0%,#1B4332 45%,#2D6A4F 100%);
+}
+
+/* ─────────────────────────────────────────
+   ANIMATED LEAVES BACKGROUND
+   Purpose: Immersive "enchanted library" world
+───────────────────────────────────────── */
+#leaves-bg{
+  position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;
+}
+.leaf{
+  position:absolute;
+  animation:leafDrift linear infinite;
+  opacity:0.18;
+  font-size:1.2rem;
+}
+@keyframes leafDrift{
+  0%  {transform:translateY(-40px) rotate(0deg)  translateX(0);}
+  25% {transform:translateY(25vh)  rotate(45deg) translateX(20px);}
+  50% {transform:translateY(50vh)  rotate(90deg) translateX(-15px);}
+  75% {transform:translateY(75vh)  rotate(135deg)translateX(25px);}
+  100%{transform:translateY(110vh) rotate(180deg)translateX(-10px);}
+}
+
+/* Floating book / sparkle particles */
+.sparkle{
+  position:fixed;pointer-events:none;z-index:1;
+  animation:sparkleFly 6s ease-in-out infinite;
+  font-size:1.1rem;opacity:0.25;
+}
+@keyframes sparkleFly{
+  0%,100%{transform:translateY(0) scale(1);}
+  50%    {transform:translateY(-22px) scale(1.3);}
+}
+
+/* ─────────────────────────────────────────
+   HUD — top bar
+───────────────────────────────────────── */
+#hud{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  display:flex;align-items:center;gap:12px;
+  padding:8px 20px;
+  background:rgba(13,43,26,0.92);
+  backdrop-filter:blur(12px);
+  border-bottom:2px solid rgba(82,183,136,0.3);
+  font-family:var(--font-head);
+}
+#hud-title{color:var(--gold);font-size:1.1rem;flex:0 0 auto;white-space:nowrap;}
+#pb-wrap{
+  flex:1;height:13px;background:rgba(255,255,255,0.12);
+  border-radius:10px;overflow:hidden;
+}
+/* Purpose: Animated progress bar = visible advancement → motivation */
+#pb{
+  height:100%;width:0%;
+  background:linear-gradient(90deg,var(--fern),var(--gold));
+  border-radius:10px;
+  transition:width .65s cubic-bezier(.4,0,.2,1);
+  box-shadow:0 0 10px var(--fern);
+}
+#hud-score{color:var(--gold);font-size:1rem;white-space:nowrap;}
+#hud-streak{color:var(--amber);font-size:1rem;white-space:nowrap;}
+#snd-btn{
+  background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);
+  color:#fff;border-radius:8px;padding:3px 10px;
+  cursor:pointer;font-size:1rem;transition:background .2s;
+}
+#snd-btn:hover{background:rgba(255,255,255,0.22);}
+
+/* ─────────────────────────────────────────
+   MAIN LAYOUT
+───────────────────────────────────────── */
+#app{
+  position:relative;z-index:10;
+  width:100vw;height:100vh;
+  display:flex;align-items:center;justify-content:center;
+}
+#slide-wrap{
+  margin-top:56px;
+  width:100%;height:calc(100vh - 56px);
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* ─────────────────────────────────────────
+   SLIDE CARD
+───────────────────────────────────────── */
+.slide{
+  display:none;
+  width:min(880px,96vw);
+  max-height:calc(100vh - 88px);
+  overflow-y:auto;
+  background:var(--card-bg);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow),0 0 0 3px rgba(82,183,136,0.18);
+  padding:28px 36px 22px;
+  position:relative;
+  scrollbar-width:thin;
+  scrollbar-color:var(--fern) transparent;
+  /* Decorative top ribbon */
+  border-top:5px solid var(--moss);
+}
+/* Purpose: Slide-in from right = spatial memory cue for forward progress */
+.slide.active{
+  display:block;
+  animation:elegantIn .5s cubic-bezier(.34,1.42,.64,1);
+}
+@keyframes elegantIn{
+  from{opacity:0;transform:translateX(55px) scale(.97);}
+  to  {opacity:1;transform:translateX(0)    scale(1);}
+}
+
+/* Scroll bar styling */
+.slide::-webkit-scrollbar{width:6px;}
+.slide::-webkit-scrollbar-thumb{background:var(--fern);border-radius:6px;}
+
+/* ─────────────────────────────────────────
+   TYPOGRAPHY
+───────────────────────────────────────── */
+.slide-title{
+  font-family:var(--font-head);font-size:1.9rem;
+  color:var(--forest);margin-bottom:8px;line-height:1.2;
+}
+.slide-subtitle{font-size:1rem;color:#666;margin-bottom:14px;}
+.slide-body{font-size:1.04rem;color:#2a2a2a;line-height:1.75;}
+
+/* Large centred emoji */
+.big-emoji{
+  font-size:3.2rem;display:block;text-align:center;margin-bottom:6px;
+  animation:gentleBob 2.5s ease-in-out infinite alternate;
+}
+@keyframes gentleBob{from{transform:translateY(0);}to{transform:translateY(-12px);}}
+
+/* Info boxes */
+.box{border-radius:14px;padding:13px 17px;margin:12px 0;font-size:1rem;}
+.box-key  {background:linear-gradient(135deg,#E8F5E9,#F0FFF4);border-left:5px solid var(--fern);}
+.box-ex   {background:linear-gradient(135deg,#FFF8E1,#FFFDE7);border-left:5px solid var(--gold);}
+.box-tip  {background:linear-gradient(135deg,#E3F2FD,#F3E5F5);border-left:5px solid var(--lavender);}
+.box-warn {background:linear-gradient(135deg,#FFF3E0,#FFEBEE);border-left:5px solid var(--clay);}
+
+/* Level badge */
+.level-tag{
+  position:absolute;top:16px;right:18px;
+  background:linear-gradient(135deg,var(--moss),var(--forest));
+  color:var(--gold);font-family:var(--font-head);font-size:0.8rem;
+  padding:4px 14px;border-radius:50px;
+  box-shadow:0 3px 10px rgba(0,0,0,0.25);
+}
+
+/* Slide number */
+.slide-num{font-size:.82rem;color:#999;text-align:center;margin-top:8px;}
+
+/* ─────────────────────────────────────────
+   READING PASSAGE
+───────────────────────────────────────── */
+.passage-wrap{
+  background:var(--parchment);
+  border:2px solid rgba(27,67,50,.15);
+  border-radius:16px;
+  padding:16px 20px;margin:12px 0;
+  position:relative;
+  box-shadow:inset 0 2px 10px rgba(0,0,0,0.05);
+}
+.passage-title{
+  font-family:var(--font-head);font-size:1.15rem;
+  color:var(--forest);margin-bottom:8px;
+}
+.passage-body{
+  font-size:.97rem;line-height:1.85;color:#2a2a2a;
+}
+.passage-body .hl{
+  background:linear-gradient(transparent 60%,rgba(233,196,106,.5) 60%);
+  font-weight:700;
+}
+.passage-body em{font-style:italic;color:var(--moss);}
+.passage-tab{
+  font-family:var(--font-head);font-size:.72rem;
+  background:var(--moss);color:white;
+  padding:3px 12px;border-radius:50px 50px 0 0;
+  display:inline-block;margin-bottom:-2px;
+}
+
+/* ─────────────────────────────────────────
+   NAVIGATION
+───────────────────────────────────────── */
+.nav-row{
+  display:flex;gap:12px;align-items:center;
+  justify-content:center;margin-top:20px;flex-wrap:wrap;
+}
+.btn{
+  font-family:var(--font-head);font-size:1.05rem;
+  padding:10px 28px;border-radius:50px;
+  border:none;cursor:pointer;
+  transition:transform .16s,box-shadow .16s;
+  box-shadow:0 4px 14px rgba(0,0,0,.18);
+  position:relative;overflow:hidden;
+}
+/* Purpose: Upward lift = tactile game feel, encourages action */
+.btn:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 8px 22px rgba(0,0,0,.22);}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:linear-gradient(135deg,var(--forest),var(--moss));color:var(--gold);}
+.btn-next   {background:linear-gradient(135deg,var(--fern),var(--forest));color:#fff;}
+.btn-back   {background:rgba(0,0,0,.07);color:#555;}
+.btn-hint   {background:linear-gradient(135deg,var(--gold),var(--amber));color:var(--forest);font-size:.9rem;padding:8px 18px;}
+.btn-retry  {background:linear-gradient(135deg,var(--clay),#c1121f);color:#fff;}
+
+/* ─────────────────────────────────────────
+   QUIZ COMPONENTS
+───────────────────────────────────────── */
+.section-tag{
+  display:inline-flex;align-items:center;gap:6px;
+  background:linear-gradient(135deg,var(--clay),#9d0208);
+  color:#fff;font-family:var(--font-head);font-size:.93rem;
+  padding:4px 16px;border-radius:50px;margin-bottom:10px;
+}
+.quiz-header{
+  display:flex;align-items:center;gap:10px;margin-bottom:12px;
+}
+.quiz-badge{
+  background:linear-gradient(135deg,var(--forest),var(--moss));
+  color:var(--gold);font-family:var(--font-head);
+  border-radius:50px;padding:4px 14px;font-size:.85rem;
+}
+.q-text{
+  font-family:var(--font-body);font-size:1.12rem;font-weight:700;
+  color:var(--forest);margin-bottom:14px;line-height:1.5;
+}
+
+/* Options */
+.opts-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.opt{
+  font-family:var(--font-body);font-size:.98rem;font-weight:600;
+  padding:11px 15px;border-radius:14px;
+  border:2.5px solid #D4C5A9;background:var(--parchment);
+  cursor:pointer;text-align:left;
+  transition:all .17s;color:#2a2a2a;
+  display:flex;align-items:center;gap:8px;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+}
+.opt:hover:not(:disabled){
+  border-color:var(--moss);background:#E8F5E9;transform:scale(1.02);
+}
+/* Purpose: Colour-coded immediate feedback = active recall reinforcement */
+.opt.correct {border-color:#2D6A4F;background:#D8F3DC;color:#1B4332;}
+.opt.wrong   {border-color:#E76F51;background:#FFE8D6;color:#9d2b10;}
+.opt:disabled{cursor:default;}
+.opt-ltr{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:27px;height:27px;border-radius:50%;
+  background:rgba(0,0,0,.08);font-size:.83rem;font-weight:800;flex-shrink:0;
+}
+.opt.correct .opt-ltr{background:#95D5B2;color:#1B4332;}
+.opt.wrong   .opt-ltr{background:#FFCBA4;color:#9d2b10;}
+
+/* Shake & pop animations */
+/* Purpose: Kinesthetic feedback strengthens memory trace */
+@keyframes quake{
+  0%,100%{transform:translateX(0);}
+  20%{transform:translateX(-9px);}
+  40%{transform:translateX(9px);}
+  60%{transform:translateX(-5px);}
+  80%{transform:translateX(5px);}
+}
+.quake{animation:quake .45s ease;}
+
+@keyframes springPop{
+  0%  {transform:scale(1);}
+  40% {transform:scale(1.09);}
+  100%{transform:scale(1);}
+}
+.spring{animation:springPop .3s ease;}
+
+/* Feedback box */
+/* Purpose: Immediate explanation = spaced retrieval + error correction */
+.fb{
+  border-radius:13px;padding:11px 15px;margin-top:8px;
+  font-size:.96rem;font-weight:600;display:none;
+  animation:riseIn .3s ease forwards;
+}
+@keyframes riseIn{
+  from{opacity:0;transform:translateY(8px);}
+  to  {opacity:1;transform:translateY(0);}
+}
+.fb.show{display:block;}
+.fb-ok  {background:#D8F3DC;border:2px solid #52B788;color:#1B4332;}
+.fb-err {background:#FFE8D6;border:2px solid #E76F51;color:#7F3D30;}
+
+/* Hint */
+.hint-txt{
+  display:none;margin-top:8px;padding:10px 14px;
+  background:#FFF9C4;border:2px dashed var(--amber);
+  border-radius:12px;font-size:.9rem;color:#5c4a1e;
+}
+.hint-txt.open{display:block;animation:riseIn .3s ease;}
+
+/* ─────────────────────────────────────────
+   TRUE / FALSE
+───────────────────────────────────────── */
+.tf-row{display:flex;gap:14px;justify-content:center;margin:14px 0;}
+.tf-btn{
+  font-family:var(--font-head);font-size:1.25rem;
+  padding:13px 36px;border-radius:18px;border:3px solid transparent;
+  cursor:pointer;transition:all .18s;
+  box-shadow:0 4px 14px rgba(0,0,0,.15);
+}
+.tf-t{background:linear-gradient(135deg,#2D6A4F,#1B4332);color:#fff;}
+.tf-f{background:linear-gradient(135deg,#E76F51,#9d0208);color:#fff;}
+.tf-btn:hover:not(:disabled){transform:scale(1.07);}
+.tf-btn:disabled{opacity:.75;cursor:default;}
+.tf-sel-t{border-color:#52B788;box-shadow:0 0 0 5px rgba(82,183,136,.3);}
+.tf-sel-f{border-color:#E76F51;box-shadow:0 0 0 5px rgba(231,111,81,.3);}
+
+/* ─────────────────────────────────────────
+   VOCABULARY CARDS — flip interaction
+   Purpose: spaced retrieval / active recall
+───────────────────────────────────────── */
+.flip-card{
+  width:100%;height:115px;perspective:800px;margin:9px 0;cursor:pointer;
+}
+.flip-inner{
+  width:100%;height:100%;transition:transform .5s;
+  transform-style:preserve-3d;position:relative;
+}
+.flip-card.flipped .flip-inner{transform:rotateY(180deg);}
+.flip-f,.flip-b{
+  position:absolute;inset:0;backface-visibility:hidden;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  padding:14px;text-align:center;
+}
+.flip-f{
+  background:linear-gradient(135deg,var(--forest),var(--moss));
+  color:var(--gold);font-family:var(--font-head);font-size:1.15rem;
+}
+.flip-b{
+  background:linear-gradient(135deg,var(--amber),var(--gold));
+  color:var(--forest);font-family:var(--font-body);font-size:.95rem;font-weight:700;
+  transform:rotateY(180deg);
+}
+
+/* ─────────────────────────────────────────
+   WORD MAP / CONCEPT BUBBLE
+───────────────────────────────────────── */
+.word-map{
+  display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;justify-content:center;
+}
+.bubble{
+  background:linear-gradient(135deg,var(--fern),var(--moss));
+  color:#fff;font-family:var(--font-head);font-size:.9rem;
+  padding:6px 16px;border-radius:50px;
+  box-shadow:0 3px 10px rgba(0,0,0,.15);
+  cursor:default;transition:transform .18s;
+}
+.bubble:hover{transform:scale(1.08);}
+.bubble.amber{background:linear-gradient(135deg,var(--amber),var(--clay));}
+.bubble.lav  {background:linear-gradient(135deg,var(--lavender),#9d4edd);}
+
+/* ─────────────────────────────────────────
+   PARTS OF SPEECH TABLE
+───────────────────────────────────────── */
+.pos-table{
+  width:100%;border-collapse:collapse;margin:12px 0;font-size:.93rem;
+}
+.pos-table th{
+  background:linear-gradient(135deg,var(--forest),var(--moss));
+  color:var(--gold);padding:9px 12px;text-align:left;
+  font-family:var(--font-head);
+}
+.pos-table td{padding:8px 12px;border-bottom:1px solid #e0d8c8;}
+.pos-table tr:nth-child(even) td{background:#f7f1e3;}
+.pos-table tr:hover td{background:#e8f5e9;}
+
+/* ─────────────────────────────────────────
+   CONCEPT CARD (flip-to-reveal)
+───────────────────────────────────────── */
+.concept-pill{
+  display:inline-block;
+  background:var(--forest);color:var(--gold);
+  font-family:var(--font-head);font-size:1.3rem;
+  padding:4px 16px;border-radius:10px;margin:2px 0;
+}
+
+/* ─────────────────────────────────────────
+   MATCHING ACTIVITY (click-to-match)
+───────────────────────────────────────── */
+.match-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0;
+}
+.match-item{
+  background:var(--parchment);border:2.5px solid #C4A882;
+  border-radius:13px;padding:10px 14px;
+  font-weight:700;font-size:.93rem;color:var(--forest);
+  cursor:pointer;transition:all .18s;text-align:center;
+}
+.match-item:hover{background:#E8F5E9;transform:scale(1.03);}
+.match-item.matched{background:#D8F3DC;border-color:var(--fern);}
+.match-item.active{border-color:var(--amber);background:#FFF8DC;box-shadow:0 0 0 3px rgba(244,162,97,.3);}
+
+/* ─────────────────────────────────────────
+   TOAST & BADGES
+───────────────────────────────────────── */
+#toast{
+  position:fixed;top:68px;left:50%;
+  transform:translateX(-50%) translateY(-80px);
+  background:linear-gradient(135deg,var(--clay),#9d0208);
+  color:#fff;font-family:var(--font-head);font-size:1.15rem;
+  padding:10px 28px;border-radius:50px;z-index:9999;
+  box-shadow:var(--shadow);
+  transition:transform .42s cubic-bezier(.34,1.56,.64,1),opacity .42s;
+  opacity:0;white-space:nowrap;
+}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+
+.badges-row{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;}
+.badge{
+  background:linear-gradient(135deg,var(--gold),var(--amber));
+  color:var(--forest);font-family:var(--font-head);font-size:.8rem;
+  padding:5px 14px;border-radius:50px;
+  box-shadow:0 3px 10px rgba(0,0,0,.18);
+  display:flex;align-items:center;gap:5px;
+  animation:badgePop .5s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes badgePop{from{transform:scale(0);opacity:0;}to{transform:scale(1);opacity:1;}}
+
+/* ─────────────────────────────────────────
+   CONFETTI CANVAS
+───────────────────────────────────────── */
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:9999;}
+
+/* ─────────────────────────────────────────
+   CELEBRATION OVERLAY
+───────────────────────────────────────── */
+#cel-overlay{
+  display:none;position:fixed;inset:0;z-index:9998;
+  background:rgba(13,43,26,.7);
+  align-items:center;justify-content:center;
+}
+#cel-overlay.show{display:flex;}
+.cel-card{
+  background:var(--cream);border-radius:24px;
+  padding:28px 40px;text-align:center;
+  box-shadow:0 20px 60px rgba(0,0,0,.35);
+  animation:popIn .5s cubic-bezier(.34,1.56,.64,1);
+  max-width:400px;width:90%;
+  border-top:6px solid var(--fern);
+}
+@keyframes popIn{from{transform:scale(.5);opacity:0;}to{transform:scale(1);opacity:1;}}
+.cel-card h2{font-family:var(--font-head);font-size:1.9rem;color:var(--forest);margin:10px 0;}
+.cel-card p {font-size:1.05rem;color:#555;}
+
+/* ─────────────────────────────────────────
+   HOOK SLIDE
+───────────────────────────────────────── */
+.hook-hero{text-align:center;padding:8px 0;}
+.hero-title{
+  font-family:var(--font-head);font-size:2.7rem;
+  color:var(--forest);line-height:1.15;margin-bottom:10px;
+}
+.hero-sub{font-size:1.05rem;color:#555;margin:10px 0;}
+/* Purpose: Animated words = curiosity gap opener, draws attention */
+.word-reveal{
+  display:inline-block;opacity:0;
+  animation:wordPop .5s cubic-bezier(.34,1.56,.64,1) forwards;
+}
+@keyframes wordPop{from{opacity:0;transform:scale(.5);}to{opacity:1;transform:scale(1);}}
+
+/* ─────────────────────────────────────────
+   SCORE SUMMARY CARD
+───────────────────────────────────────── */
+.score-card{
+  background:linear-gradient(135deg,var(--forest),var(--moss));
+  border-radius:18px;color:#fff;padding:18px 22px;
+  text-align:center;margin:12px 0;
+}
+.score-big{
+  font-family:var(--font-head);font-size:3.8rem;
+  color:var(--gold);line-height:1;margin:8px 0;
+}
+.score-lbl{font-size:1.05rem;opacity:.9;}
+
+/* ─────────────────────────────────────────
+   STARS RATING
+───────────────────────────────────────── */
+.stars-row{display:flex;justify-content:center;gap:6px;margin:10px 0;}
+.star-ic{
+  font-size:2.4rem;
+  animation:starBurst .5s cubic-bezier(.34,1.56,.64,1) forwards;
+  opacity:0;
+}
+@keyframes starBurst{
+  from{transform:rotate(-180deg) scale(0);opacity:0;}
+  to  {transform:rotate(0)       scale(1);opacity:1;}
+}
+
+/* ─────────────────────────────────────────
+   REVIEW LIST
+───────────────────────────────────────── */
+.rev-item{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:8px 0;border-bottom:1px solid #e0d8c8;font-size:.87rem;
+}
+.rev-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px;}
+
+/* ─────────────────────────────────────────
+   FIGURATIVE LANGUAGE EXAMPLES
+───────────────────────────────────────── */
+.fig-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0;
+}
+.fig-card{
+  background:linear-gradient(135deg,#f0fff4,#e8f5e9);
+  border:2px solid var(--fern);border-radius:12px;
+  padding:10px 13px;font-size:.9rem;
+}
+.fig-card.amber{background:linear-gradient(135deg,#fff8e1,#fff3cd);border-color:var(--amber);}
+.fig-card.lav  {background:linear-gradient(135deg,#f3e5f5,#ede7f6);border-color:var(--lavender);}
+.fig-card.rose {background:linear-gradient(135deg,#fce4ec,#fce4ec);border-color:var(--rose);}
+.fig-label{
+  font-family:var(--font-head);font-size:.85rem;
+  color:var(--forest);margin-bottom:4px;
+}
+
+/* ─────────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────────── */
+@media(max-width:600px){
+  .slide{padding:16px 14px 14px;}
+  .opts-grid{grid-template-columns:1fr;}
+  .hero-title{font-size:2rem;}
+  .fig-grid{grid-template-columns:1fr;}
+  .match-grid{grid-template-columns:1fr;}
+}
+
+/* ─────────────────────────────────────────
+   SELECTION HIGHLIGHT (passage interaction)
+───────────────────────────────────────── */
+.hl-interactive{
+  background:linear-gradient(transparent 55%,rgba(233,196,106,.6) 55%);
+  cursor:pointer;border-radius:3px;transition:background .2s;
+  font-weight:600;
+}
+.hl-interactive:hover{
+  background:linear-gradient(transparent 55%,rgba(244,162,97,.7) 55%);
+}
+
+/* ─────────────────────────────────────────
+   SEQUENCE / ORDER ACTIVITY
+───────────────────────────────────────── */
+.seq-list{display:flex;flex-direction:column;gap:7px;margin:10px 0;}
+.seq-item{
+  background:var(--parchment);border:2.5px solid #C4A882;
+  border-radius:12px;padding:10px 14px;
+  font-weight:700;font-size:.93rem;color:var(--forest);
+  cursor:pointer;transition:all .18s;
+  display:flex;align-items:center;gap:10px;
+}
+.seq-item:hover{background:#E8F5E9;border-color:var(--fern);}
+.seq-num{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--moss);color:var(--gold);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-head);font-size:.9rem;flex-shrink:0;
+}
+
+/* ─────────────────────────────────────────
+   FINAL CHALLENGE PROGRESS BAR
+───────────────────────────────────────── */
+.fc-prog-wrap{
+  height:9px;background:#e0d8c8;border-radius:6px;
+  overflow:hidden;margin-bottom:14px;
+}
+.fc-prog-bar{
+  height:100%;
+  background:linear-gradient(90deg,var(--fern),var(--amber));
+  border-radius:6px;transition:width .35s linear;
+}
+
+/* ─────────────────────────────────────────
+   GRAMMAR COLOUR CODING
+───────────────────────────────────────── */
+.noun   {color:#1B4332;background:#D8F3DC;padding:1px 6px;border-radius:5px;font-weight:700;}
+.verb   {color:#7F3D30;background:#FFE8D6;padding:1px 6px;border-radius:5px;font-weight:700;}
+.adj    {color:#5c4a1e;background:#FFF9C4;padding:1px 6px;border-radius:5px;font-weight:700;}
+.adv    {color:#1a237e;background:#E3F2FD;padding:1px 6px;border-radius:5px;font-weight:700;}
+.prep   {color:#4a0072;background:#F3E5F5;padding:1px 6px;border-radius:5px;font-weight:700;}
+
+/* ─────────────────────────────────────────
+   PUNCTUATION DEMO
+───────────────────────────────────────── */
+.punc-demo{
+  font-size:1.1rem;line-height:2;
+  background:var(--parchment);border-radius:12px;
+  padding:12px 16px;margin:10px 0;color:#1a1a2e;
+}
+.punc-demo .correct-mark{color:var(--moss);font-weight:800;font-size:1.2rem;}
+.punc-demo .wrong-mark  {color:var(--clay);text-decoration:line-through;}
+
+/* ─────────────────────────────────────────
+   HOOK BOOK SVG wrapper
+───────────────────────────────────────── */
+.book-hero{
+  display:flex;justify-content:center;margin:10px 0;
+}
+</style>
+</head>
+<body>
+
+<!-- ░░ LEAVES BACKGROUND ░░ -->
+<div id="leaves-bg"></div>
+
+<!-- ░░ CONFETTI ░░ -->
+<canvas id="confetti"></canvas>
+
+<!-- ░░ TOAST ░░ -->
+<div id="toast">🎉 Nice one!</div>
+
+<!-- ░░ CELEBRATION OVERLAY ░░ -->
+<div id="cel-overlay">
+  <div class="cel-card">
+    <div style="font-size:3rem" id="cel-em">🎉</div>
+    <h2 id="cel-title">Brilliant!</h2>
+    <p id="cel-msg">Keep going, Word Wizard!</p>
+    <button class="btn btn-next" onclick="closeCel()" style="margin-top:14px">Continue 📖</button>
+  </div>
+</div>
+
+<!-- ░░ HUD ░░ -->
+<div id="hud">
+  <div id="hud-title">📚 MCAP ELA</div>
+  <div id="pb-wrap"><div id="pb"></div></div>
+  <div id="hud-score">⭐ 0 pts</div>
+  <div id="hud-streak">🔥 0</div>
+  <button id="snd-btn" onclick="toggleSound()">🔇</button>
+</div>
+
+<!-- ░░ APP ░░ -->
+<div id="app">
+<div id="slide-wrap">
+
+<!-- ══════════════════════════════════════
+     SLIDE 0 — HOOK / CURIOSITY OPENER
+════════════════════════════════════════ -->
+<div class="slide" id="s0">
+  <div class="hook-hero">
+    <span class="big-emoji">📖</span>
+    <h1 class="hero-title">
+      Welcome to the<br>
+      <span style="color:var(--moss)">MCAP ELA</span><br>
+      <span style="color:var(--clay)">Word Adventure!</span>
+    </h1>
+    <p class="hero-sub">Grade 4 · Baltimore, Maryland 🦀</p>
+
+    <!-- Enchanted library SVG -->
+    <div class="book-hero">
+      <svg viewBox="0 0 320 195" width="300" height="180" xmlns="http://www.w3.org/2000/svg">
+        <!-- Sky / background -->
+        <rect width="320" height="195" rx="18" fill="#0d2b1a"/>
+        <!-- Glowing stars -->
+        <circle cx="30" cy="25"  r="2" fill="#E9C46A" opacity=".9"/>
+        <circle cx="75" cy="15"  r="1.5" fill="#E9C46A" opacity=".7"/>
+        <circle cx="130" cy="30" r="2" fill="#fff" opacity=".8"/>
+        <circle cx="200" cy="18" r="1.5" fill="#E9C46A" opacity=".6"/>
+        <circle cx="260" cy="28" r="2" fill="#fff" opacity=".9"/>
+        <circle cx="295" cy="12" r="1.5" fill="#E9C46A" opacity=".7"/>
+        <circle cx="50"  cy="50" r="1.5" fill="#fff" opacity=".5"/>
+        <circle cx="250" cy="55" r="2" fill="#fff" opacity=".6"/>
+        <!-- Bookshelf -->
+        <rect x="10"  y="130" width="300" height="12" rx="3" fill="#5D4037"/>
+        <rect x="10"  y="155" width="300" height="12" rx="3" fill="#5D4037"/>
+        <rect x="10"  y="180" width="300" height="12" rx="3" fill="#5D4037"/>
+        <!-- Books row 1 -->
+        <rect x="20"  y="75"  width="18" height="55" rx="3" fill="#E76F51"/>
+        <rect x="40"  y="80"  width="22" height="50" rx="3" fill="#2D6A4F"/>
+        <rect x="64"  y="70"  width="16" height="60" rx="3" fill="#E9C46A"/>
+        <rect x="82"  y="78"  width="20" height="52" rx="3" fill="#ADE8F4"/>
+        <rect x="104" y="73"  width="14" height="57" rx="3" fill="#FFAFCC"/>
+        <rect x="120" y="82"  width="18" height="48" rx="3" fill="#CDB4DB"/>
+        <rect x="140" y="68"  width="22" height="62" rx="3" fill="#F4A261"/>
+        <rect x="164" y="76"  width="16" height="54" rx="3" fill="#52B788"/>
+        <rect x="182" y="72"  width="18" height="58" rx="3" fill="#E76F51"/>
+        <rect x="202" y="80"  width="20" height="50" rx="3" fill="#E9C46A"/>
+        <rect x="224" y="74"  width="16" height="56" rx="3" fill="#ADE8F4"/>
+        <rect x="242" y="82"  width="22" height="48" rx="3" fill="#2D6A4F"/>
+        <rect x="266" y="70"  width="18" height="60" rx="3" fill="#FFAFCC"/>
+        <rect x="286" y="78"  width="22" height="52" rx="3" fill="#CDB4DB"/>
+        <!-- Floating quill pen -->
+        <ellipse cx="165" cy="45" rx="5" ry="22" fill="#fff" opacity=".8" transform="rotate(-30 165 45)"/>
+        <path d="M162 60 Q165 65 168 60" fill="#E9C46A" opacity=".9"/>
+        <!-- Floating letters -->
+        <text x="40" y="60" fill="#52B788" font-size="18" font-family="serif" font-weight="bold" opacity=".8">A</text>
+        <text x="220" y="60" fill="#E9C46A" font-size="18" font-family="serif" font-weight="bold" opacity=".8">B</text>
+        <text x="280" y="62" fill="#FFAFCC" font-size="16" font-family="serif" font-weight="bold" opacity=".7">C</text>
+        <!-- Sparkles -->
+        <text x="90"  y="55" font-size="12" opacity=".7">✨</text>
+        <text x="200" y="50" font-size="12" opacity=".6">✨</text>
+        <text x="140" y="62" font-size="10" opacity=".5">⭐</text>
+      </svg>
+    </div>
+
+    <div class="box box-warn" style="margin-top:6px">
+      <strong>🤔 Brain Teaser:</strong> If the author writes
+      <em>"Her laughter was music to his ears"</em> — is that literally true?
+      What kind of language is this? Discover the answer as we go! 🎵
+    </div>
+    <p style="font-size:.93rem;color:#666;margin-top:10px">
+      🕐 ~45 minutes · 5 ELA topics · 30+ questions · Earn badges!
+    </p>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-next" onclick="goNext()">Let's Read! 📚</button>
+  </div>
+  <div class="slide-num">Slide 1 of <span id="total-s">39</span></div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SLIDE 1 — HOW TO PLAY
+════════════════════════════════════════ -->
+<div class="slide" id="s1">
+  <div class="level-tag">📖 How to Play</div>
+  <span class="big-emoji">🎯</span>
+  <h2 class="slide-title">Your ELA Mission!</h2>
+  <div class="slide-body">
+    <div class="book-hero">
+      <svg viewBox="0 0 280 140" width="260" height="130" xmlns="http://www.w3.org/2000/svg">
+        <rect width="280" height="140" rx="14" fill="#f0fff4"/>
+        <!-- Trophy -->
+        <path d="M100 30 Q100 85 140 85 Q180 85 180 30Z" fill="#E9C46A"/>
+        <rect x="120" y="30" width="40" height="5" rx="2" fill="#F4A261"/>
+        <rect x="115" y="85" width="50" height="12" rx="4" fill="#E9C46A"/>
+        <rect x="125" y="95" width="30" height="8"  rx="3" fill="#F4A261"/>
+        <text x="60" y="65" font-size="20">⭐</text>
+        <text x="195" y="65" font-size="20">⭐</text>
+        <text x="130" y="28" font-size="15">✨</text>
+        <text x="140" y="120" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="13" fill="#1B4332">Word Wizard Trophy</text>
+      </svg>
+    </div>
+    <table class="pos-table">
+      <tr><th>🎮 Action</th><th>🏆 Reward</th></tr>
+      <tr><td>✅ Correct answer</td><td>+10 points</td></tr>
+      <tr><td>🔥 3 correct in a row</td><td>+15 bonus points!</td></tr>
+      <tr><td>📖 Finish a section</td><td>Earn a badge!</td></tr>
+      <tr><td>🌟 Perfect Final Challenge</td><td>Word Wizard badge!</td></tr>
+      <tr><td>💡 Use a hint</td><td>Free — but try first!</td></tr>
+    </table>
+    <div class="box box-tip">
+      💡 <strong>Tip:</strong> Read every passage carefully — details matter!
+      ELA rewards <em>close reading</em>. 🔍
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-back" onclick="goBack()">← Back</button>
+    <button class="btn btn-next" onclick="goNext()">Start! 🚀</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SLIDE 2 — CONCEPT: READING COMPREHENSION
+════════════════════════════════════════ -->
+<div class="slide" id="s2">
+  <div class="level-tag">📍 Topic 1</div>
+  <span class="big-emoji">🔍</span>
+  <h2 class="slide-title">Reading Comprehension</h2>
+  <p class="slide-subtitle">Understanding what you read — literally AND between the lines</p>
+  <div class="slide-body">
+    <div class="box box-key">
+      <strong>Key Skills:</strong><br>
+      📌 <strong>Main Idea</strong> — what the whole text is mostly about<br>
+      📌 <strong>Key Details</strong> — facts that support the main idea<br>
+      📌 <strong>Inference</strong> — using clues to figure out what the author doesn't say directly<br>
+      📌 <strong>Author's Purpose</strong> — why did the author write this? (inform, entertain, persuade)
+    </div>
+
+    <!-- Short practice passage -->
+    <div class="passage-wrap">
+      <div class="passage-tab">📄 Read This!</div>
+      <p class="passage-title">🌻 Maya's Garden</p>
+      <p class="passage-body">
+        Maya had always <span class="hl">loved</span> growing things. Last spring, she dug up a small patch of
+        soil in her backyard and planted tomato seeds. Every morning before school, she
+        <span class="hl">carefully</span> watered her plants and pulled out any weeds. By summer, the
+        tomatoes were fat and <span class="hl">bright red</span>. Maya picked them and shared them with
+        her neighbors, who said they were the <em>tastiest tomatoes they had ever eaten</em>.
+        Maya decided she would plant an even bigger garden next year.
+      </p>
+    </div>
+
+    <div class="box box-ex">
+      🟢 <strong>Main Idea:</strong> Maya works hard to grow tomatoes and shares them.<br>
+      🟡 <strong>Key Detail:</strong> She watered and weeded every morning.<br>
+      🔵 <strong>Inference:</strong> Maya is dedicated and kind (we infer this from her actions).<br>
+      🟠 <strong>Author's Purpose:</strong> To <em>entertain</em> and show that hard work pays off.
+    </div>
+
+    <p style="font-weight:700;margin:10px 0 5px;font-size:.93rem">👆 Click cards to reveal answers!</p>
+    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-f">How do you find the MAIN IDEA of a passage?</div>
+        <div class="flip-b">Ask: "What is this MOSTLY about?" — it covers the whole text, not just one detail. Look at the first and last sentences!</div>
+      </div>
+    </div>
+    <div class="flip-card" onclick="this.classList.toggle('flipped')" style="margin-top:8px">
+      <div class="flip-inner">
+        <div class="flip-f">What is an INFERENCE?</div>
+        <div class="flip-b">An inference is a smart guess using text clues + what you already know. The author hints at it — you figure it out! 🔎</div>
+      </div>
+    </div>
+    <div class="box box-tip" style="margin-top:10px">
+      💡 <strong>Remember:</strong> Main idea ≠ first sentence. The first sentence is often a hook!
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-back" onclick="goBack()">← Back</button>
+    <button class="btn btn-next" onclick="goNext()">Mini Quiz! 🧠</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SLIDE 3 — MINI QUIZ 1A (Comprehension)
+════════════════════════════════════════ -->
+<div class="slide" id="s3">
+  <div class="section-tag">🧠 Mini Quiz – Reading Comprehension</div>
+  <div class="passage-wrap" style="margin-bottom:10px">
+    <div class="passage-tab">📄 Passage</div>
+    <p class="passage-title">🌻 Maya's Garden</p>
+    <p class="passage-body" style="font-size:.9rem">
+      Maya had always loved growing things. Last spring, she dug up a small patch of soil and
+      planted tomato seeds. Every morning before school, she carefully watered her plants and
+      pulled out any weeds. By summer, the tomatoes were fat and bright red. Maya picked them
+      and shared them with her neighbors, who said they were the tastiest tomatoes they had ever eaten.
+    </p>
+  </div>
+  <div class="quiz-header">
+    <span class="quiz-badge">Q 1 of 3</span>
+    <span style="font-size:.85rem;color:#888">Comprehension · +10 pts</span>
+  </div>
+  <p class="q-text">What is the <strong>MAIN IDEA</strong> of this passage?</p>
+  <div class="opts-grid" id="q1-opts">
+    <button class="opt" onclick="chk(this,'q1','A')"><span class="opt-ltr">A</span> Maya lives in a house with a backyard.</button>
+    <button class="opt" onclick="chk(this,'q1','B')"><span class="opt-ltr">B</span> Tomatoes take a long time to grow red.</button>
+    <button class="opt" onclick="chk(this,'q1','C')"><span class="opt-ltr">C</span> Maya works hard to grow tomatoes and generously shares them.</button>
+    <button class="opt" onclick="chk(this,'q1','D')"><span class="opt-ltr">D</span> Neighbors enjoy eating fresh vegetables.</button>
+  </div>
+  <button class="btn btn-hint" onclick="showHint('h1')">💡 Hint</button>
+  <div id="h1" class="hint-txt">The main idea covers the WHOLE story. Which answer describes everything Maya does — not just one part?</div>
+  <div id="fb-q1" class="fb"></div>
+  <div class="nav-row" id="nav-q1" style="display:none">
+    <button class="btn btn-next" onclick="goNext()">Next →</button>
+  </div>
+</div>
+
+<!-- SLIDE 4 — QUIZ 1B -->
+<div class="slide" id="s4">
+  <div class="section-tag">🧠 Mini Quiz – Reading Comprehension</div>
+  <div class="passage-wrap" style="margin-bottom:10px">
+    <div class="passage-tab">📄 Passage</div>
+    <p class="passage-body" style="font-size:.9rem">
+      Maya had always loved growing things. Last spring, she dug up a small patch of soil and
+      planted tomato seeds. <strong>Every morning before school, she carefully watered her plants and
+      pulled out any weeds.</strong> By summer, the tomatoes were fat and bright red.
+    </p>
+  </div>
+  <div class="quiz-header">
+    <span class="quiz-badge">Q 2 of 3</span>
+    <span style="font-size:.85rem;color:#888">Comprehension · +10 pts</span>
+  </div>
+  <p class="q-text">Which detail BEST supports the idea that Maya is <strong>hardworking</strong>?</p>
+  <div class="opts-grid" id="q2-opts">
+    <button class="opt" onclick="chk(this,'q2','A')"><span class="opt-ltr">A</span> Maya had always loved growing things.</button>
+    <button class="opt" onclick="chk(this,'q2','B')"><span class="opt-ltr">B</span> She watered and weeded every single morning before school.</button>
+    <button class="opt" onclick="chk(this,'q2','C')"><span class="opt-ltr">C</span> The tomatoes turned fat and bright red by summer.</button>
+    <button class="opt" onclick="chk(this,'q2','D')"><span class="opt-ltr">D</span> The neighbors called them the tastiest tomatoes ever.</button>
+  </div>
+  <button class="btn btn-hint" onclick="showHint('h2')">💡 Hint</button>
+  <div id="h2" class="hint-txt">Look for an action Maya DOES that shows effort and dedication — something she repeats.</div>
+  <div id="fb-q2" class="fb"></div>
+  <div class="nav-row" id="nav-q2" style="display:none">
+    <button class="btn btn-next" onclick="goNext()">Next →</button>
+  </div>
+</div>
+
+<!-- SLIDE 5 — QUIZ 1C -->
+<div class="slide" id="s5">
+  <div class="section-tag">🧠 Mini Quiz – Reading Comprehension</div>
+  <div class="quiz-header">
+    <span class="quiz-badge">Q 3 of 3</span>
+    <span style="font-size:.85rem;color:#888">Inference · +10 pts</span>
+  </div>
+  <p class="q-text">
+    The passage says Maya decided to plant a <strong>bigger</strong> garden next year.<br>
+    What can you <strong>INFER</strong> about how Maya feels about gardening?
+  </p>
+  <div class="opts-grid" id="q3-opts">
+    <button class="opt" onclick="chk(this,'q3','A')"><span class="opt-ltr">A</span> She is tired of gardening and wants to quit.</button>
+    <button class="opt" onclick="chk(this,'q3','B')"><span class="opt-ltr">B</span> She finds gardening boring but keeps trying.</button>
+    <button class="opt" onclick="chk(this,'q3','C')"><span class="opt-ltr">C</span> She is passionate about gardening and wants to do even more.</button>
+    <button class="opt" onclick="chk(this,'q3','D')"><span class="opt-ltr">D</span> She only gardens because her parents make her.</button>
+  </div>
+  <button class="btn btn-hint" onclick="showHint('h3')">💡 Hint</button>
+  <div id="h3" class="hint-txt">If someone wants to do MORE of something next year, what does that tell you about how they FEEL about it?</div>
+  <div id="fb-q3" class="fb"></div>
+  <div class="nav-row" id="nav-q3" style="display:none">
+    <button class="btn btn-next" onclick="goNext()">Vocab Time! 📝</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SLIDE 6 — CONCEPT: VOCABULARY & WORD STUDY
+════════════════════════════════════════ -->
+<div class="slide" id="s6">
+  <div class="level-tag">📍 Topic 2</div>
+  <span class="big-emoji">🔤</span>
+  <h2 class="slide-title">Vocabulary & Word Study</h2>
+  <p class="slide-subtitle">Context clues, prefixes, suffixes, synonyms & antonyms</p>
+  <div class="slide-body">
+    <div class="box box-key">
+      <strong>Context Clues</strong> — use words AROUND an unknown word to figure out its meaning.<br>
+      <strong>Prefixes</strong> — letters added to the FRONT of a word to change its meaning.<br>
+      <strong>Suffixes</strong> — letters added to the END of a word.<br>
+      <strong>Synonyms</strong> — words that mean the SAME (happy → joyful).<br>
+      <strong>Antonyms</strong> — words that mean the OPPOSITE (hot → cold).
+    </div>
+
+    <!-- SVG word tree illustration -->
+    <div class="book-hero">
+      <svg viewBox="0 0 300 160" width="280" height="150" xmlns="http://www.w3.org/2000/svg">
+        <rect width="300" height="160" rx="14" fill="#f0fff4"/>
+        <!-- Tree trunk -->
+        <rect x="140" y="100" width="20" height="50" rx="5" fill="#5D4037"/>
+        <!-- Tree canopy -->
+        <circle cx="150" cy="70"  r="50" fill="#2D6A4F" opacity=".85"/>
+        <circle cx="110" cy="85"  r="35" fill="#52B788" opacity=".8"/>
+        <circle cx="190" cy="82"  r="38" fill="#40916C" opacity=".8"/>
+        <!-- Root word label -->
+        <text x="150" y="78" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="13" fill="#fff">ROOT</text>
+        <text x="150" y="93" text-anchor="middle" font-family="Arial" font-size="11"     fill="#D8F3DC">"happy"</text>
+        <!-- Prefix branch -->
+        <text x="100" y="92" text-anchor="middle" font-family="Arial" font-size="10" font-weight="bold" fill="#fff">un- +</text>
+        <text x="100" y="104" text-anchor="middle" font-family="Arial" font-size="10" fill="#D8F3DC">unhappy</text>
+        <!-- Suffix branch -->
+        <text x="198" y="88" text-anchor="middle" font-family="Arial" font-size="10" font-weight="bold" fill="#fff">+ -ness</text>
+        <text x="198" y="100" text-anchor="middle" font-family="Arial" font-size="10" fill="#D8F3DC">happiness</text>
+        <!-- Ground label -->
+        <text x="150" y="155" text-anchor="middle" font-family="Arial" font-size="11" fill="#5D4037" font-weight="bold">Word Family Tree</text>
+      </svg>
+    </div>
+
+    <table class="pos-table">
+      <tr><th>Prefix/Suffix</th><th>Meaning</th><th>Example</th></tr>
+      <tr><td><strong>un-</strong></td><td>not / opposite</td><td>unhappy, unkind</td></tr>
+      <tr><td><strong>re-</strong></td><td>again</td><td>rewrite, replay</td></tr>
+      <tr><td><strong>pre-</strong></td><td>before</td><td>preview, prepay</td></tr>
+      <tr><td><strong>-ful</strong></td><td>full of</td><td>hopeful, joyful</td></tr>
+      <tr><td><strong>-less</strong></td><td>without</td><td>hopeless, careless</td></tr>
+      <tr><td><strong>-er / -est</strong></td><td>comparison</td><td>taller, tallest</td></tr>
+    </table>
+    <div class="box box-tip">
+      💡 <strong>Context Clue Trick:</strong> Cover the unknown word. Read the rest of the sentence.
+      What word would make sense there? That's your clue! 🕵️
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-back" onclick="goBack()">← Back</button>
+    <button class="btn btn-next" onclick="goNext()">Mini Quiz! 🧠</button>
+  </div>
+</div>
+
+<!-- SLIDE 7 — QUIZ 2A (Vocabulary) -->
+<div class="slide" id="s7">
+  <div class="section-tag">🧠 Mini Quiz – Vocabulary</div>
+  <div class="quiz-header">
+    <span class="quiz-badge">Q 1 of 3</span>
+    <span style="font-size:.85rem;color:#888">Prefixes · +10 pts</span>
+  </div>
+  <p class="q-text">
+    What does the word <strong>"rewrite"</strong> mean?<br>
+    <em>(Hint: think about the prefix <strong>re-</strong>)</em>
+  </p>
+  <div class="opts-grid" id="q4-opts">
+    <button class="opt" onclick="chk(this,'q4','A')"><span class="opt-ltr">A</span> To write very quickly</button>
+    <button class="opt" onclick="chk(this,'q4','B')"><span class="opt-ltr">B</span> To write again</button>
+    <button class="opt" onclick="chk(this,'q4','C')"><span class="opt-ltr">C</span> To write backward</button>
+    <button class="opt" onclick="chk(this,'q4','D')"><span class="opt-ltr">D</span> To never write</button>
+  </div>
+  <button class="btn btn-hint" onclick="showHint('h4')">💡 Hint</button>
+  <div id="h4" class="hint-txt">The prefix <strong>re-</strong> means "again." So re + write = ?</div>
+  <div id="fb-q4" class="fb"></div>
+  <div class="nav-row" id="nav-q4" style="display:none">
+    <button class="btn btn-next" onclick="goNext()">Next →</button>
+  </div>
+</div>
+
+<!-- SLIDE 8 — QUIZ 2B -->
+<div class="slide" id="s8">
+  <div class="section-tag">🧠 Mini Quiz – Vocabulary</div>
+  <div class="quiz-header">
+    <span class="quiz-badge">Q 2 of 3</span>
+    <span style="font-size:.85rem;color:#888">Context Clues · +10 pts</span>
+  </div>
+  <p class="q-text">
+    Read the sentence:<br>
+    <span style="font-style:italic;color:var(--forest);display:block;margin:8px 0;padding:10px;background:var(--parchment);border-radius:10px">
+      "The elephant was so <strong>enormous</strong> that it filled the entire cage at the zoo."
+    </span>
+    What does the word <strong>enormous</strong> most likely mean?
+  </p>
+  <div class="opts-grid" id="q5-opts">
+    <button class="opt" onclick="chk(this,'q5','A')"><span class="opt-ltr">A</span> Very small</button>
+    <button class="opt" onclick="chk(this,'q5','B')"><span class="opt-ltr">B</span> Very loud</button>
+    <button class="opt" onclick="chk(this,'q5','C')"><span class="opt-ltr">C</span> Very large</button>
+    <button class="opt" onclick="chk(this,'q5','D')"><span class="opt-ltr">D</span> Very fast</button>
+  </div>
+  <button class="btn btn-hint" onclick="showHint('h5')">💡 Hint</button>
+  <div id="h5" class="hint-txt">The clue is "filled the ENTIRE cage." If something fills the whole space, what must it be?</div>
+  <div id="fb-q5" class="fb"></div>
+  <div class="nav-row" id="nav-q5" style="display:none">
+    <button class="btn btn-next" onclick="goNext()">Next →</button>
+  </div>
+</div>
+
+<!-- SLIDE 9 — QUIZ 2C -->
+<div class="slide" id="s9">
+  <div class="section-tag">🧠 Mini Quiz – Vocabulary</div>
+  <div class="quiz-header">
+    <span class="quiz-badge">Q 3 of 3</span>
+    <span style="font-size:.85rem;color:#888">Synonyms · +10 pts</span>
+  </div>
+  <p class="q-text">
+    Which word is a <strong>SYNONYM</strong> for <strong>"brave"</strong>?
+  </p>
+  <div class="word-map" style="margin-bottom:12px">
+    <span class="bubble">fearless</span>
+    <span class="bubble amber">timid</span>
+    <span class="bubble">courageous</span>
+    <span class="bubble lav">cowardly</span>
+    <span class="bubble">bold</span>
+    <span class="bubble amber">frightened</span>
+  </div>
+  <div class="opts-grid" id="q6-opts">
+    <button class="opt" onclick="chk(this,'q6','A')"><span class="opt-ltr">A</span> Cowardly</button>
+    <button class="opt" onclick="chk(this,'q6','B')"><span class="opt-ltr">B</span> Courageous</button>
+    <button class="opt" onclick="chk(this,'q6','C')"><span class="opt-ltr">C</span> Timid</button>
+    <button class="opt" onclick="chk(this,'q6','D')"><span class="opt-ltr">D</span> Frightened</button>
+  </div>
+  <button class="btn btn-hint" onclick="showHint('h6')">💡 Hint</button>
+  <div id="h6" class="hint-txt">A SYNONYM means the SAME thing. Which word in the bubbles above means something similar to "brave"?</div>
+  <div id="fb-q6" class="fb"></div>
+  <div class="nav-row" id="nav-q6" style="display:none">
+    <button class="btn btn-next" onclick="goNext()">Grammar Time! ✏️</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SLIDE 10 — CONCEPT: GRAMMAR & LANGUAGE
+════════════════════════════════════════ -->
+<div class="slide" id="s10">
+  <div class="level-tag">📍 Topic 3</div>
+  <span class="big-emoji">✏️</span>
+  <h2 class="slide-title">Grammar & Language</h2>
+  <p class="slide-subtitle">Parts of speech, punctuation & sentence structure</p>
+  <div class="slide-body">
+    <div class="box box-key">
+      <strong>Parts of Speech Quick Guide:</strong><br>
+      <span class="noun">Noun</span> — person, place, thing, or idea &nbsp;|&nbsp;
+      <span class="verb">Verb</span> — action or state of being<br>
+      <span class="adj">Adjective</span> — describes a noun &nbsp;|&nbsp;
+      <span class="adv">Adverb</span> — describes a verb, adj, or adverb<br>
+      <span class="prep">Preposition</span> — shows relationship (in, on, under, beside)
+    </div>
+
+    <!-- Colour-coded sentence example -->
+    <div class="punc-demo">
+      The <span class="adj">quick</span> <span class="noun">fox</span>
+      <span class="verb">jumped</span>
+      <span class="adv">swiftly</span>
+      <span class="prep">over</span>
+      the <span class="adj">lazy</span> <span class="noun">dog</span>.
+    </div>
+
+    <!-- SVG punctuation marks illustration -->
+    <div class="book-hero">
+      <svg viewBox="0 0 300 130" width="280" height="120" xmlns="http://www.w3.org/2000/svg">
+        <rect width="300" height="130" rx="14" fill="#FFF9F0"/>
+        <!-- Period -->
+        <circle cx="40" cy="75" r="12" fill="#2D6A4F"/>
+        <text x="40" y="80" text-anchor="middle" font-size="18" font-weight="bold" fill="#fff">.</text>
+        <text x="40" y="110" text-anchor="middle" font-size="10" fill="#2D6A4F" font-weight="bold">Period</text>
+        <text x="40" y="22"  text-anchor="middle" font-size="10" fill="#555">End of</text>
+        <text x="40" y="33"  text-anchor="middle" font-size="10" fill="#555">sentence</text>
+        <!-- Question mark -->
+        <circle cx="90" cy="75" r="12" fill="#E9C46A"/>
+        <text x="90" y="80" text-anchor="middle" font-size="16" font-weight="bold" fill="#fff">?</text>
+        <text x="90" y="110" text-anchor="middle" font-size="10" fill="#5c4a1e" font-weight="bold">Question</text>
+        <!-- Exclamation -->
+        <circle cx="140" cy="75" r="12" fill="#E76F51"/>
+        <text x="140" y="80" text-anchor="middle" font-size="16" font-weight="bold" fill="#fff">!</text>
+        <text x="140" y="110" text-anchor="middle" font-size="10" fill="#9d2b10" font-weight="bold">Exclamation</text>
+        <!-- Comma -->
+        <circle cx="190" cy="75" r="12" fill="#CDB4DB"/>
+        <text x="190" y="81" text-anchor="middle" font-size="18" font-weight="bold" fill="#fff">,</text>
+        <text x="190" y="110" text-anchor="middle" font-size="10" fill="#4a0072" font-weight="bold">Comma</text>
+        <text x="190" y="22"  text-anchor="middle" font-size="10" fill="#555">Pause /</text>
+        <text x="190" y="33"  text-anchor="middle" font-size="10" fill="#555">list</text>
+        <!-- Quotation -->
+        <circle cx="245" cy="75" r="14" fill="#ADE8F4"/>
+        <text x="245" y="80" text-anchor="middle" font-size="14" font-weight="bold" fill="#023e8a">" "</text>
+        <text x="245" y="110" text-anchor="middle" font-size="10" fill="#023e8a" font-weight="bold">Quotes</text>
+        <text x="245" y="22"  text-anchor="middle" font-size="10" fill="#555">Speech /</text>
+        <text x="245" y="33"  text-anchor="middle" font-size="10" fill="#555">titles</text>
+      </svg>
+    </div>
+
+    <div class="box box-ex">
+      <strong>Sentence Types:</strong><br>
+      📌 <strong>Simple</strong> — one independent clause: <em>The dog barked.</em><br>
+      📌 <strong>Compound</strong> — two clauses joined by and/but/or: <em>I like cats, but she prefers dogs.</em><br>
+      📌 <strong>Complex</strong> — independent + dependent clause: <em>Because it rained, we stayed inside.</em>
+    </div>
+    <div class="box box-tip">
+      💡 <strong>Apostrophe Trick:</strong> it's = it IS &nbsp;|&nbsp; its = belonging to it.<br>
+      "The cat licked <strong>its</strong> paw." (belonging) vs. "<strong>It's</strong> a nice day." (it is)
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-back" onclick="goBack()">← Back</button>
+    <button class="btn btn-next" onclick="goNext()">Mini Quiz! 🧠</button>
+  </div>
+</div>
+
+<!-- SLIDE 11 — QUIZ 3A (Grammar) -->
+<div class="slide" id="s11">
+  <div class="section-tag">🧠 Mini Quiz – Grammar</div>
+  <div class="quiz-header">
+    <span class="quiz-badge">Q 1 of 3</span>
+    <span style="font-size:.85rem;color:#888">Parts of Speech · +10 pts</span>
+  </div>
+  <p class="q-text">
+    Read the sentence:<br>
+    <span style="font-style:italic;color:var(--forest);display:block;margin:8px 0;padding:10px;background:var(--parchment);border-radius:10px">
+      "The <strong>fluffy</strong> rabbit hopped quickly across the green meadow."
+    </span>
+    What part of speech is the word <strong>"quickly"</strong>?
+  </p>
+  <div class="opts-grid" id="q7-opts">
+    <button class="opt" onclick="chk(this,'q7','A')"><span class="opt-ltr">A</span> Noun</button>
+    <button class="opt" onclick="chk(this,'q7','B')"><span class="opt-ltr">B</span> Adjective</button>
+    <button class="opt" onclick="chk(this,'q7','C')"><span class="opt-ltr">C</span> Verb</button>
+    <button class="opt" onclick="chk(this,'q7','D')"><span class="opt-ltr">D</span> Adverb</button>
+  </div>
+  <button class="btn btn-hint" onclick="showHint('h7')">💡 Hint</button>
+  <div id="h7" class="hint-txt">"Quickly" describes HOW the rabbit hopped. Words that describe how an action happens are called…?</div>
+  <div id="fb-q7" class="fb"></div>
+  <div class="nav-row" id="nav-q7" style="display:none">
+    <button class="btn btn-next" onclick="goNext()">Next →</button>
+  </div>
+</div>
+
+<!-- SLIDE 12 — QUIZ 3B -->
+<div class="slide" id="s12">
+  <div class="section-tag">🧠 Mini Quiz – Grammar</div>
+  <div class="quiz-header">
+    <span class="quiz-badge">Q 2 of 3</span>
+    <span style="font-size:.85rem;color:#888">Punctuation · +10 pts</span>
+  </div>
+  <p class="q-text">Which sentence uses <strong>correct punctuation</strong>?</p>
+  <div class="opts-grid" id="q8-opts">
+    <button class="opt" onclick="chk(this,'q8','A')"><span class="opt-ltr">A</span> I like cats, dogs and, birds.</button>
+    <button class="opt" onclick="chk(this,'q8','B')"><span class="opt-ltr">B</span> She said, "I will be there soon."</button>
+    <button class="opt" onclick="chk(this,'q8','C')"><span class="opt-ltr">C</span> its my favorite book!</button>
+    <button class="opt" onclick="chk(this,'q8','D')"><span class="opt-ltr">D</span> Where are you going.</button>
+  </div>
+  <button class="btn btn-hint" onclick="showHint('h8')">💡 Hint</button>
+  <div id="h8" class="hint-txt">A: the comma before "and" is misplaced. C: needs capital I and apostrophe (It's). D: questions need a "?". Check each one!</div>
+  <div id="fb-q8" class="fb"></div>
+  <div class="nav-row" id="nav-q8" style="display:none">
+    <button class="btn btn-next" onclick="goNext()">Next →</button>
+  </div>
+</div>
+
+<!-- SLIDE 13 — QUIZ 3C -->
+<div class="slide" id="s13">
+  <div class="section-tag">🧠 Mini Quiz – Grammar</div>
+  <div class="quiz-header">
+    <span class="quiz-badge">Q 3 of 3</span>
+    <span style="font-size:.85rem;color:#888">Grammar True/False · +10 pts</span>
+  </div>
+  <p class="q-text">
+    True or False:<br>
+    <strong>"I like cats dogs and birds"</strong> is correctly written — it does NOT need any commas.
+  </p>
+  <div class="tf-row">
+    <button class="tf-btn tf-t" onclick="chkTF(this,'q9',true)">TRUE ✓</button>
+    <button class="tf-btn tf-f" onclick="chkTF(this,'q9',false)">FALSE ✗</button>
+  </div>
+  <button class="btn btn-hint" onclick="showHint('h9')">💡 Hint</button>
+  <div id="h9" class="hint-txt">When listing 3 or more items, commas separate them: "cats, dogs, and birds." Is the sentence in the question correct?</div>
+  <div id="fb-q9" class="fb"></div>
+  <div class="nav-row" id="nav-q9" style="display:none">
+    <button class="btn btn-next" onclick="goNext()">Literary Elements! 📖</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SLIDE 14 — CONCEPT: LITERARY ELEMENTS
+════════════════════════════════════════ -->
+<div class="slide" id="s14">
+  <div class="level-tag">📍 Topic 4</div>
+  <span class="big-emoji">🎭</span>
+  <h2 class="slide-title">Literary Elements</h2>
+  <p class="slide-subtitle">Character, setting, plot, theme, point of view & figurative language</p>
+  <div class="slide-body">
+    <div class="box box-key">
+      <strong>Story Elements:</strong><br>
+      🧑 <strong>Character</strong> — who the story is about<br>
+      🏡 <strong>Setting</strong> — where and when the story happens<br>
+      📈 <strong>Plot</strong> — what happens (problem → events → solution)<br>
+      💡 <strong>Theme</strong> — the big life lesson or message<br>
+      👁️ <strong>Point of View</strong> — who is telling the story (1st, 2nd, or 3rd person)
+    </div>
+
+    <!-- SVG story mountain / plot diagram -->
+    <div class="book-hero">
+      <svg viewBox="0 0 320 165" width="300" height="155" xmlns="http://www.w3.org/2000/svg">
+        <rect width="320" height="165" rx="14" fill="#f0fff4"/>
+        <!-- Mountain shape -->
+        <path d="M20 145 L160 30 L300 145Z" fill="#D8F3DC" stroke="#52B788" stroke-width="2"/>
+        <!-- Sections -->
+        <path d="M20 145 L90 145 L160 30Z" fill="#ADE8F4" opacity=".7"/>
+        <path d="M300 145 L230 145 L160 30Z" fill="#FFAFCC" opacity=".7"/>
+        <!-- Labels -->
+        <text x="55"  y="120" text-anchor="middle" font-size="10" fill="#023e8a" font-weight="bold">Rising</text>
+        <text x="55"  y="132" text-anchor="middle" font-size="10" fill="#023e8a" font-weight="bold">Action</text>
+        <text x="160" y="20"  text-anchor="middle" font-size="11" fill="#1B4332" font-weight="bold">Climax ⭐</text>
+        <text x="255" y="120" text-anchor="middle" font-size="10" fill="#880E4F" font-weight="bold">Falling</text>
+        <text x="255" y="132" text-anchor="middle" font-size="10" fill="#880E4F" font-weight="bold">Action</text>
+        <!-- Start / End labels -->
+        <text x="20"  y="158" font-size="10" fill="#555" font-weight="bold">Exposition</text>
+        <text x="245" y="158" font-size="10" fill="#555" font-weight="bold">Resolution</text>
+        <!-- Conflict label at peak -->
+        <text x="130" y="38" font-size="9" fill="#1B4332">Peak =</text>
+        <text x="130" y="48" font-size="9" fill="#1B4332">Climax!</text>
+      </svg>
+    </div>
+
+    <div class="fig-grid">
+      <div class="fig-card">
+        <div class="fig-label">🎭 Simile</div>
+        <em>"Her smile was <strong>like sunshine</strong>."</em><br>
+        Compares using <strong>like</strong> or <strong>as</strong>
+      </div>
+      <div class="fig-card amber">
+        <div class="fig-label">🎭 Metaphor</div>
+        <em>"Her laughter was <strong>music</strong>."</em><br>
+        Direct comparison — no like/as
+      </div>
+      <div class="fig-card lav">
+        <div class="fig-label">🎭 Personification</div>
+        <em>"The wind <strong>whispered</strong> secrets."</em><br>
+        Gives human traits to non-humans
+      </div>
+      <div class="fig-card rose">
+        <div class="fig-label">🎭 Alliteration</div>
+        <em>"<strong>Peter Piper</strong> picked peppers."</em><br>
+        Same starting sound repeated
+      </div>
+    </div>
+
+    <div class="box box-tip">
+      💡 <strong>Point of View:</strong> <strong>1st person</strong> uses I/me/we.
+      <strong>3rd person</strong> uses he/she/they. Check the pronouns!
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-back" onclick="goBack()">← Back</button>
+    <button class="btn btn-next" onclick="goNext()">Mini Quiz! 🧠</button>
+  </div>
+</div>
+
+<!-- SLIDE 15 — QUIZ 4A (Literary) -->
+<div class="slide" id="s15">
+  <div class="section-tag">🧠 Mini Quiz – Literary Elements</div>
+  <div class="quiz-header">
+    <span class="quiz-badge">Q 1 of 3</span>
+    <span style="font-size:.85rem;color:#888">Figurative Language · +10 pts</span>
+  </div>
+  <p class="q-text">
+    Read the sentence:<br>
+    <span style="display:block;margin:8px 0;padding:10px;background:var(--parchment);border-radius:10px;color:var(--forest);font-style:italic">
+      "The old oak tree was a silent <strong>guardian</strong> watching over the village."
+    </span>
+    What type of figurative language is this?
+  </p>
+  <div class="opts-grid" id="q10-opts">
+    <button class="opt" onclick="chk(this,'q10','A')"><span class="opt-ltr">A</span> Simile</button>
+    <button class="opt" onclick="chk(this,'q10','B')"><span class="opt-ltr">B</span> Metaphor</button>
+    <button class="opt" onclick="chk(this,'q10','C')"><span class="opt-ltr">C</span> Alliteration</button>
+    <button class="opt" onclick="chk(this,'q10','D')"><span class="opt-ltr">D</span> Onomatopoeia</button>
+  </div>
+  <button class="btn btn-hint" onclick="showHint('h10')">💡 Hint</button>
+  <div id="h10" class="hint-txt">The tree IS called a guardian — directly compared without using "like" or "as." What figure of speech does NOT use like/as?</div>
+  <div id="fb-q10" class="fb"></div>
+  <div class="nav-row" id="nav-q10" style="display:none">
+    <button class="btn btn-next" onclick="goNext()">Next →</button>
+  </div>
+</div>
+
+<!-- SLIDE 16 — QUIZ 4B -->
+<div class="slide" id="s16">
+  <div class="section-tag">🧠 Mini Quiz – Literary Elements</div>
+  <div class="quiz-header">
+    <span class="quiz-badge">Q 2 of 3</span>
+    <span style="font-size:.85rem;color:#888">Point of View · +10 pts</span>
+  </div>
+  <p class="q-text">
+    Read the passage opening:<br>
+    <span style="display:block;margin:8px 0;padding:10px;background:var(--parchment);border-radius:10px;color:var(--forest);font-style:italic">
+      "<strong>She</strong> ran as fast as <strong>her</strong> legs could carry <strong>her</strong>. 
+      The forest was dark, but <strong>she</strong> was not afraid."
+    </span>
+    What is the <strong>point of view</strong> of this passage?
+  </p>
+  <div class="opts-grid" id="q11-opts">
+    <button class="opt" onclick="chk(this,'q11','A')"><span class="opt-ltr">A</span> First person (narrator is in the story)</button>
+    <button class="opt" onclick="chk(this,'q11','B')"><span class="opt-ltr">B</span> Second person (narrator speaks to "you")</button>
+    <button class="opt" onclick="chk(this,'q11','C')"><span class="opt-ltr">C</span> Third person (narrator observes from outside)</button>
+    <button class="opt" onclick="chk(this,'q11','D')"><span class="opt-ltr">D</span> It has no point of view</button>
+  </div>
+  <button class="btn btn-hint" onclick="showHint('h11')">💡 Hint</button>
+  <div id="h11" class="hint-txt">Circle the pronouns: "she" and "her." These are third-person pronouns. First person = I/me/we. Second = you/your.</div>
+  <div id="fb-q11" class="fb"></div>
+  <div class="nav-row" id="nav-q11" style="display:none">
+    <button class="btn btn-next" onclick="goNext()">Next →</button>
+  </div>
+</div>
+
+<!-- SLIDE 17 — QUIZ 4C -->
+<div class="slide" id="s17">
+  <div class="section-tag">🧠 Mini Quiz – Literary Elements</div>
+  <div class="quiz-header">
+    <span class="quiz-badge">Q 3 of 3</span>
+    <span style="font-size:.85rem;color:#888">Theme · +10 pts</span>
+  </div>
+  <p class="q-text">
+    A story tells of a boy who keeps losing at chess but never gives up.
+    After months of practice, he finally wins the tournament.<br><br>
+    What is the most likely <strong>THEME</strong> of this story?
+  </p>
+  <div class="opts-grid" id="q12-opts">
+    <button class="opt" onclick="chk(this,'q12','A')"><span class="opt-ltr">A</span> Chess is the most important game in the world.</button>
+    <button class="opt" onclick="chk(this,'q12','B')"><span class="opt-ltr">B</span> Persistence and hard work lead to success.</button>
+    <button class="opt" onclick="chk(this,'q12','C')"><span class="opt-ltr">C</span> Boys are better at chess than girls.</button>
+    <button class="opt" onclick="chk(this,'q12','D')"><span class="opt-ltr">D</span> Winning is the only thing that matters.</button>
+  </div>
+  <button class="btn btn-hint" onclick="showHint('h12')">💡 Hint</button>
+  <div id="h12" class="hint-txt">Theme = the life lesson. What did the boy LEARN or show through the whole story? Focus on his behavior, not just chess.</div>
+  <div id="fb-q12" class="fb"></div>
+  <div class="nav-row" id="nav-q12" style="display:none">
+    <button class="btn btn-next" onclick="goNext()">Writing Time! ✍️</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SLIDE 18 — CONCEPT: WRITING
+════════════════════════════════════════ -->
+<div class="slide" id="s18">
+  <div class="level-tag">📍 Topic 5</div>
+  <span class="big-emoji">✍️</span>
+  <h2 class="slide-title">Writing & Text Structure</h2>
+  <p class="slide-subtitle">Main idea, text organization, opinion vs. fact & author's craft</p>
+  <div class="slide-body">
+    <div class="box box-key">
+      <strong>Types of Writing:</strong><br>
+      📣 <strong>Opinion / Argument</strong> — writer's belief + reasons + evidence<br>
+      📰 <strong>Informative / Explanatory</strong> — facts and information about a topic<br>
+      🌟 <strong>Narrative</strong> — tells a story with characters, plot, and setting
+    </div>
+
+    <!-- Text structure SVG -->
+    <div class="book-hero">
+      <svg viewBox="0 0 310 150" width="290" height="140" xmlns="http://www.w3.org/2000/svg">
+        <rect width="310" height="150" rx="14" fill="#FFF9F0"/>
+        <!-- Opinion paragraph structure -->
+        <rect x="15"  y="20" width="85" height="110" rx="10" fill="#D8F3DC" stroke="#52B788" stroke-width="1.5"/>
+        <text x="57" y="38" text-anchor="middle" font-size="10" fill="#1B4332" font-weight="bold">OPINION</text>
+        <rect x="22" y="45" width="71" height="12" rx="4" fill="#95D5B2"/>
+        <text x="57" y="55" text-anchor="middle" font-size="8" fill="#1B4332">Claim/Opinion</text>
+        <rect x="22" y="62" width="71" height="12" rx="4" fill="#B7E4C7"/>
+        <text x="57" y="72" text-anchor="middle" font-size="8" fill="#1B4332">Reason 1</text>
+        <rect x="22" y="79" width="71" height="12" rx="4" fill="#B7E4C7"/>
+        <text x="57" y="89" text-anchor="middle" font-size="8" fill="#1B4332">Reason 2</text>
+        <rect x="22" y="96" width="71" height="12" rx="4" fill="#B7E4C7"/>
+        <text x="57" y="106" text-anchor="middle" font-size="8" fill="#1B4332">Evidence</text>
+        <rect x="22" y="113" width="71" height="12" rx="4" fill="#95D5B2"/>
+        <text x="57" y="123" text-anchor="middle" font-size="8" fill="#1B4332">Conclusion</text>
+        <!-- Informative -->
+        <rect x="113" y="20" width="85" height="110" rx="10" fill="#E3F2FD" stroke="#ADE8F4" stroke-width="1.5"/>
+        <text x="155" y="38" text-anchor="middle" font-size="10" fill="#023e8a" font-weight="bold">INFORM</text>
+        <rect x="120" y="45" width="71" height="12" rx="4" fill="#90CAF9"/>
+        <text x="155" y="55" text-anchor="middle" font-size="8" fill="#023e8a">Main Idea</text>
+        <rect x="120" y="62" width="71" height="12" rx="4" fill="#BBDEFB"/>
+        <text x="155" y="72" text-anchor="middle" font-size="8" fill="#023e8a">Fact / Detail</text>
+        <rect x="120" y="79" width="71" height="12" rx="4" fill="#BBDEFB"/>
+        <text x="155" y="89" text-anchor="middle" font-size="8" fill="#023e8a">Fact / Detail</text>
+        <rect x="120" y="96" width="71" height="12" rx="4" fill="#BBDEFB"/>
+        <text x="155" y="106" text-anchor="middle" font-size="8" fill="#023e8a">Example</text>
+        <rect x="120" y="113" width="71" height="12" rx="4" fill="#90CAF9"/>
+        <text x="155" y="123" text-anchor="middle" font-size="8" fill="#023e8a">Summary</text>
+        <!-- Narrative -->
+        <rect x="211" y="20" width="85" height="110" rx="10" fill="#FCE4EC" stroke="#FFAFCC" stroke-width="1.5"/>
+        <text x="253" y="38" text-anchor="middle" font-size="10" fill="#880E4F" font-weight="bold">NARRATIVE</text>
+        <rect x="218" y="45" width="71" height="12" rx="4" fill="#F48FB1"/>
+        <text x="253" y="55" text-anchor="middle" font-size="8" fill="#880E4F">Setting</text>
+        <rect x="218" y="62" width="71" height="12" rx="4" fill="#F8BBD0"/>
+        <text x="253" y="72" text-anchor="middle" font-size="8" fill="#880E4F">Characters</text>
+        <rect x="218" y="79" width="71" height="12" rx="4" fill="#F8BBD0"/>
+        <text x="253" y="89" text-anchor="middle" font-size="8" fill="#880E4F">Problem</text>
+        <rect x="218" y="96" width="71" height="12" rx="4" fill="#F8BBD0"/>
+        <text x="253" y="106" text-anchor="middle" font-size="8" fill="#880E4F">Events</text>
+        <rect x="218" y="113" width="71" height="12" rx="4" fill="#F48FB1"/>
+        <text x="253" y="123" text-anchor="middle" font-size="8" fill="#880E4F">Solution</text>
+      </svg>
+    </div>
+
+    <div class="box box-ex">
+      <strong>📋 Text Structure Patterns:</strong><br>
+      📝 <strong>Cause & Effect</strong> — one event causes another (because, as a result, therefore)<br>
+      📝 <strong>Compare & Contrast</strong> — similarities and differences (however, both, on the other hand)<br>
+      📝 <strong>Sequence / Order</strong> — steps in order (first, next, then, finally)<br>
+      📝 <strong>Problem & Solution</strong> — a problem is presented and solved
+    </div>
+    <div class="box box-tip">
+      💡 <strong>Opinion vs. Fact:</strong><br>
+      FACT = can be proven true ✅ ("Dogs have four legs.")<br>
+      OPINION = someone's belief 💭 ("Dogs are the best pets.")
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-back" onclick="goBack()">← Back</button>
+    <button class="btn btn-next" onclick="goNext()">Mini Quiz! 🧠</button>
+  </div>
+</div>
+
+<!-- SLIDE 19 — QUIZ 5A (Writing) -->
+<div class="slide" id="s19">
+  <div class="section-tag">🧠 Mini Quiz – Writing & Text Structure</div>
+  <div class="quiz-header">
+    <span class="quiz-badge">Q 1 of 3</span>
+    <span style="font-size:.85rem;color:#888">Opinion vs Fact · +10 pts</span>
+  </div>
+  <p class="q-text">Which sentence is an <strong>OPINION</strong>?</p>
+  <div class="opts-grid" id="q13-opts">
+    <button class="opt" onclick="chk(this,'q13','A')"><span class="opt-ltr">A</span> Reading every day is the best way to become smarter.</button>
+    <button class="opt" onclick="chk(this,'q13','B')"><span class="opt-ltr">B</span> Maryland became a state in 1788.</button>
+    <button class="opt" onclick="chk(this,'q13','C')"><span class="opt-ltr">C</span> The library has 500 books.</button>
+    <button class="opt" onclick="chk(this,'q13','D')"><span class="opt-ltr">D</span> Summer is three months long.</button>
+  </div>
+  <button class="btn btn-hint" onclick="showHint('h13')">💡 Hint</button>
+  <div id="h13" class="hint-txt">An opinion is someone's BELIEF — it cannot be proven true or false. Which sentence uses a judgment word like "best"?</div>
+  <div id="fb-q13" class="fb"></div>
+  <div class="nav-row" id="nav-q13" style="display:none">
+    <button class="btn btn-next" onclick="goNext()">Next →</button>
+  </div>
+</div>
+
+<!-- SLIDE 20 — QUIZ 5B -->
+<div class="slide" id="s20">
+  <div class="section-tag">🧠 Mini Quiz – Writing & Text Structure</div>
+  <div class="quiz-header">
+    <span class="quiz-badge">Q 2 of 3</span>
+    <span style="font-size:.85rem;color:#888">Text Structure · +10 pts</span>
+  </div>
+  <p class="q-text">
+    Read the paragraph:<br>
+    <span style="display:block;margin:8px 0;padding:10px;background:var(--parchment);border-radius:10px;font-style:italic;color:var(--forest)">
+      "<strong>Because</strong> it rained heavily all week, the river overflowed its banks.
+       <strong>As a result</strong>, several families had to leave their homes temporarily."
+    </span>
+    What text structure is this?
+  </p>
+  <div class="opts-grid" id="q14-opts">
+    <button class="opt" onclick="chk(this,'q14','A')"><span class="opt-ltr">A</span> Compare and Contrast</button>
+    <button class="opt" onclick="chk(this,'q14','B')"><span class="opt-ltr">B</span> Sequence / Chronological Order</button>
+    <button class="opt" onclick="chk(this,'q14','C')"><span class="opt-ltr">C</span> Cause and Effect</button>
+    <button class="opt" onclick="chk(this,'q14','D')"><span class="opt-ltr">D</span> Problem and Solution</button>
+  </div>
+  <button class="btn btn-hint" onclick="showHint('h14')">💡 Hint</button>
+  <div id="h14" class="hint-txt">The signal words "Because" and "As a result" are strong clues. These words show that one event LEADS TO another event.</div>
+  <div id="fb-q14" class="fb"></div>
+  <div class="nav-row" id="nav-q14" style="display:none">
+    <button class="btn btn-next" onclick="goNext()">Next →</button>
+  </div>
+</div>
+
+<!-- SLIDE 21 — QUIZ 5C -->
+<div class="slide" id="s21">
+  <div class="section-tag">🧠 Mini Quiz – Writing</div>
+  <div class="quiz-header">
+    <span class="quiz-badge">Q 3 of 3</span>
+    <span style="font-size:.85rem;color:#888">Main Idea · +10 pts</span>
+  </div>
+  <p class="q-text">
+    A student writes an informational paragraph about dolphins.<br>
+    Which sentence would make the BEST <strong>main idea</strong> sentence?
+  </p>
+  <div class="opts-grid" id="q15-opts">
+    <button class="opt" onclick="chk(this,'q15','A')"><span class="opt-ltr">A</span> Some dolphins live in the Amazon River.</button>
+    <button class="opt" onclick="chk(this,'q15','B')"><span class="opt-ltr">B</span> Dolphins are intelligent marine mammals with remarkable communication skills.</button>
+    <button class="opt" onclick="chk(this,'q15','C')"><span class="opt-ltr">C</span> Dolphins make clicking sounds.</button>
+    <button class="opt" onclick="chk(this,'q15','D')"><span class="opt-ltr">D</span> I saw a dolphin at the aquarium once.</button>
+  </div>
+  <button class="btn btn-hint" onclick="showHint('h15')">💡 Hint</button>
+  <div id="h15" class="hint-txt">A main idea sentence covers the WHOLE paragraph topic — broad enough to be supported by multiple details. Which one does that?</div>
+  <div id="fb-q15" class="fb"></div>
+  <div class="nav-row" id="nav-q15" style="display:none">
+    <button class="btn btn-next" onclick="goNext()">🏁 Final Challenge!</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SLIDE 22 — FINAL CHALLENGE INTRO
+════════════════════════════════════════ -->
+<div class="slide" id="s22">
+  <div style="text-align:center;padding:8px 0">
+    <span style="font-size:4rem;display:block;animation:gentleBob 1.5s ease-in-out infinite alternate">🏆</span>
+    <h2 class="hero-title" style="font-size:2.2rem">FINAL CHALLENGE!</h2>
+    <p style="font-size:1.05rem;color:#555;margin:10px 0">
+      15 questions across all 5 ELA topics.<br>Show what you know, Word Wizard! ✨
+    </p>
+    <div class="score-card">
+      <div class="score-lbl">Your score so far</div>
+      <div class="score-big" id="fc-cur-score">0</div>
+      <div class="score-lbl">points</div>
+    </div>
+    <div class="badges-row" id="badges-preview" style="justify-content:center;margin-top:8px"></div>
+    <div class="box box-tip" style="text-align:left;margin-top:10px">
+      📚 <strong>Remember to:</strong><br>
+      • Read each question carefully — every word matters<br>
+      • Use what you learned in the lessons<br>
+      • Check signal words in reading passages<br>
+      • Hints are still available!
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-back" onclick="goBack()">← Review</button>
+    <button class="btn btn-next" style="font-size:1.15rem;padding:12px 36px" onclick="goNext()">Begin Final! 🚀</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     FINAL CHALLENGE QUESTIONS FC 1–15
+════════════════════════════════════════ -->
+
+<!-- FC Q1 -->
+<div class="slide" id="s23">
+  <div class="section-tag">🏆 Final Challenge</div>
+  <div class="fc-prog-wrap"><div class="fc-prog-bar" style="width:6.67%"></div></div>
+  <div class="quiz-header"><span class="quiz-badge">FC Q1 / 15</span><span style="font-size:.85rem;color:#888">+10 pts</span></div>
+  <div class="passage-wrap" style="margin-bottom:10px">
+    <div class="passage-tab">📄 Read First!</div>
+    <p class="passage-body" style="font-size:.88rem">
+      Every October, the town of Maplewood held a harvest festival. Families brought
+      homemade pies, jams, and vegetables to share. Children played games and listened
+      to storytellers. The festival had been running for over 100 years and brought
+      the whole community together.
+    </p>
+  </div>
+  <p class="q-text">What is the <strong>main idea</strong> of this passage?</p>
+  <div class="opts-grid" id="fcq1-opts">
+    <button class="opt" onclick="chk(this,'fcq1','A')"><span class="opt-ltr">A</span> Children play games in October.</button>
+    <button class="opt" onclick="chk(this,'fcq1','B')"><span class="opt-ltr">B</span> The Maplewood harvest festival is a long-standing community tradition.</button>
+    <button class="opt" onclick="chk(this,'fcq1','C')"><span class="opt-ltr">C</span> Families like to bake pies and jams.</button>
+    <button class="opt" onclick="chk(this,'fcq1','D')"><span class="opt-ltr">D</span> The festival started more than 100 years ago.</button>
+  </div>
+  <div id="fb-fcq1" class="fb"></div>
+  <div class="nav-row" id="nav-fcq1" style="display:none"><button class="btn btn-next" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- FC Q2 -->
+<div class="slide" id="s24">
+  <div class="section-tag">🏆 Final Challenge</div>
+  <div class="fc-prog-wrap"><div class="fc-prog-bar" style="width:13.34%"></div></div>
+  <div class="quiz-header"><span class="quiz-badge">FC Q2 / 15</span></div>
+  <p class="q-text">What does the word <strong>"extraordinary"</strong> mean?<br><em>(Hint: extra- means "beyond")</em></p>
+  <div class="opts-grid" id="fcq2-opts">
+    <button class="opt" onclick="chk(this,'fcq2','A')"><span class="opt-ltr">A</span> Ordinary and common</button>
+    <button class="opt" onclick="chk(this,'fcq2','B')"><span class="opt-ltr">B</span> Very extra-long</button>
+    <button class="opt" onclick="chk(this,'fcq2','C')"><span class="opt-ltr">C</span> Beyond ordinary — very unusual or remarkable</button>
+    <button class="opt" onclick="chk(this,'fcq2','D')"><span class="opt-ltr">D</span> Ordinary but exciting</button>
+  </div>
+  <button class="btn btn-hint" onclick="showHint('hfc2')">💡 Hint</button>
+  <div id="hfc2" class="hint-txt">Extra- = "beyond." Ordinary = "normal." So extra+ordinary = beyond normal. Which answer matches?</div>
+  <div id="fb-fcq2" class="fb"></div>
+  <div class="nav-row" id="nav-fcq2" style="display:none"><button class="btn btn-next" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- FC Q3 -->
+<div class="slide" id="s25">
+  <div class="section-tag">🏆 Final Challenge</div>
+  <div class="fc-prog-wrap"><div class="fc-prog-bar" style="width:20%"></div></div>
+  <div class="quiz-header"><span class="quiz-badge">FC Q3 / 15</span></div>
+  <p class="q-text">
+    Which sentence has an <strong>error</strong> in it?
+  </p>
+  <div class="opts-grid" id="fcq3-opts">
+    <button class="opt" onclick="chk(this,'fcq3','A')"><span class="opt-ltr">A</span> "She walked to school every morning."</button>
+    <button class="opt" onclick="chk(this,'fcq3','B')"><span class="opt-ltr">B</span> "Can I have a apple please?"</button>
+    <button class="opt" onclick="chk(this,'fcq3','C')"><span class="opt-ltr">C</span> "My dog loves to play fetch."</button>
+    <button class="opt" onclick="chk(this,'fcq3','D')"><span class="opt-ltr">D</span> "He ran quickly to catch the bus."</button>
+  </div>
+  <button class="btn btn-hint" onclick="showHint('hfc3')">💡 Hint</button>
+  <div id="hfc3" class="hint-txt">Look at each sentence carefully. One has a grammar error with an article (a/an). Before vowel sounds, we use "an."</div>
+  <div id="fb-fcq3" class="fb"></div>
+  <div class="nav-row" id="nav-fcq3" style="display:none"><button class="btn btn-next" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- FC Q4 -->
+<div class="slide" id="s26">
+  <div class="section-tag">🏆 Final Challenge</div>
+  <div class="fc-prog-wrap"><div class="fc-prog-bar" style="width:26.67%"></div></div>
+  <div class="quiz-header"><span class="quiz-badge">FC Q4 / 15</span></div>
+  <p class="q-text">
+    Read this sentence:<br>
+    <span style="display:block;margin:8px 0;padding:10px;background:var(--parchment);border-radius:10px;font-style:italic;color:var(--forest)">
+      "The wind howled like a <strong>wolf</strong> in the night."
+    </span>
+    What type of figurative language is used?
+  </p>
+  <div class="opts-grid" id="fcq4-opts">
+    <button class="opt" onclick="chk(this,'fcq4','A')"><span class="opt-ltr">A</span> Metaphor</button>
+    <button class="opt" onclick="chk(this,'fcq4','B')"><span class="opt-ltr">B</span> Personification</button>
+    <button class="opt" onclick="chk(this,'fcq4','C')"><span class="opt-ltr">C</span> Simile</button>
+    <button class="opt" onclick="chk(this,'fcq4','D')"><span class="opt-ltr">D</span> Alliteration</button>
+  </div>
+  <div id="fb-fcq4" class="fb"></div>
+  <div class="nav-row" id="nav-fcq4" style="display:none"><button class="btn btn-next" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- FC Q5 -->
+<div class="slide" id="s27">
+  <div class="section-tag">🏆 Final Challenge</div>
+  <div class="fc-prog-wrap"><div class="fc-prog-bar" style="width:33.34%"></div></div>
+  <div class="quiz-header"><span class="quiz-badge">FC Q5 / 15</span></div>
+  <p class="q-text">
+    What does the suffix <strong>"-ful"</strong> mean in the word <strong>"joyful"</strong>?
+  </p>
+  <div class="opts-grid" id="fcq5-opts">
+    <button class="opt" onclick="chk(this,'fcq5','A')"><span class="opt-ltr">A</span> Without joy</button>
+    <button class="opt" onclick="chk(this,'fcq5','B')"><span class="opt-ltr">B</span> Full of joy</button>
+    <button class="opt" onclick="chk(this,'fcq5','C')"><span class="opt-ltr">C</span> Before joy</button>
+    <button class="opt" onclick="chk(this,'fcq5','D')"><span class="opt-ltr">D</span> Against joy</button>
+  </div>
+  <div id="fb-fcq5" class="fb"></div>
+  <div class="nav-row" id="nav-fcq5" style="display:none"><button class="btn btn-next" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- FC Q6 -->
+<div class="slide" id="s28">
+  <div class="section-tag">🏆 Final Challenge</div>
+  <div class="fc-prog-wrap"><div class="fc-prog-bar" style="width:40%"></div></div>
+  <div class="quiz-header"><span class="quiz-badge">FC Q6 / 15</span></div>
+  <div class="passage-wrap" style="margin-bottom:8px">
+    <div class="passage-tab">📄 Passage</div>
+    <p class="passage-body" style="font-size:.88rem">
+      Marcus loved science class. He always arrived early to set up experiments.
+      One day, his teacher asked if anyone wanted to present their project to the whole school.
+      Marcus raised his hand immediately, even though his heart was pounding with nervousness.
+    </p>
+  </div>
+  <p class="q-text">What can you <strong>INFER</strong> about Marcus from this passage?</p>
+  <div class="opts-grid" id="fcq6-opts">
+    <button class="opt" onclick="chk(this,'fcq6','A')"><span class="opt-ltr">A</span> Marcus is not interested in science.</button>
+    <button class="opt" onclick="chk(this,'fcq6','B')"><span class="opt-ltr">B</span> Marcus is passionate about science and brave enough to face his fears.</button>
+    <button class="opt" onclick="chk(this,'fcq6','C')"><span class="opt-ltr">C</span> Marcus is always calm and never nervous.</button>
+    <button class="opt" onclick="chk(this,'fcq6','D')"><span class="opt-ltr">D</span> Marcus disliked the teacher.</button>
+  </div>
+  <div id="fb-fcq6" class="fb"></div>
+  <div class="nav-row" id="nav-fcq6" style="display:none"><button class="btn btn-next" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- FC Q7 -->
+<div class="slide" id="s29">
+  <div class="section-tag">🏆 Final Challenge</div>
+  <div class="fc-prog-wrap"><div class="fc-prog-bar" style="width:46.67%"></div></div>
+  <div class="quiz-header"><span class="quiz-badge">FC Q7 / 15</span></div>
+  <p class="q-text">
+    Which word is an <strong>ANTONYM</strong> (opposite) for <strong>"ancient"</strong>?
+  </p>
+  <div class="opts-grid" id="fcq7-opts">
+    <button class="opt" onclick="chk(this,'fcq7','A')"><span class="opt-ltr">A</span> Old</button>
+    <button class="opt" onclick="chk(this,'fcq7','B')"><span class="opt-ltr">B</span> Historical</button>
+    <button class="opt" onclick="chk(this,'fcq7','C')"><span class="opt-ltr">C</span> Modern</button>
+    <button class="opt" onclick="chk(this,'fcq7','D')"><span class="opt-ltr">D</span> Aged</button>
+  </div>
+  <div id="fb-fcq7" class="fb"></div>
+  <div class="nav-row" id="nav-fcq7" style="display:none"><button class="btn btn-next" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- FC Q8 -->
+<div class="slide" id="s30">
+  <div class="section-tag">🏆 Final Challenge</div>
+  <div class="fc-prog-wrap"><div class="fc-prog-bar" style="width:53.34%"></div></div>
+  <div class="quiz-header"><span class="quiz-badge">FC Q8 / 15</span></div>
+  <p class="q-text">
+    True or False:<br>
+    <strong>"Because I was tired, so I went to bed early"</strong> is a correctly written sentence.
+  </p>
+  <div class="tf-row">
+    <button class="tf-btn tf-t" onclick="chkTF(this,'fcq8',true)">TRUE ✓</button>
+    <button class="tf-btn tf-f" onclick="chkTF(this,'fcq8',false)">FALSE ✗</button>
+  </div>
+  <button class="btn btn-hint" onclick="showHint('hfc8')">💡 Hint</button>
+  <div id="hfc8" class="hint-txt">"Because" already connects two clauses. Using "so" as well is redundant. The sentence should be EITHER: "Because I was tired, I went to bed" OR "I was tired, so I went to bed."</div>
+  <div id="fb-fcq8" class="fb"></div>
+  <div class="nav-row" id="nav-fcq8" style="display:none"><button class="btn btn-next" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- FC Q9 -->
+<div class="slide" id="s31">
+  <div class="section-tag">🏆 Final Challenge</div>
+  <div class="fc-prog-wrap"><div class="fc-prog-bar" style="width:60%"></div></div>
+  <div class="quiz-header"><span class="quiz-badge">FC Q9 / 15</span></div>
+  <p class="q-text">
+    A story begins: <em>"I clutched my blanket tighter as the thunder boomed outside my window."</em><br>
+    This story is told from which point of view?
+  </p>
+  <div class="opts-grid" id="fcq9-opts">
+    <button class="opt" onclick="chk(this,'fcq9','A')"><span class="opt-ltr">A</span> Third person limited</button>
+    <button class="opt" onclick="chk(this,'fcq9','B')"><span class="opt-ltr">B</span> Second person</button>
+    <button class="opt" onclick="chk(this,'fcq9','C')"><span class="opt-ltr">C</span> First person</button>
+    <button class="opt" onclick="chk(this,'fcq9','D')"><span class="opt-ltr">D</span> Third person omniscient</button>
+  </div>
+  <div id="fb-fcq9" class="fb"></div>
+  <div class="nav-row" id="nav-fcq9" style="display:none"><button class="btn btn-next" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- FC Q10 -->
+<div class="slide" id="s32">
+  <div class="section-tag">🏆 Final Challenge</div>
+  <div class="fc-prog-wrap"><div class="fc-prog-bar" style="width:66.67%"></div></div>
+  <div class="quiz-header"><span class="quiz-badge">FC Q10 / 15</span></div>
+  <p class="q-text">
+    Read the paragraph opener:<br>
+    <span style="display:block;margin:8px 0;padding:10px;background:var(--parchment);border-radius:10px;font-style:italic;color:var(--forest)">
+      "Dogs make excellent pets for several important reasons. <strong>First</strong>, they are loyal companions. 
+       <strong>In addition</strong>, they encourage their owners to exercise. <strong>Finally</strong>, they can be trained to help people with disabilities."
+    </span>
+    What type of writing is this?
+  </p>
+  <div class="opts-grid" id="fcq10-opts">
+    <button class="opt" onclick="chk(this,'fcq10','A')"><span class="opt-ltr">A</span> Narrative writing</button>
+    <button class="opt" onclick="chk(this,'fcq10','B')"><span class="opt-ltr">B</span> Opinion / argument writing</button>
+    <button class="opt" onclick="chk(this,'fcq10','C')"><span class="opt-ltr">C</span> Informational writing</button>
+    <button class="opt" onclick="chk(this,'fcq10','D')"><span class="opt-ltr">D</span> Poetry</button>
+  </div>
+  <button class="btn btn-hint" onclick="showHint('hfc10')">💡 Hint</button>
+  <div id="hfc10" class="hint-txt">The paragraph says dogs "make excellent pets" — that's a claim. Then it gives REASONS. Opinion writing = claim + reasons. Informational just presents facts.</div>
+  <div id="fb-fcq10" class="fb"></div>
+  <div class="nav-row" id="nav-fcq10" style="display:none"><button class="btn btn-next" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- FC Q11 -->
+<div class="slide" id="s33">
+  <div class="section-tag">🏆 Final Challenge</div>
+  <div class="fc-prog-wrap"><div class="fc-prog-bar" style="width:73.34%"></div></div>
+  <div class="quiz-header"><span class="quiz-badge">FC Q11 / 15</span></div>
+  <p class="q-text">
+    Which of the following words has the <strong>same root</strong> as <strong>"predict"</strong>?
+  </p>
+  <div class="opts-grid" id="fcq11-opts">
+    <button class="opt" onclick="chk(this,'fcq11','A')"><span class="opt-ltr">A</span> Prediction</button>
+    <button class="opt" onclick="chk(this,'fcq11','B')"><span class="opt-ltr">B</span> Present</button>
+    <button class="opt" onclick="chk(this,'fcq11','C')"><span class="opt-ltr">C</span> Pretend</button>
+    <button class="opt" onclick="chk(this,'fcq11','D')"><span class="opt-ltr">D</span> Predate</button>
+  </div>
+  <button class="btn btn-hint" onclick="showHint('hfc11')">💡 Hint</button>
+  <div id="hfc11" class="hint-txt">"Predict" comes from the Latin root "dict" meaning "to say/tell." Which word also contains "dict"?</div>
+  <div id="fb-fcq11" class="fb"></div>
+  <div class="nav-row" id="nav-fcq11" style="display:none"><button class="btn btn-next" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- FC Q12 -->
+<div class="slide" id="s34">
+  <div class="section-tag">🏆 Final Challenge</div>
+  <div class="fc-prog-wrap"><div class="fc-prog-bar" style="width:80%"></div></div>
+  <div class="quiz-header"><span class="quiz-badge">FC Q12 / 15</span></div>
+  <p class="q-text">
+    In a story, the <strong>climax</strong> is:
+  </p>
+  <div class="opts-grid" id="fcq12-opts">
+    <button class="opt" onclick="chk(this,'fcq12','A')"><span class="opt-ltr">A</span> The beginning where characters are introduced</button>
+    <button class="opt" onclick="chk(this,'fcq12','B')"><span class="opt-ltr">B</span> The most exciting or important turning point</button>
+    <button class="opt" onclick="chk(this,'fcq12','C')"><span class="opt-ltr">C</span> The ending where everything is resolved</button>
+    <button class="opt" onclick="chk(this,'fcq12','D')"><span class="opt-ltr">D</span> A description of the setting</button>
+  </div>
+  <div id="fb-fcq12" class="fb"></div>
+  <div class="nav-row" id="nav-fcq12" style="display:none"><button class="btn btn-next" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- FC Q13 -->
+<div class="slide" id="s35">
+  <div class="section-tag">🏆 Final Challenge</div>
+  <div class="fc-prog-wrap"><div class="fc-prog-bar" style="width:86.67%"></div></div>
+  <div class="quiz-header"><span class="quiz-badge">FC Q13 / 15</span></div>
+  <p class="q-text">
+    Which sentence uses <strong>personification</strong>?
+  </p>
+  <div class="opts-grid" id="fcq13-opts">
+    <button class="opt" onclick="chk(this,'fcq13','A')"><span class="opt-ltr">A</span> "Her eyes were as blue as the ocean."</button>
+    <button class="opt" onclick="chk(this,'fcq13','B')"><span class="opt-ltr">B</span> "The thunder clapped its angry hands."</button>
+    <button class="opt" onclick="chk(this,'fcq13','C')"><span class="opt-ltr">C</span> "He ran like a cheetah."</button>
+    <button class="opt" onclick="chk(this,'fcq13','D')"><span class="opt-ltr">D</span> "Sally sells seashells by the seashore."</button>
+  </div>
+  <div id="fb-fcq13" class="fb"></div>
+  <div class="nav-row" id="nav-fcq13" style="display:none"><button class="btn btn-next" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- FC Q14 -->
+<div class="slide" id="s36">
+  <div class="section-tag">🏆 Final Challenge</div>
+  <div class="fc-prog-wrap"><div class="fc-prog-bar" style="width:93.34%"></div></div>
+  <div class="quiz-header"><span class="quiz-badge">FC Q14 / 15</span></div>
+  <div class="passage-wrap" style="margin-bottom:8px">
+    <div class="passage-tab">📄 Read!</div>
+    <p class="passage-body" style="font-size:.88rem">
+      Ants are incredible insects. A single ant colony can contain millions of ants working
+      together. Each ant has a special job — some find food, some protect the queen, and some
+      care for the young. Scientists have discovered that ants can carry up to 50 times
+      their own body weight!
+    </p>
+  </div>
+  <p class="q-text">What is the <strong>author's purpose</strong> in this passage?</p>
+  <div class="opts-grid" id="fcq14-opts">
+    <button class="opt" onclick="chk(this,'fcq14','A')"><span class="opt-ltr">A</span> To entertain readers with a funny story about ants</button>
+    <button class="opt" onclick="chk(this,'fcq14','B')"><span class="opt-ltr">B</span> To persuade readers that ants are dangerous</button>
+    <button class="opt" onclick="chk(this,'fcq14','C')"><span class="opt-ltr">C</span> To inform readers about ant colonies and behavior</button>
+    <button class="opt" onclick="chk(this,'fcq14','D')"><span class="opt-ltr">D</span> To describe the setting of an ant colony</button>
+  </div>
+  <div id="fb-fcq14" class="fb"></div>
+  <div class="nav-row" id="nav-fcq14" style="display:none"><button class="btn btn-next" onclick="goNext()">Last Question! 💪</button></div>
+</div>
+
+<!-- FC Q15 (FINAL) -->
+<div class="slide" id="s37">
+  <div class="section-tag">🏆 Final Challenge — LAST ONE! 🌟</div>
+  <div class="fc-prog-wrap"><div class="fc-prog-bar" style="width:100%"></div></div>
+  <div class="quiz-header"><span class="quiz-badge">FC Q15 / 15 🌟</span></div>
+  <p class="q-text">
+    A student wants to write a <strong>conclusion sentence</strong> for a paragraph about why
+    libraries are important. Which is the BEST conclusion?
+  </p>
+  <div class="opts-grid" id="fcq15-opts">
+    <button class="opt" onclick="chk(this,'fcq15','A')"><span class="opt-ltr">A</span> Libraries also have movies and music.</button>
+    <button class="opt" onclick="chk(this,'fcq15','B')"><span class="opt-ltr">B</span> In conclusion, libraries are valuable community resources that support learning, creativity, and connection for everyone.</button>
+    <button class="opt" onclick="chk(this,'fcq15','C')"><span class="opt-ltr">C</span> I like to go to the library on Saturdays.</button>
+    <button class="opt" onclick="chk(this,'fcq15','D')"><span class="opt-ltr">D</span> Libraries have books, computers, and quiet rooms.</button>
+  </div>
+  <button class="btn btn-hint" onclick="showHint('hfc15')">💡 Hint</button>
+  <div id="hfc15" class="hint-txt">A conclusion restates the main idea and wraps up the paragraph. It should be broad, summarize the paragraph's message, and feel like a satisfying ending.</div>
+  <div id="fb-fcq15" class="fb"></div>
+  <div class="nav-row" id="nav-fcq15" style="display:none">
+    <button class="btn btn-next" style="background:linear-gradient(135deg,var(--clay),#9d0208);font-size:1.1rem;padding:12px 30px" onclick="goNext()">
+      🎊 See My Results!
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SLIDE 38 — FINAL RESULTS
+════════════════════════════════════════ -->
+<div class="slide" id="s38">
+  <div style="text-align:center">
+    <div class="stars-row" id="stars-row"></div>
+    <h2 class="slide-title" style="text-align:center;font-size:2.1rem" id="result-title">🌟 Word Wizard!</h2>
+    <p id="result-msg" style="font-size:1rem;color:#555;margin-bottom:12px"></p>
+    <div class="score-card">
+      <div class="score-lbl">Final Score</div>
+      <div class="score-big" id="final-score">0</div>
+      <div class="score-lbl">/ 300 points</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:12px 0">
+      <div style="background:#D8F3DC;border-radius:12px;padding:12px;text-align:center">
+        <div style="font-size:1.8rem;font-family:var(--font-head);color:var(--forest)" id="stat-ok">0</div>
+        <div style="font-size:.8rem;color:#555">Correct ✅</div>
+      </div>
+      <div style="background:#FFE8D6;border-radius:12px;padding:12px;text-align:center">
+        <div style="font-size:1.8rem;font-family:var(--font-head);color:#9d2b10" id="stat-err">0</div>
+        <div style="font-size:.8rem;color:#555">Incorrect ❌</div>
+      </div>
+      <div style="background:#E3F2FD;border-radius:12px;padding:12px;text-align:center">
+        <div style="font-size:1.8rem;font-family:var(--font-head);color:#023e8a" id="stat-pct">0%</div>
+        <div style="font-size:.8rem;color:#555">Score %</div>
+      </div>
+    </div>
+    <h3 style="font-family:var(--font-head);color:var(--forest);margin:10px 0 5px">🏅 Badges Earned</h3>
+    <div class="badges-row" id="final-badges" style="justify-content:center"></div>
+    <h3 style="font-family:var(--font-head);color:var(--forest);margin:10px 0 5px;text-align:left">📝 Answer Review</h3>
+    <div id="review-list"></div>
+  </div>
+  <div class="nav-row" style="margin-top:16px">
+    <button class="btn btn-retry" onclick="restart()">🔄 Play Again!</button>
+    <button class="btn btn-primary" onclick="window.print()">🖨️ Print Results</button>
+  </div>
+</div>
+
+</div><!-- /slide-wrap -->
+</div><!-- /app -->
+
+<!-- ══════════════════════════════════════
+     JAVASCRIPT ENGINE
+════════════════════════════════════════ -->
+<script>
+// ─── STATE ───────────────────────────────
+let cur    = 0;
+const TOTAL = 39;
+let score  = 0;
+let streak = 0;
+let maxStreak = 0;
+let soundOn = false;
+let audioCtx = null;
+const qLog = {};
+
+// ─── ANSWER KEY ──────────────────────────
+// Each entry: correct option letter OR boolean for T/F,
+// plus explanation shown after answering.
+const AK = {
+  // Mini Quiz 1 – Comprehension
+  q1:  {a:'C', e:'✅ The main idea covers the WHOLE story — Maya working hard AND sharing. Not just one detail.'},
+  q2:  {a:'B', e:'✅ "Every morning before school, she carefully watered and weeded" — that\'s repeated effort = hardworking.'},
+  q3:  {a:'C', e:'✅ Wanting to do MORE next year tells us she is passionate and enthusiastic about gardening.'},
+  // Mini Quiz 2 – Vocabulary
+  q4:  {a:'B', e:'✅ re- = "again." Re + write = to write again. Always check prefixes!'},
+  q5:  {a:'C', e:'✅ Context clue: "filled the ENTIRE cage" → something that fills a whole space must be very LARGE = enormous.'},
+  q6:  {a:'B', e:'✅ Courageous is a synonym for brave — both mean showing fearlessness and bravery.'},
+  // Mini Quiz 3 – Grammar
+  q7:  {a:'D', e:'✅ "Quickly" describes HOW the rabbit hopped — it describes the verb, so it\'s an ADVERB.'},
+  q8:  {a:'B', e:'✅ She said, "I will be there soon." — correctly uses a comma after "said" and quotation marks around speech.'},
+  q9:  {a:false, e:'✅ FALSE! The sentence DOES need commas: "I like cats, dogs, and birds." Lists of 3+ items need commas!'},
+  // Mini Quiz 4 – Literary Elements
+  q10: {a:'B', e:'✅ The tree IS called a guardian — a direct comparison without "like" or "as" = METAPHOR.'},
+  q11: {a:'C', e:'✅ Pronouns "she" and "her" = third-person. The narrator observes from outside the story.'},
+  q12: {a:'B', e:'✅ Theme = the life lesson. The boy never quits → hard work + persistence leads to success.'},
+  // Mini Quiz 5 – Writing
+  q13: {a:'A', e:'✅ "Reading every day is the BEST way" — uses a judgment ("best") that can\'t be proven = OPINION.'},
+  q14: {a:'C', e:'✅ Signal words "Because" and "As a result" = CAUSE AND EFFECT structure.'},
+  q15: {a:'B', e:'✅ A main idea sentence is broad enough to cover the whole paragraph — "intelligent marine mammals with remarkable communication skills" does that.'},
+  // Final Challenge
+  fcq1:  {a:'B', e:'✅ The passage describes a community tradition that has lasted 100+ years — that covers the whole text.'},
+  fcq2:  {a:'C', e:'✅ extra- = "beyond" + ordinary = "normal" → extraordinary = remarkable, beyond ordinary.'},
+  fcq3:  {a:'B', e:'✅ "Can I have a apple?" should be "an apple" — use "an" before vowel sounds (a, e, i, o, u).'},
+  fcq4:  {a:'C', e:'✅ "like a wolf" — comparing using "like" = SIMILE. Metaphor would say "The wind WAS a wolf."'},
+  fcq5:  {a:'B', e:'✅ The suffix -ful means "full of." Joyful = full of joy. Think: hopeful, grateful, beautiful.'},
+  fcq6:  {a:'B', e:'✅ He loves science (arrives early) AND volunteers despite being nervous = passionate AND brave.'},
+  fcq7:  {a:'C', e:'✅ "Ancient" means very old. Its opposite (antonym) is "modern" — new and current.'},
+  fcq8:  {a:false, e:'✅ FALSE! This has a double-conjunction error. Use EITHER "Because I was tired, I went to bed" OR "I was tired, so I went to bed" — not both.'},
+  fcq9:  {a:'C', e:'✅ "I clutched my blanket" — the pronoun "I" = first-person narrator.'},
+  fcq10: {a:'B', e:'✅ It makes a claim ("excellent pets") and gives REASONS (loyal, exercise, help disabled people) = opinion/argument writing.'},
+  fcq11: {a:'A', e:'✅ "Predict" and "prediction" share the root "dict" (to say). Prediction is predict + suffix -ion.'},
+  fcq12: {a:'B', e:'✅ The climax is the peak — the most exciting or decisive turning point of the story.'},
+  fcq13: {a:'B', e:'✅ Thunder "clapped its angry hands" — gives human actions to thunder = PERSONIFICATION.'},
+  fcq14: {a:'C', e:'✅ The passage presents facts about ant behavior. No story, no argument = informational / to inform.'},
+  fcq15: {a:'B', e:'✅ A great conclusion restates the big idea broadly and wraps up — "valuable community resources that support learning, creativity, and connection" does exactly that.'},
+};
+
+// ─── BADGES ──────────────────────────────
+const BADGE_DEFS = [
+  {id:'first_word',  ic:'📖', label:'First Answer!',      ok:()=>Object.keys(qLog).length>=1},
+  {id:'on_fire',     ic:'🔥', label:'On Fire! (3 streak)', ok:()=>maxStreak>=3},
+  {id:'reader_pro',  ic:'🔍', label:'Reading Pro',         ok:()=>['q1','q2','q3'].every(k=>qLog[k]?.ok)},
+  {id:'vocab_star',  ic:'🔤', label:'Vocab Star',          ok:()=>['q4','q5','q6'].every(k=>qLog[k]?.ok)},
+  {id:'grammar_ace', ic:'✏️', label:'Grammar Ace',         ok:()=>['q7','q8','q9'].every(k=>qLog[k]?.ok)},
+  {id:'story_teller',ic:'🎭', label:'Story Expert',        ok:()=>['q10','q11','q12'].every(k=>qLog[k]?.ok)},
+  {id:'write_champ', ic:'✍️', label:'Writing Champion',   ok:()=>['q13','q14','q15'].every(k=>qLog[k]?.ok)},
+  {id:'ela_hero',    ic:'🌟', label:'ELA Hero',            ok:()=>score>=150},
+  {id:'word_wizard', ic:'🧙', label:'Word Wizard!',        ok:()=>{
+    return ['fcq1','fcq2','fcq3','fcq4','fcq5','fcq6','fcq7','fcq8',
+            'fcq9','fcq10','fcq11','fcq12','fcq13','fcq14','fcq15'].every(k=>qLog[k]?.ok);
+  }},
+  {id:'lightning',   ic:'⚡', label:'Lightning Thinker',  ok:()=>streak>=5},
+];
+const earnedBadges = new Set();
+
+function checkBadges(){
+  BADGE_DEFS.forEach(b=>{
+    if(!earnedBadges.has(b.id) && b.ok()){
+      earnedBadges.add(b.id);
+      showToast(`${b.ic} Badge: ${b.label}!`);
+      playSound('levelup');
+    }
+  });
+}
+
+// ─── AUDIO (Web Audio API — no files needed) ──
+function getACtx(){
+  if(!audioCtx){ try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){} }
+  return audioCtx;
+}
+function playSound(t){
+  if(!soundOn) return;
+  const ac=getACtx(); if(!ac) return;
+  const o=ac.createOscillator(), g=ac.createGain();
+  o.connect(g); g.connect(ac.destination);
+  const now=ac.currentTime;
+  if(t==='correct'){
+    o.type='sine';
+    [523,659,784,1046].forEach((f,i)=>o.frequency.setValueAtTime(f,now+i*.1));
+    g.gain.setValueAtTime(.25,now);
+    g.gain.exponentialRampToValueAtTime(.001,now+.6);
+    o.start(now); o.stop(now+.6);
+  } else if(t==='wrong'){
+    o.type='sawtooth';
+    [300,250,220].forEach((f,i)=>o.frequency.setValueAtTime(f,now+i*.12));
+    g.gain.setValueAtTime(.18,now);
+    g.gain.exponentialRampToValueAtTime(.001,now+.45);
+    o.start(now); o.stop(now+.45);
+  } else if(t==='levelup'){
+    o.type='sine';
+    [523,587,659,698,784,880].forEach((f,i)=>o.frequency.setValueAtTime(f,now+i*.1));
+    g.gain.setValueAtTime(.22,now);
+    g.gain.exponentialRampToValueAtTime(.001,now+.8);
+    o.start(now); o.stop(now+.8);
+  } else {
+    o.type='sine'; o.frequency.value=440;
+    g.gain.setValueAtTime(.08,now);
+    g.gain.exponentialRampToValueAtTime(.001,now+.1);
+    o.start(now); o.stop(now+.1);
+  }
+}
+function toggleSound(){
+  soundOn=!soundOn;
+  document.getElementById('snd-btn').textContent=soundOn?'🔊':'🔇';
+  if(soundOn){getACtx();playSound('click');}
+}
+
+// ─── NAVIGATION ──────────────────────────
+// Section celebration map: trigger after completing each mini-quiz set
+const SECTION_CEL = {
+  5:  {em:'🔍',t:'Comprehension Complete!',   m:'You found the main ideas! Brilliant reader! 📖'},
+  9:  {em:'🔤',t:'Vocabulary Victory!',        m:'Words are your superpower now! 💪'},
+  13: {em:'✏️', t:'Grammar Gold!',            m:'Your grammar game is strong! ✅'},
+  17: {em:'🎭',t:'Literary Legend!',           m:'Characters, themes, figurative language — mastered! 🌟'},
+  21: {em:'✍️', t:'Writing Wizard!',          m:'You understand how great writers think! 🖊️'},
+};
+
+function showSlide(i){
+  document.querySelectorAll('.slide').forEach((s,j)=>{
+    s.classList.remove('active');
+    if(j===i) s.classList.add('active');
+  });
+  cur=i;
+  updateHUD();
+  if(i===22){ // FC intro
+    document.getElementById('fc-cur-score').textContent=score;
+    renderBadgesPreview();
+  }
+  if(i===38) buildResults();
+  const a=document.querySelector('.slide.active');
+  if(a) a.scrollTop=0;
+}
+
+function goNext(){
+  playSound('click');
+  if(cur>=TOTAL-1) return;
+  const cel=SECTION_CEL[cur];
+  if(cel){
+    triggerCelebration(cel.em,cel.t,cel.m);
+    setTimeout(()=>{closeCel();showSlide(cur+1);},120);
+  } else {
+    showSlide(cur+1);
+  }
+}
+function goBack(){
+  playSound('click');
+  if(cur>0) showSlide(cur-1);
+}
+
+function updateHUD(){
+  const pct=Math.round((cur/(TOTAL-1))*100);
+  document.getElementById('pb').style.width=pct+'%';
+  document.getElementById('hud-score').textContent=`⭐ ${score} pts`;
+  document.getElementById('hud-streak').textContent=`🔥 ${streak}`;
+}
+
+// ─── ANSWER CHECKING ─────────────────────
+function chk(btn, qId, sel){
+  const ans=AK[qId]; if(!ans) return;
+  const opts=btn.parentElement.querySelectorAll('.opt');
+  opts.forEach(b=>b.disabled=true);
+
+  const ok=(sel===ans.a);
+  qLog[qId]={ok, sel, explanation:ans.e};
+
+  if(ok){
+    btn.classList.add('correct','spring');
+    handleOk(qId);
+  } else {
+    btn.classList.add('wrong','quake');
+    opts.forEach(b=>{ if(b.querySelector('.opt-ltr').textContent===ans.a) b.classList.add('correct'); });
+    handleErr();
+  }
+
+  const fb=document.getElementById(`fb-${qId}`);
+  if(fb){ fb.textContent=ok?'✅ '+ans.e:'❌ '+ans.e; fb.className=`fb show ${ok?'fb-ok':'fb-err'}`; }
+  const nav=document.getElementById(`nav-${qId}`);
+  if(nav) nav.style.display='flex';
+  checkBadges();
+}
+
+function chkTF(btn, qId, sel){
+  const ans=AK[qId]; if(!ans) return;
+  const tfBtns=btn.parentElement.querySelectorAll('.tf-btn');
+  tfBtns.forEach(b=>b.disabled=true);
+
+  const ok=(sel===ans.a);
+  qLog[qId]={ok, sel, explanation:ans.e};
+  btn.classList.add(sel?'tf-sel-t':'tf-sel-f');
+
+  if(ok){
+    btn.style.outline='4px solid #52B788';
+    handleOk(qId);
+  } else {
+    btn.classList.add('quake');
+    tfBtns.forEach(b=>{
+      if(b.classList.contains('tf-t')===ans.a) b.style.outline='4px solid #52B788';
+    });
+    handleErr();
+  }
+
+  const fb=document.getElementById(`fb-${qId}`);
+  if(fb){ fb.textContent=ok?'✅ '+ans.e:'❌ '+ans.e; fb.className=`fb show ${ok?'fb-ok':'fb-err'}`; }
+  const nav=document.getElementById(`nav-${qId}`);
+  if(nav) nav.style.display='flex';
+  checkBadges();
+}
+
+function handleOk(){
+  streak++; if(streak>maxStreak) maxStreak=streak;
+  let pts=10;
+  if(streak>=3){ pts+=15; showToast(`🔥 ${streak} Streak! +15 Bonus!`); }
+  score+=pts;
+  playSound('correct');
+  updateHUD();
+  if([30,90,150,210,270].includes(score)) triggerConfetti();
+}
+function handleErr(){
+  streak=0; playSound('wrong'); updateHUD();
+}
+
+// ─── HINTS ───────────────────────────────
+function showHint(id){
+  const h=document.getElementById(id);
+  if(h) h.classList.toggle('open');
+}
+
+// ─── TOAST ───────────────────────────────
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.classList.remove('show'),2600);
+}
+
+// ─── CONFETTI ────────────────────────────
+// Purpose: Positive reinforcement at milestone points
+let cParts=[], cAnim=null;
+function triggerConfetti(){
+  const cv=document.getElementById('confetti');
+  cv.width=window.innerWidth; cv.height=window.innerHeight;
+  const cx=cv.getContext('2d');
+  const cols=['#E9C46A','#E76F51','#52B788','#ADE8F4','#CDB4DB','#F4A261','#FFAFCC'];
+  for(let i=0;i<130;i++){
+    cParts.push({
+      x:Math.random()*cv.width, y:Math.random()*cv.height-cv.height,
+      r:Math.random()*7+3,
+      col:cols[Math.floor(Math.random()*cols.length)],
+      vx:Math.random()*4-2, vy:Math.random()*3+1.5,
+      spin:Math.random()*.3-.15, angle:Math.random()*Math.PI*2, grav:.13
+    });
+  }
+  function draw(){
+    cx.clearRect(0,0,cv.width,cv.height);
+    cParts.forEach(p=>{
+      cx.save(); cx.translate(p.x,p.y); cx.rotate(p.angle);
+      cx.fillStyle=p.col; cx.beginPath();
+      cx.rect(-p.r/2,-p.r/2,p.r,p.r*.5); cx.fill(); cx.restore();
+      p.x+=p.vx; p.y+=p.vy; p.vy+=p.grav; p.angle+=p.spin;
+    });
+    cParts=cParts.filter(p=>p.y<cv.height+50);
+    if(cParts.length>0) cAnim=requestAnimationFrame(draw);
+    else cx.clearRect(0,0,cv.width,cv.height);
+  }
+  if(cAnim) cancelAnimationFrame(cAnim);
+  cAnim=requestAnimationFrame(draw);
+}
+
+// ─── CELEBRATION OVERLAY ─────────────────
+function triggerCelebration(em,title,msg){
+  document.getElementById('cel-em').textContent=em;
+  document.getElementById('cel-title').textContent=title;
+  document.getElementById('cel-msg').textContent=msg;
+  document.getElementById('cel-overlay').classList.add('show');
+  triggerConfetti(); playSound('levelup');
+}
+function closeCel(){
+  document.getElementById('cel-overlay').classList.remove('show');
+}
+
+// ─── BADGES PREVIEW ──────────────────────
+function renderBadgesPreview(){
+  const w=document.getElementById('badges-preview'); if(!w) return;
+  w.innerHTML='';
+  earnedBadges.forEach(bid=>{
+    const d=BADGE_DEFS.find(b=>b.id===bid); if(!d) return;
+    const el=document.createElement('div');
+    el.className='badge'; el.textContent=`${d.ic} ${d.label}`;
+    w.appendChild(el);
+  });
+}
+
+// ─── RESULTS BUILD ───────────────────────
+function buildResults(){
+  checkBadges(); triggerConfetti();
+
+  const total=30;
+  const correct=Object.values(qLog).filter(q=>q.ok).length;
+  const wrong=Object.keys(qLog).length-correct;
+  const pct=Math.round((correct/total)*100);
+
+  document.getElementById('final-score').textContent=score;
+  document.getElementById('stat-ok').textContent=correct;
+  document.getElementById('stat-err').textContent=wrong;
+  document.getElementById('stat-pct').textContent=pct+'%';
+
+  // Stars (Purpose: visual summary = mastery encouragement)
+  const sr=document.getElementById('stars-row'); sr.innerHTML='';
+  const ns=pct>=90?5:pct>=70?4:pct>=50?3:pct>=30?2:1;
+  for(let i=0;i<5;i++){
+    const s=document.createElement('span');
+    s.className='star-ic'; s.textContent=i<ns?'⭐':'☆';
+    s.style.animationDelay=(i*.2)+'s'; sr.appendChild(s);
+  }
+
+  const tEl=document.getElementById('result-title');
+  const mEl=document.getElementById('result-msg');
+  if(pct>=90){tEl.textContent='🌟 Word Wizard Achieved!';mEl.textContent='Incredible ELA performance! You\'re ready for the MCAP! 🎊';}
+  else if(pct>=70){tEl.textContent='🎉 ELA Star!';mEl.textContent='Excellent reading and writing skills! A little more practice and you\'re unstoppable! 💪';}
+  else if(pct>=50){tEl.textContent='👍 Good Reader!';mEl.textContent='You understand the basics! Review the topics you missed and try again!';}
+  else{tEl.textContent='💪 Keep Reading!';mEl.textContent='Every great reader started somewhere! Review the lessons and give it another go!';}
+
+  // Badges
+  const bw=document.getElementById('final-badges'); bw.innerHTML='';
+  if(earnedBadges.size===0){
+    bw.innerHTML='<span style="color:#888;font-size:.9rem">Answer questions to earn badges! 🏅</span>';
+  } else {
+    earnedBadges.forEach(bid=>{
+      const d=BADGE_DEFS.find(b=>b.id===bid); if(!d) return;
+      const el=document.createElement('div');
+      el.className='badge'; el.textContent=`${d.ic} ${d.label}`;
+      bw.appendChild(el);
+    });
+  }
+
+  // Review list
+  const rl=document.getElementById('review-list'); rl.innerHTML='';
+  const labels={
+    q1:'Comprehension Q1',q2:'Comprehension Q2',q3:'Inference Q3',
+    q4:'Vocab Q1 (Prefix)',q5:'Vocab Q2 (Context)',q6:'Vocab Q3 (Synonym)',
+    q7:'Grammar Q1 (POS)',q8:'Grammar Q2 (Punctuation)',q9:'Grammar Q3 (Comma)',
+    q10:'Literary Q1 (Metaphor)',q11:'Literary Q2 (POV)',q12:'Literary Q3 (Theme)',
+    q13:'Writing Q1 (Opinion)',q14:'Writing Q2 (Structure)',q15:'Writing Q3 (Main Idea)',
+    fcq1:'FC Q1',fcq2:'FC Q2',fcq3:'FC Q3',fcq4:'FC Q4',fcq5:'FC Q5',
+    fcq6:'FC Q6',fcq7:'FC Q7',fcq8:'FC Q8',fcq9:'FC Q9',fcq10:'FC Q10',
+    fcq11:'FC Q11',fcq12:'FC Q12',fcq13:'FC Q13',fcq14:'FC Q14',fcq15:'FC Q15',
+  };
+  Object.entries(qLog).forEach(([k,v])=>{
+    const item=document.createElement('div');
+    item.className='rev-item';
+    item.innerHTML=`<span class="rev-icon">${v.ok?'✅':'❌'}</span>
+      <div><strong>${labels[k]||k}:</strong> ${v.explanation}</div>`;
+    rl.appendChild(item);
+  });
+}
+
+// ─── RESTART ─────────────────────────────
+function restart(){
+  score=0;streak=0;maxStreak=0;
+  earnedBadges.clear();
+  Object.keys(qLog).forEach(k=>delete qLog[k]);
+  document.querySelectorAll('.opt').forEach(b=>{
+    b.disabled=false;
+    b.classList.remove('correct','wrong','spring','quake');
+    b.style.outline='';
+  });
+  document.querySelectorAll('.tf-btn').forEach(b=>{
+    b.disabled=false;b.style.outline='';
+    b.classList.remove('tf-sel-t','tf-sel-f','quake');
+  });
+  document.querySelectorAll('.fb').forEach(f=>{f.classList.remove('show');f.textContent='';});
+  document.querySelectorAll('[id^="nav-"]').forEach(n=>n.style.display='none');
+  document.querySelectorAll('.hint-txt').forEach(h=>h.classList.remove('open'));
+  document.querySelectorAll('.flip-card').forEach(f=>f.classList.remove('flipped'));
+  updateHUD();
+  showSlide(0);
+}
+
+// ─── KEYBOARD NAV ────────────────────────
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown') goNext();
+  if(e.key==='ArrowLeft' ||e.key==='ArrowUp')   goBack();
+});
+
+// ─── LEAVES BACKGROUND ───────────────────
+// Purpose: Enchanted library world-building = emotional engagement
+function buildLeaves(){
+  const bg=document.getElementById('leaves-bg');
+  const emojis=['🍂','🍃','🌿','✨','📜','🌱'];
+  for(let i=0;i<50;i++){
+    const l=document.createElement('div');
+    l.className='leaf';
+    l.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+    l.style.cssText=`
+      left:${Math.random()*100}%;
+      top:${Math.random()*100}%;
+      font-size:${.8+Math.random()*1.4}rem;
+      animation-duration:${7+Math.random()*10}s;
+      animation-delay:${Math.random()*8}s;
+      opacity:${.1+Math.random()*.15};
+    `;
+    bg.appendChild(l);
+  }
+  // Floating sparkles fixed (not falling)
+  const sparkEmojis=['✨','💫','⭐','🌟'];
+  for(let i=0;i<12;i++){
+    const s=document.createElement('div');
+    s.className='sparkle';
+    s.textContent=sparkEmojis[Math.floor(Math.random()*sparkEmojis.length)];
+    s.style.cssText=`
+      left:${Math.random()*95}%;top:${10+Math.random()*75}%;
+      font-size:${.8+Math.random()*1}rem;
+      animation-delay:${Math.random()*5}s;
+      animation-duration:${4+Math.random()*4}s;
+    `;
+    document.body.appendChild(s);
+  }
+}
+
+// ─── INIT ─────────────────────────────────
+buildLeaves();
+showSlide(0);
+</script>
+</body>
+</html>
