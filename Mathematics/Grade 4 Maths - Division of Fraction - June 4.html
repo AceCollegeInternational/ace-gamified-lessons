@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>➗ Fraction Quest 3 — The Great Divide!</title>
+<style>
+/* ===== FONTS & RESET ===== */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --sun:#FFD93D;--sky:#4FC3F7;--grass:#56C596;--coral:#FF6B6B;--purple:#A78BFA;
+  --orange:#FF9F43;--pink:#FF6EB4;--dark:#0a1f1c;--white:#fff;
+  --emerald:#2ecc71;--teal:#26d0ce;--gold:#FFC93C;
+}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background:var(--dark);}
+
+/* ===== BACKGROUND ===== */
+#bg{position:fixed;inset:0;background:linear-gradient(135deg,#06201c,#0a3d33,#072a3e);z-index:0;}
+.star{position:absolute;border-radius:50%;background:#fff;animation:twinkle 3s infinite alternate;}
+@keyframes twinkle{0%{opacity:.2;transform:scale(1);}100%{opacity:1;transform:scale(1.5);}}
+
+/* Floating division symbols drift upward (decorative ambience) */
+.float-sym{position:fixed;font-size:1.6rem;opacity:.06;pointer-events:none;z-index:0;animation:floatUp linear infinite;}
+@keyframes floatUp{0%{transform:translateY(110vh) rotate(0deg);opacity:.06;}100%{transform:translateY(-10vh) rotate(360deg);opacity:0;}}
+
+/* ===== APP SHELL ===== */
+#app{position:relative;z-index:1;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+
+/* ===== HUD ===== */
+#hud{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:rgba(6,32,28,.9);backdrop-filter:blur(14px);border-bottom:2px solid rgba(255,255,255,.07);}
+.hud-item{display:flex;align-items:center;gap:6px;font-weight:800;font-size:.95rem;color:#fff;}
+#xp-bar-wrap{flex:1;max-width:200px;height:14px;background:rgba(255,255,255,.12);border-radius:99px;overflow:hidden;margin:0 12px;}
+#xp-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--emerald),var(--gold));border-radius:99px;transition:width .6s ease;}
+.badge-chip{background:linear-gradient(135deg,var(--emerald),var(--teal));padding:3px 10px;border-radius:99px;font-size:.75rem;margin-left:4px;animation:pop .3s ease;}
+#sound-btn{cursor:pointer;background:none;border:none;font-size:1.5rem;color:#fff;transition:transform .2s;}
+#sound-btn:hover{transform:scale(1.2);}
+
+/* ===== PROGRESS BAR ===== */
+#progress-wrap{position:fixed;bottom:0;left:0;right:0;z-index:100;padding:8px 20px;background:rgba(6,32,28,.9);display:flex;align-items:center;gap:12px;}
+#prog-label{color:rgba(255,255,255,.65);font-size:.82rem;white-space:nowrap;}
+#prog-track{flex:1;height:10px;background:rgba(255,255,255,.12);border-radius:99px;overflow:hidden;}
+#prog-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--emerald),var(--teal),var(--gold));border-radius:99px;transition:width .5s ease;}
+#prog-pct{color:#fff;font-size:.82rem;font-weight:800;min-width:36px;text-align:right;}
+
+/* ===== SLIDE WRAPPER ===== */
+#slide-wrap{width:min(900px,96vw);max-height:calc(100vh - 112px);overflow-y:auto;margin-top:62px;padding-bottom:62px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.15) transparent;}
+#slide-wrap::-webkit-scrollbar{width:4px;}
+#slide-wrap::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18);border-radius:99px;}
+
+/* ===== SLIDE CARD ===== */
+/* slideIn animation primes attention for each new concept (novelty cue) */
+.slide{background:rgba(255,255,255,.055);backdrop-filter:blur(18px);border:1.5px solid rgba(255,255,255,.1);border-radius:28px;padding:30px 36px;animation:slideIn .45s cubic-bezier(.34,1.56,.64,1);min-height:340px;display:flex;flex-direction:column;gap:16px;}
+@keyframes slideIn{from{opacity:0;transform:translateY(44px) scale(.95);}to{opacity:1;transform:translateY(0) scale(1);}}
+.slide h1{font-family:'Fredoka One',cursive;font-size:clamp(1.6rem,3.5vw,2.4rem);color:var(--gold);line-height:1.2;animation:fadeUp .5s .1s both;}
+.slide h2{font-family:'Fredoka One',cursive;font-size:clamp(1.2rem,2.5vw,1.8rem);color:var(--teal);animation:fadeUp .5s .15s both;}
+.slide p,.slide li{font-size:clamp(.88rem,1.8vw,1.08rem);color:rgba(255,255,255,.92);line-height:1.75;animation:fadeUp .5s .2s both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+
+/* ===== CONCEPT BOX ===== */
+.concept-box{background:linear-gradient(135deg,rgba(46,204,113,.15),rgba(38,208,206,.15));border:1.5px solid rgba(46,204,113,.3);border-radius:18px;padding:20px 24px;animation:fadeUp .5s .3s both;}
+.concept-box .big-eq{font-family:'Fredoka One',cursive;font-size:clamp(1.6rem,4vw,2.6rem);color:var(--gold);text-align:center;margin:10px 0;line-height:1.3;}
+
+/* ===== FRACTION DISPLAY ===== */
+.fraction-display{display:inline-flex;flex-direction:column;align-items:center;line-height:1.1;padding:0 5px;vertical-align:middle;}
+.fraction-display .top,.fraction-display .bot{font-family:'Fredoka One',cursive;font-size:clamp(1rem,2.5vw,1.7rem);color:var(--white);}
+.fraction-display .line{width:100%;height:3px;background:var(--white);border-radius:2px;margin:3px 0;}
+.mixed-num{display:inline-flex;align-items:center;gap:4px;vertical-align:middle;}
+.whole-num{font-family:'Fredoka One',cursive;font-size:clamp(1.2rem,3vw,2.2rem);color:var(--gold);}
+.div-sym{font-family:'Fredoka One',cursive;font-size:clamp(1.2rem,3vw,2rem);color:var(--coral);padding:0 6px;vertical-align:middle;}
+.eq-sym{font-family:'Fredoka One',cursive;font-size:clamp(1.2rem,3vw,2rem);color:var(--emerald);padding:0 6px;vertical-align:middle;}
+
+/* ===== KEEP-CHANGE-FLIP CARDS ===== */
+.kcf-row{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin:8px 0;}
+.kcf-card{flex:1;min-width:130px;max-width:200px;border-radius:18px;padding:16px;text-align:center;animation:pop .4s both;}
+.kcf-card .kcf-word{font-family:'Fredoka One',cursive;font-size:1.3rem;display:block;}
+.kcf-card .kcf-icon{font-size:2.2rem;display:block;margin-bottom:4px;}
+.kcf-card .kcf-sub{font-size:.82rem;color:rgba(255,255,255,.85);margin-top:6px;display:block;}
+.kcf-keep{background:linear-gradient(135deg,rgba(79,195,247,.3),rgba(79,195,247,.12));border:1.5px solid var(--sky);}
+.kcf-change{background:linear-gradient(135deg,rgba(255,159,67,.3),rgba(255,159,67,.12));border:1.5px solid var(--orange);}
+.kcf-flip{background:linear-gradient(135deg,rgba(255,110,180,.3),rgba(255,110,180,.12));border:1.5px solid var(--pink);}
+
+/* ===== STEP BOXES ===== */
+.steps{list-style:none;display:flex;flex-direction:column;gap:11px;}
+.steps li{display:flex;align-items:flex-start;gap:14px;background:rgba(255,255,255,.06);border-radius:14px;padding:13px 17px;animation:fadeUp .5s calc(.14s * var(--i,1)) both;border-left:4px solid var(--emerald);}
+.step-num{font-family:'Fredoka One',cursive;font-size:1.3rem;color:var(--gold);min-width:30px;}
+
+/* ===== QUIZ ===== */
+.quiz-question{font-family:'Fredoka One',cursive;font-size:clamp(1.05rem,2.4vw,1.55rem);color:#fff;text-align:center;margin-bottom:8px;animation:fadeUp .4s both;line-height:1.5;}
+.options-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;animation:fadeUp .5s .15s both;}
+@media(max-width:520px){.options-grid{grid-template-columns:1fr;}}
+.opt-btn{font-family:'Nunito',sans-serif;font-weight:800;font-size:clamp(.85rem,1.7vw,1rem);padding:13px 10px;border-radius:16px;border:2px solid rgba(255,255,255,.18);background:rgba(255,255,255,.07);color:#fff;cursor:pointer;transition:all .2s;text-align:center;line-height:1.5;}
+.opt-btn:hover:not(:disabled){background:rgba(255,255,255,.18);transform:scale(1.03);}
+.opt-btn.correct{background:linear-gradient(135deg,#0db887,#00c9a7)!important;border-color:#0db887!important;animation:pop .3s ease;}
+.opt-btn.wrong{background:linear-gradient(135deg,#ff4757,#ee5a24)!important;border-color:#ff4757!important;animation:shake .4s ease;}
+.opt-btn:disabled{cursor:default;}
+
+/* ===== FEEDBACK ===== */
+#feedback{border-radius:16px;padding:13px 18px;text-align:center;font-weight:800;font-size:.95rem;display:none;animation:pop .3s ease;}
+#feedback.show{display:block;}
+#feedback.correct-fb{background:linear-gradient(135deg,rgba(13,184,135,.22),rgba(0,201,167,.08));border:1.5px solid #0db887;color:#7fffd4;}
+#feedback.wrong-fb{background:linear-gradient(135deg,rgba(255,71,87,.22),rgba(238,90,36,.08));border:1.5px solid #ff4757;color:#ffa9ae;}
+
+/* ===== TRUE/FALSE ===== */
+.tf-row{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;}
+.tf-btn{font-family:'Fredoka One',cursive;font-size:1.3rem;padding:15px 38px;border-radius:18px;border:none;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px rgba(0,0,0,.3);}
+.tf-btn.true-btn{background:linear-gradient(135deg,#0db887,#00c9a7);color:#fff;}
+.tf-btn.false-btn{background:linear-gradient(135deg,#ff6b6b,#ee5a24);color:#fff;}
+.tf-btn:hover:not(:disabled){transform:scale(1.07) rotate(-1deg);}
+.tf-btn:disabled{opacity:.6;cursor:default;}
+
+/* ===== HINT ===== */
+.hint-wrap{text-align:center;}
+.hint-btn{background:linear-gradient(135deg,var(--orange),var(--gold));color:var(--dark);font-weight:800;padding:8px 20px;border-radius:99px;border:none;cursor:pointer;font-size:.88rem;transition:transform .2s;}
+.hint-btn:hover{transform:scale(1.05);}
+.hint-text{display:none;background:rgba(255,165,0,.1);border:1px solid var(--orange);border-radius:12px;padding:11px 15px;margin-top:8px;color:rgba(255,255,255,.9);font-size:.88rem;line-height:1.65;animation:fadeUp .3s both;}
+.hint-text.show{display:block;}
+
+/* ===== NAV ===== */
+#nav{display:flex;justify-content:space-between;align-items:center;padding:12px 0 0;}
+.nav-btn{font-family:'Fredoka One',cursive;font-size:1.1rem;padding:12px 28px;border-radius:99px;border:none;cursor:pointer;transition:all .2s;}
+#prev-btn{background:rgba(255,255,255,.1);color:rgba(255,255,255,.65);}
+#prev-btn:hover{background:rgba(255,255,255,.2);}
+#next-btn{background:linear-gradient(135deg,var(--emerald),var(--teal));color:#fff;box-shadow:0 4px 18px rgba(46,204,113,.38);animation:pulse 2s infinite;}
+#next-btn:hover{transform:scale(1.06);animation:none;}
+@keyframes pulse{0%,100%{box-shadow:0 4px 18px rgba(46,204,113,.38);}50%{box-shadow:0 4px 28px rgba(46,204,113,.7);}}
+@keyframes pop{0%{transform:scale(.8);}60%{transform:scale(1.12);}100%{transform:scale(1);}}
+@keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-8px);}40%{transform:translateX(8px);}60%{transform:translateX(-5px);}80%{transform:translateX(5px);}}
+
+/* ===== STREAK TOAST ===== */
+#streak-toast{position:fixed;top:72px;right:20px;z-index:200;background:linear-gradient(135deg,var(--orange),var(--gold));color:var(--dark);font-family:'Fredoka One',cursive;font-size:1.05rem;padding:10px 20px;border-radius:99px;transform:translateX(220%);transition:transform .4s cubic-bezier(.34,1.56,.64,1);box-shadow:0 4px 20px rgba(255,159,67,.5);}
+#streak-toast.show{transform:translateX(0);}
+
+/* ===== CONFETTI ===== */
+.confetti-piece{position:fixed;width:10px;height:10px;border-radius:2px;z-index:300;animation:confettiFall 2.5s ease-out forwards;pointer-events:none;}
+@keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1;}100%{transform:translateY(110vh) rotate(720deg);opacity:0;}}
+
+/* ===== BADGE MODAL ===== */
+#badge-modal{position:fixed;inset:0;z-index:400;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);animation:fadeIn .3s both;}
+#badge-modal.show{display:flex;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.badge-popup{background:linear-gradient(135deg,#06201c,#0a3d33);border:2px solid var(--emerald);border-radius:28px;padding:34px 38px;text-align:center;max-width:360px;animation:pop .4s ease;box-shadow:0 0 60px rgba(46,204,113,.35);}
+.badge-popup .badge-icon{font-size:4rem;animation:spin 1s ease;display:block;margin:0 auto 12px;}
+@keyframes spin{from{transform:rotate(-15deg) scale(0);}to{transform:rotate(0deg) scale(1);}}
+.badge-popup h3{font-family:'Fredoka One',cursive;font-size:1.55rem;color:var(--gold);margin-bottom:6px;}
+.badge-popup p{color:rgba(255,255,255,.8);font-size:.93rem;}
+#badge-ok{margin-top:20px;background:linear-gradient(135deg,var(--emerald),var(--teal));color:#fff;border:none;padding:12px 30px;border-radius:99px;font-family:'Fredoka One',cursive;font-size:1.05rem;cursor:pointer;transition:transform .2s;}
+#badge-ok:hover{transform:scale(1.06);}
+
+/* ===== FINAL SCORE ===== */
+.score-big{font-family:'Fredoka One',cursive;font-size:clamp(3rem,8vw,5rem);color:var(--gold);text-align:center;animation:pop .5s both;}
+.score-breakdown{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}
+.score-item{background:rgba(255,255,255,.07);border-radius:14px;padding:13px;text-align:center;}
+.score-item .val{font-family:'Fredoka One',cursive;font-size:1.7rem;color:var(--teal);}
+.score-item .lbl{font-size:.8rem;color:rgba(255,255,255,.55);margin-top:3px;}
+.badges-earned{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:14px;}
+.earned-badge{background:linear-gradient(135deg,var(--emerald),var(--teal));border-radius:99px;padding:6px 16px;font-size:.86rem;color:#fff;font-weight:800;}
+
+/* ===== FINAL CHALLENGE BAR ===== */
+#fc-bar{background:rgba(255,255,255,.07);border-radius:14px;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;}
+#fc-progress{font-family:'Fredoka One',cursive;font-size:1.05rem;color:var(--teal);}
+#fc-score{font-family:'Fredoka One',cursive;font-size:1.05rem;color:var(--gold);}
+
+/* ===== WORD PROBLEM BOX ===== */
+.word-box{background:linear-gradient(135deg,rgba(255,201,60,.12),rgba(255,159,67,.12));border:1.5px solid rgba(255,201,60,.35);border-radius:16px;padding:16px 20px;font-style:italic;font-size:clamp(.9rem,1.8vw,1.05rem);line-height:1.75;}
+
+/* ===== COLOR HELPERS ===== */
+.c-gold{color:var(--gold);}.c-sky{color:var(--sky);}.c-grass{color:var(--grass);}
+.c-coral{color:var(--coral);}.c-teal{color:var(--teal);}.c-orange{color:var(--orange);}.c-emerald{color:var(--emerald);}.c-pink{color:var(--pink);}
+.text-center{text-align:center;}
+.mt-8{margin-top:8px;}.mt-12{margin-top:12px;}.mt-16{margin-top:16px;}
+.emoji-big{font-size:2.4rem;display:block;text-align:center;margin:6px 0;}
+</style>
+</head>
+<body>
+<div id="bg"></div>
+
+<!-- HUD -->
+<div id="hud">
+  <div class="hud-item">⭐ <span id="points-display">0</span> pts</div>
+  <div class="hud-item">🔥 <span id="streak-display">0</span></div>
+  <div id="xp-bar-wrap"><div id="xp-bar"></div></div>
+  <div class="hud-item" id="level-display">Lv 1 🌱</div>
+  <div class="hud-item" id="badges-hud"></div>
+  <button id="sound-btn" title="Toggle sound">🔊</button>
+</div>
+
+<!-- STREAK TOAST -->
+<div id="streak-toast">🔥 STREAK x<span id="streak-count">0</span>! +<span id="streak-bonus">0</span> BONUS!</div>
+
+<!-- MAIN SLIDE -->
+<div id="app">
+  <div id="slide-wrap">
+    <div id="slide-content"></div>
+    <div id="nav">
+      <button class="nav-btn" id="prev-btn">← Back</button>
+      <button class="nav-btn" id="next-btn">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM PROGRESS -->
+<div id="progress-wrap">
+  <span id="prog-label">Slide 1</span>
+  <div id="prog-track"><div id="prog-fill"></div></div>
+  <span id="prog-pct">0%</span>
+</div>
+
+<!-- BADGE MODAL -->
+<div id="badge-modal">
+  <div class="badge-popup">
+    <span class="badge-icon" id="badge-icon">🏆</span>
+    <h3 id="badge-title">Badge Unlocked!</h3>
+    <p id="badge-desc">You earned a new badge!</p>
+    <button id="badge-ok">Awesome! 🎉</button>
+  </div>
+</div>
+
+<!-- AUDIO (replace file paths with real .mp3s) -->
+<audio id="audio-correct" src="correct.mp3" preload="none"></audio>
+<audio id="audio-wrong"   src="wrong.mp3"   preload="none"></audio>
+<audio id="audio-levelup" src="levelup.mp3"  preload="none"></audio>
+<audio id="audio-bg"      src="bgmusic.mp3"  loop preload="none"></audio>
+
+<script>
+/*
+  =====================================================
+  FRACTION QUEST 3 — DIVIDING FRACTIONS
+  Grade 4 | Baltimore, Maryland
+  Skill Progression (simple → complex):
+    Level 1 → Fraction ÷ whole number
+    Level 2 → Whole number ÷ fraction (Keep-Change-Flip)
+    Level 3 → Fraction ÷ fraction
+    Level 4 → Simplify / cross-cancel
+    Level 5 → Mixed number ÷ whole / fraction
+    Level 6 → Mixed number ÷ mixed number   (PEAK SKILL)
+  30 questions total: 15 mini-quizzes + 15 Final Challenge
+  =====================================================
+*/
+
+// ========== STATE ==========
+const state={currentSlide:0,points:0,streak:0,maxStreak:0,badges:[],soundOn:false,quizAnswered:false,xp:0,level:1};
+
+// ========== AUDIO ==========
+function playSound(id){
+  if(!state.soundOn) return;
+  const el=document.getElementById('audio-'+id);
+  if(el){el.currentTime=0;el.play().catch(()=>{});}
+}
+
+// ========== POINTS / XP / LEVEL ==========
+function addPoints(p){
+  state.points+=p; state.xp+=p;
+  document.getElementById('points-display').textContent=state.points;
+  const xpPL=200;
+  const lvl=Math.floor(state.xp/xpPL)+1;
+  if(lvl>state.level){state.level=lvl;onLevelUp();}
+  const pct=((state.xp%xpPL)/xpPL)*100;
+  document.getElementById('xp-bar').style.width=pct+'%';
+  const icons=['🌱','🌿','⭐','🚀','💎','👑','🔮'];
+  document.getElementById('level-display').textContent=`Lv ${state.level} ${icons[Math.min(state.level-1,icons.length-1)]}`;
+}
+function onLevelUp(){
+  playSound('levelup'); launchConfetti(55);
+  showBadgeModal({icon:'🚀',title:`Level ${state.level} Reached!`,desc:'You are dividing fractions like a champion! Keep going!'});
+}
+
+// ========== STREAK ==========
+function updateStreak(correct){
+  if(correct){
+    state.streak++;
+    if(state.streak>state.maxStreak) state.maxStreak=state.streak;
+    document.getElementById('streak-display').textContent=state.streak;
+    if(state.streak>=3){const bonus=state.streak*5;addPoints(bonus);showStreakToast(state.streak,bonus);}
+    checkBadges();
+  }else{
+    state.streak=0;
+    document.getElementById('streak-display').textContent='0';
+  }
+}
+function showStreakToast(s,bonus){
+  const t=document.getElementById('streak-toast');
+  document.getElementById('streak-count').textContent=s;
+  document.getElementById('streak-bonus').textContent=bonus;
+  t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+// ========== BADGES ==========
+const BADGES=[
+  {id:'first_correct', icon:'⭐', title:'First Divide!',     desc:'Got your first division correct!',        condition:()=>state.points>=10},
+  {id:'streak3',       icon:'🔥', title:'Dividing Streak!',  desc:'3 correct answers in a row!',             condition:()=>state.streak>=3},
+  {id:'flip_master',   icon:'🔄', title:'Flip Master!',      desc:'You mastered Keep-Change-Flip!',          condition:()=>state.points>=80},
+  {id:'div_dynamo',    icon:'🦸', title:'Division Dynamo!',  desc:'You can divide mixed numbers!',           condition:()=>false},
+  {id:'fast_divider',  icon:'⚡', title:'Speed Divider!',    desc:'10 questions answered correctly!',        condition:()=>state.points>=100},
+  {id:'level2',        icon:'🌟', title:'Star Student!',     desc:'Reached Level 2!',                        condition:()=>state.level>=2},
+  {id:'fraction_champ',icon:'🏆', title:'Division Champion!',desc:'Scored 80%+ on the Final Challenge!',    condition:()=>false},
+];
+function checkBadges(){
+  BADGES.forEach(b=>{
+    if(!state.badges.includes(b.id)&&b.condition()){
+      state.badges.push(b.id); showBadgeModal(b); renderBadgesHUD();
+    }
+  });
+}
+function renderBadgesHUD(){
+  document.getElementById('badges-hud').innerHTML=state.badges.slice(-3).map(id=>{
+    const b=BADGES.find(x=>x.id===id); return b?`<span class="badge-chip">${b.icon}</span>`:'';
+  }).join('');
+}
+
+// ========== BADGE MODAL ==========
+function showBadgeModal(b){
+  document.getElementById('badge-icon').textContent=b.icon||'🏆';
+  document.getElementById('badge-title').textContent=b.title;
+  document.getElementById('badge-desc').textContent=b.desc;
+  document.getElementById('badge-modal').classList.add('show');
+}
+document.getElementById('badge-ok').onclick=()=>document.getElementById('badge-modal').classList.remove('show');
+
+// ========== CONFETTI ==========
+function launchConfetti(n=40){
+  const cols=['#FFD93D','#FF6B6B','#4FC3F7','#A78BFA','#56C596','#FF9F43','#FF6EB4','#2ecc71','#26d0ce'];
+  for(let i=0;i<n;i++){
+    const el=document.createElement('div'); el.className='confetti-piece';
+    el.style.cssText=`left:${Math.random()*100}vw;top:-10px;background:${cols[Math.floor(Math.random()*cols.length)]};width:${6+Math.random()*10}px;height:${6+Math.random()*10}px;border-radius:${Math.random()>.5?'50%':'2px'};animation-delay:${Math.random()*.8}s;animation-duration:${2+Math.random()}s;`;
+    document.body.appendChild(el); setTimeout(()=>el.remove(),3500);
+  }
+}
+
+// ========== FRACTION HELPERS ==========
+function frac(top,bot){return `<span class="fraction-display"><span class="top">${top}</span><span class="line"></span><span class="bot">${bot}</span></span>`;}
+function mixed(w,top,bot){return `<span class="mixed-num"><span class="whole-num">${w}</span>${frac(top,bot)}</span>`;}
+function divSym(){return `<span class="div-sym">÷</span>`;}
+function eqSym(){return `<span class="eq-sym">=</span>`;}
+
+// ========== PIE FRACTION SVG ==========
+/* Pie visuals show fractions as parts of a whole (multisensory support) */
+function pieSVG(num,den,size=80){
+  if(den===0||num===0) return `<svg width="${size}" height="${size}"><circle cx="${size/2}" cy="${size/2}" r="${size*0.44}" fill="rgba(255,255,255,.07)" stroke="rgba(255,255,255,.2)" stroke-width="2"/></svg>`;
+  const cx=size/2,cy=size/2,r=size*0.44;
+  const step=(2*Math.PI)/den; let slices='';
+  const cs=['#2ecc71','#26d0ce','#FFC93C','#FF9F43','#4FC3F7','#A78BFA','#FF6EB4'];
+  for(let i=0;i<den;i++){
+    const a1=-Math.PI/2+i*step, a2=a1+step;
+    const x1=cx+r*Math.cos(a1),y1=cy+r*Math.sin(a1);
+    const x2=cx+r*Math.cos(a2),y2=cy+r*Math.sin(a2);
+    const lg=step>Math.PI?1:0;
+    slices+=`<path d="M${cx},${cy}L${x1},${y1}A${r},${r},0,${lg},1,${x2},${y2}Z" fill="${i<num?cs[i%cs.length]:'rgba(255,255,255,.07)'}" stroke="rgba(255,255,255,.25)" stroke-width="1.5"/>`;
+  }
+  return `<svg width="${size}" height="${size}"><circle cx="${cx}" cy="${cy}" r="${r}" fill="#06201c" stroke="rgba(255,255,255,.1)" stroke-width="2"/>${slices}<circle cx="${cx}" cy="${cy}" r="4" fill="rgba(255,255,255,.35)"/></svg>`;
+}
+
+// ========== "HOW MANY FIT" BAR SVG ==========
+/* Visualizes division as "how many small pieces fit into the big amount" */
+function fitBarSVG(whole,pieceDen,width=320){
+  const h=46; const total=whole*pieceDen; const seg=width/total;
+  let rects='';
+  const cs=['#2ecc71','#26d0ce'];
+  for(let i=0;i<total;i++){
+    rects+=`<rect x="${i*seg}" y="0" width="${seg-2}" height="${h}" rx="4" fill="${cs[i%2]}" opacity="0.85"/>`;
+  }
+  // whole-number dividers
+  let dividers='';
+  for(let w=1;w<whole;w++){
+    dividers+=`<line x1="${w*pieceDen*seg}" y1="-4" x2="${w*pieceDen*seg}" y2="${h+4}" stroke="#fff" stroke-width="2"/>`;
+  }
+  return `<svg width="${width}" height="${h+10}" viewBox="0 -5 ${width} ${h+10}">${rects}${dividers}</svg>`;
+}
+
+// ========== FINAL CHALLENGE STATE ==========
+const fcState={correct:0, answered:new Array(15).fill(null)};
+const FC_START=28; // slide index where FC begins
+const FC_TOTAL=15;
+
+// ===================================================
+//  S L I D E S
+// ===================================================
+const slides=[
+
+/* ── 0  HOOK ─────────────────────────────────────── */
+{type:'info', render:()=>`
+  <h1>➗ Fraction Quest 3: The Great Divide!</h1>
+  <div style="display:flex;justify-content:center;flex-wrap:wrap;gap:14px;align-items:center;animation:fadeUp .5s .2s both;">
+    <span style="font-family:'Fredoka One';font-size:2.5rem;color:var(--gold);">4</span>
+    <span class="div-sym" style="font-size:2.5rem;">÷</span>
+    ${pieSVG(1,2,90)}
+    <span class="eq-sym" style="font-size:2.5rem;">=</span>
+    <span style="font-family:'Fredoka One';font-size:2.5rem;color:var(--emerald);">8</span>
+  </div>
+  <div class="concept-box">
+    <p class="text-center" style="font-size:1.1rem;font-weight:800;color:var(--gold);">🤔 Curiosity Question:</p>
+    <p class="text-center mt-8">You have <strong>4 whole pizzas</strong> 🍕. You cut each into <strong>halves</strong>.<br>How many half-pizza slices do you get?</p>
+    <p class="text-center mt-8" style="font-family:'Fredoka One';font-size:1.6rem;color:var(--teal);">4 ÷ ${frac(1,2)} = 8 slices!</p>
+    <p class="text-center" style="font-size:.85rem;color:rgba(255,255,255,.55);">Surprising, right? Dividing can make the number BIGGER! 😲</p>
+  </div>
+  <p class="text-center">Today you'll go from <strong class="c-teal">fraction ÷ whole number</strong> all the way to <strong class="c-gold">mixed number ÷ mixed number</strong>! 🧙‍♂️🚀</p>
+  <p class="text-center" style="color:rgba(255,255,255,.5);font-size:.82rem;">30 questions total • Earn points • Unlock badges • Become a Division Champion!</p>
+`},
+
+/* ── 1  LEVEL 1 CONCEPT: FRACTION ÷ WHOLE ────────── */
+{type:'info', render:()=>`
+  <h2>⭐ Level 1: Fraction ÷ Whole Number</h2>
+  <p>Dividing a fraction by a whole number means <strong class="c-teal">"sharing it into equal groups"</strong>.</p>
+  <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;align-items:center;margin:6px 0;">
+    ${pieSVG(1,2,82)}<span class="div-sym">÷</span><span style="font-family:'Fredoka One';font-size:1.6rem;color:var(--gold);">3</span><span class="eq-sym">=</span>${pieSVG(1,6,82)}
+  </div>
+  <div class="concept-box">
+    <p class="text-center c-gold" style="font-weight:800;">Example: ${frac(1,2)} ÷ 3</p>
+    <p class="text-center mt-8">Split one-half into 3 equal parts → each part is ${frac(1,6)}</p>
+    <div class="big-eq">${frac(1,2)} ÷ 3 = ${frac(1,6)}</div>
+  </div>
+  <ul class="steps">
+    <li style="--i:1"><span class="step-num">①</span><span>Keep the fraction the same</span></li>
+    <li style="--i:2"><span class="step-num">②</span><span><strong>Multiply the denominator</strong> by the whole number</span></li>
+    <li style="--i:3"><span class="step-num">③</span><span>Simplify if you can</span></li>
+  </ul>
+`},
+
+/* ── 2  LEVEL 1 WALKTHROUGH ───────────────────────── */
+{type:'info', render:()=>`
+  <h2>🎬 Walkthrough: ${frac(3,4)} ÷ 2</h2>
+  <ul class="steps">
+    <li style="--i:1"><span class="step-num">①</span><div>Keep the numerator: <strong class="c-sky">3</strong></div></li>
+    <li style="--i:2"><span class="step-num">②</span><div>Multiply denominator by 2: 4 × 2 = <strong class="c-coral">8</strong></div></li>
+    <li style="--i:3"><span class="step-num">✅</span><div style="font-family:'Fredoka One';font-size:1.4rem;color:var(--grass);">${frac(3,8)}</div></li>
+  </ul>
+  <div class="concept-box text-center">
+    <p style="font-weight:800;color:var(--gold);">Quick Rule:</p>
+    <p class="mt-8" style="font-size:1.1rem;">${frac('a','b')} ÷ c = ${frac('a','b × c')}</p>
+    <p style="font-size:.85rem;color:rgba(255,255,255,.55);margin-top:6px;">The pieces get smaller because you're sharing them out!</p>
+  </div>
+`},
+
+/* ── 3  QUIZ 1 ─────────────────────────────────────── */
+{type:'quiz',
+ question:`${frac(1,3)} ÷ 2 = ?`,
+ options:[`${frac(1,6)}`,`${frac(2,3)}`,`${frac(1,3)}`,`${frac(2,6)}`],
+ correct:0,
+ hint:`Keep the 1 on top. Multiply the bottom: 3 × 2 = 6.`,
+ explanation:`✅ Keep 1, multiply 3×2=6 → ${frac(1,6)}`},
+
+/* ── 4  QUIZ 2 ─────────────────────────────────────── */
+{type:'quiz',
+ question:`${frac(4,5)} ÷ 4 = ?`,
+ options:[`${frac(1,5)}`,`${frac(16,5)}`,`${frac(1,9)}`,`${frac(4,5)}`],
+ correct:0,
+ hint:`Keep 4 on top, multiply bottom: 5 × 4 = 20 → 4/20, then simplify.`,
+ explanation:`✅ ${frac(4,5)} ÷ 4 = ${frac(4,20)} = ${frac(1,5)}`},
+
+/* ── 5  QUIZ 3 (T/F) ───────────────────────────────── */
+{type:'trueFalse',
+ question:`${frac(2,3)} ÷ 2 = ${frac(1,3)}. TRUE or FALSE?`,
+ correct:true,
+ explanation:`✅ TRUE! ${frac(2,3)} ÷ 2 = ${frac(2,6)} = ${frac(1,3)}. Sharing 2/3 between 2 gives 1/3 each.`},
+
+/* ── 6  LEVEL 2 CONCEPT: KEEP-CHANGE-FLIP ─────────── */
+{type:'info', render:()=>`
+  <h2>🔄 Level 2: The Magic Trick — Keep, Change, Flip!</h2>
+  <p>The <strong class="c-teal">superpower</strong> for ALL fraction division. Watch it work on <strong>4 ÷ ${frac(1,2)}</strong>:</p>
+  <div class="kcf-row">
+    <div class="kcf-card kcf-keep"><span class="kcf-icon">🤚</span><span class="kcf-word c-sky">KEEP</span><span class="kcf-sub">Keep the first number<br>4 stays 4</span></div>
+    <div class="kcf-card kcf-change"><span class="kcf-icon">🔁</span><span class="kcf-word c-orange">CHANGE</span><span class="kcf-sub">Change ÷ into ×</span></div>
+    <div class="kcf-card kcf-flip"><span class="kcf-icon">🙃</span><span class="kcf-word c-pink">FLIP</span><span class="kcf-sub">Flip the 2nd fraction<br>${frac(1,2)} → ${frac(2,1)}</span></div>
+  </div>
+  <div class="concept-box text-center">
+    <p style="font-family:'Fredoka One';font-size:1.4rem;">4 ÷ ${frac(1,2)} = 4 × ${frac(2,1)} = ${frac(8,1)} = 8</p>
+    <p style="font-size:.85rem;color:rgba(255,255,255,.55);">The flipped fraction is called the <strong>reciprocal</strong>!</p>
+  </div>
+  <div class="text-center">${fitBarSVG(4,2,300)}<p style="font-size:.82rem;color:rgba(255,255,255,.55);margin-top:4px;">4 wholes split into halves = 8 pieces ✨</p></div>
+`},
+
+/* ── 7  LEVEL 2 WALKTHROUGH ───────────────────────── */
+{type:'info', render:()=>`
+  <h2>🎬 Walkthrough: 3 ÷ ${frac(1,4)}</h2>
+  <ul class="steps">
+    <li style="--i:1"><span class="step-num">🤚</span><div><strong>KEEP</strong> the 3 → ${frac(3,1)}</div></li>
+    <li style="--i:2"><span class="step-num">🔁</span><div><strong>CHANGE</strong> ÷ to ×</div></li>
+    <li style="--i:3"><span class="step-num">🙃</span><div><strong>FLIP</strong> ${frac(1,4)} → ${frac(4,1)}</div></li>
+    <li style="--i:4"><span class="step-num">✅</span><div>${frac(3,1)} × ${frac(4,1)} = ${frac(12,1)} = <strong class="c-grass" style="font-family:'Fredoka One';font-size:1.4rem;">12</strong></div></li>
+  </ul>
+  <div class="word-box">🍫 <strong>Real Life:</strong> A 3-metre chocolate bar is cut into ${frac(1,4)}-metre pieces. How many pieces? <strong>3 ÷ ${frac(1,4)} = 12 pieces!</strong></div>
+`},
+
+/* ── 8  QUIZ 4 ─────────────────────────────────────── */
+{type:'quiz',
+ question:`6 ÷ ${frac(1,3)} = ?`,
+ options:[`18`,`2`,`3`,`9`],
+ correct:0,
+ hint:`Keep 6, change to ×, flip 1/3 → 3/1. So 6 × 3 = 18.`,
+ explanation:`✅ 6 ÷ ${frac(1,3)} = 6 × ${frac(3,1)} = 18`},
+
+/* ── 9  QUIZ 5 ─────────────────────────────────────── */
+{type:'quiz',
+ question:`5 ÷ ${frac(1,2)} = ?`,
+ options:[`10`,`${mixed(2,1,2)}`,`15`,`7`],
+ correct:0,
+ hint:`Keep 5, change to ×, flip 1/2 → 2/1. So 5 × 2 = 10.`,
+ explanation:`✅ 5 ÷ ${frac(1,2)} = 5 × ${frac(2,1)} = 10`},
+
+/* ── 10  QUIZ 6 (T/F) ──────────────────────────────── */
+{type:'trueFalse',
+ question:`2 ÷ ${frac(1,4)} = 8. TRUE or FALSE?`,
+ correct:true,
+ explanation:`✅ TRUE! Keep-Change-Flip: 2 × ${frac(4,1)} = 8. There are eight quarters in 2 wholes!`},
+
+/* ── 11  LEVEL 3 CONCEPT: FRACTION ÷ FRACTION ─────── */
+{type:'info', render:()=>`
+  <h2>🌟 Level 3: Fraction ÷ Fraction</h2>
+  <p>Same magic trick — <strong class="c-teal">Keep, Change, Flip</strong> — works here too!</p>
+  <div class="concept-box">
+    <p class="text-center c-gold" style="font-weight:800;">Example: ${frac(1,2)} ÷ ${frac(1,4)}</p>
+    <ul class="steps mt-8">
+      <li style="--i:1"><span class="step-num">🤚</span><div>KEEP ${frac(1,2)}</div></li>
+      <li style="--i:2"><span class="step-num">🔁</span><div>CHANGE ÷ to ×</div></li>
+      <li style="--i:3"><span class="step-num">🙃</span><div>FLIP ${frac(1,4)} → ${frac(4,1)}</div></li>
+      <li style="--i:4"><span class="step-num">✅</span><div>${frac(1,2)} × ${frac(4,1)} = ${frac(4,2)} = <strong class="c-grass" style="font-family:'Fredoka One';font-size:1.3rem;">2</strong></div></li>
+    </ul>
+    <p class="text-center" style="font-size:.85rem;color:rgba(255,255,255,.55);">Ask yourself: "How many quarters fit in one half?" → 2! 🎯</p>
+  </div>
+`},
+
+/* ── 12  LEVEL 3 WALKTHROUGH ──────────────────────── */
+{type:'info', render:()=>`
+  <h2>🎬 Walkthrough: ${frac(2,3)} ÷ ${frac(1,6)}</h2>
+  <ul class="steps">
+    <li style="--i:1"><span class="step-num">🤚</span><div>KEEP ${frac(2,3)}</div></li>
+    <li style="--i:2"><span class="step-num">🙃</span><div>CHANGE & FLIP: × ${frac(6,1)}</div></li>
+    <li style="--i:3"><span class="step-num">③</span><div>Multiply: ${frac(2,3)} × ${frac(6,1)} = ${frac(12,3)}</div></li>
+    <li style="--i:4"><span class="step-num">✅</span><div>${frac(12,3)} = <strong class="c-grass" style="font-family:'Fredoka One';font-size:1.4rem;">4</strong></div></li>
+  </ul>
+  <div class="concept-box text-center"><p style="font-family:'Fredoka One';font-size:1.3rem;color:var(--gold);">${frac(2,3)} ÷ ${frac(1,6)} = 4</p></div>
+`},
+
+/* ── 13  QUIZ 7 ────────────────────────────────────── */
+{type:'quiz',
+ question:`${frac(3,4)} ÷ ${frac(1,2)} = ?`,
+ options:[`${mixed(1,1,2)}`,`${frac(3,8)}`,`${frac(3,4)}`,`${frac(2,3)}`],
+ correct:0,
+ hint:`Keep 3/4, flip 1/2 → 2/1. So 3/4 × 2/1 = 6/4 = 1½.`,
+ explanation:`✅ ${frac(3,4)} × ${frac(2,1)} = ${frac(6,4)} = ${mixed(1,1,2)}`},
+
+/* ── 14  QUIZ 8 ────────────────────────────────────── */
+{type:'quiz',
+ question:`${frac(2,5)} ÷ ${frac(1,5)} = ?`,
+ options:[`2`,`${frac(2,25)}`,`${frac(1,2)}`,`${mixed(2,1,2)}`],
+ correct:0,
+ hint:`Keep 2/5, flip 1/5 → 5/1. So 2/5 × 5/1 = 10/5 = 2.`,
+ explanation:`✅ ${frac(2,5)} × ${frac(5,1)} = ${frac(10,5)} = 2. (How many fifths fit in 2 fifths? 2!)`},
+
+/* ── 15  QUIZ 9 (T/F) ──────────────────────────────── */
+{type:'trueFalse',
+ question:`${frac(1,2)} ÷ ${frac(1,4)} = 2. TRUE or FALSE?`,
+ correct:true,
+ explanation:`✅ TRUE! ${frac(1,2)} × ${frac(4,1)} = ${frac(4,2)} = 2. Two quarters fit inside one half.`},
+
+/* ── 16  LEVEL 4 CONCEPT: SIMPLIFY ─────────────────── */
+{type:'info', render:()=>`
+  <h2>✂️ Level 4: Simplify After You Flip!</h2>
+  <p>Once you've flipped, you can <strong class="c-teal">cross-cancel</strong> to keep numbers small — just like in multiplication!</p>
+  <div class="concept-box">
+    <p class="text-center c-gold" style="font-weight:800;">Example: ${frac(4,9)} ÷ ${frac(8,3)}</p>
+    <ul class="steps mt-8">
+      <li style="--i:1"><span class="step-num">🙃</span><div>Keep-Change-Flip: ${frac(4,9)} × ${frac(3,8)}</div></li>
+      <li style="--i:2"><span class="step-num">✂️</span><div>Cancel diagonally: 4 & 8 share 4 → 1 & 2. Also 3 & 9 share 3 → 1 & 3.</div></li>
+      <li style="--i:3"><span class="step-num">✅</span><div>${frac(1,3)} × ${frac(1,2)} = <strong class="c-grass" style="font-family:'Fredoka One';font-size:1.3rem;">${frac(1,6)}</strong></div></li>
+    </ul>
+  </div>
+  <p class="text-center" style="font-size:.88rem;color:rgba(255,255,255,.55);">⚠️ Remember: ALWAYS flip FIRST, then cancel. Never cancel before you flip!</p>
+`},
+
+/* ── 17  QUIZ 10 ───────────────────────────────────── */
+{type:'quiz',
+ question:`${frac(3,8)} ÷ ${frac(9,4)} = ?`,
+ options:[`${frac(1,6)}`,`${frac(27,32)}`,`6`,`${frac(2,3)}`],
+ correct:0,
+ hint:`Flip: 3/8 × 4/9. Cancel 3&9 → 1,3 and 4&8 → 1,2. Then 1/2 × 1/3 = 1/6.`,
+ explanation:`✅ ${frac(3,8)} × ${frac(4,9)} → cancel → ${frac(1,2)} × ${frac(1,3)} = ${frac(1,6)}`},
+
+/* ── 18  QUIZ 11 ───────────────────────────────────── */
+{type:'quiz',
+ question:`${frac(2,3)} ÷ ${frac(4,9)} = ?`,
+ options:[`${mixed(1,1,2)}`,`${frac(8,27)}`,`${frac(2,3)}`,`6`],
+ correct:0,
+ hint:`Flip: 2/3 × 9/4. Cancel 2&4 → 1,2 and 9&3 → 3,1. Then 1/1 × 3/2 = 3/2 = 1½.`,
+ explanation:`✅ ${frac(2,3)} × ${frac(9,4)} → cancel → ${frac(1,1)} × ${frac(3,2)} = ${frac(3,2)} = ${mixed(1,1,2)}`},
+
+/* ── 19  CHECKPOINT ────────────────────────────────── */
+{type:'info', render:()=>`
+  <h2 class="text-center">🏁 Checkpoint! You're Crushing It!</h2>
+  <span class="emoji-big">🎯</span>
+  <div class="concept-box text-center">
+    <p style="font-weight:800;color:var(--gold);">Skills Unlocked So Far:</p>
+    <ul style="list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:8px;text-align:left;">
+      <li>✅ <strong>Fraction ÷ Whole</strong> → multiply the denominator</li>
+      <li>✅ <strong>Whole ÷ Fraction</strong> → Keep, Change, Flip 🔄</li>
+      <li>✅ <strong>Fraction ÷ Fraction</strong> → Keep, Change, Flip</li>
+      <li>✅ <strong>Cross-cancel</strong> after flipping to keep it tidy</li>
+    </ul>
+  </div>
+  <div class="word-box">
+    <strong>🥤 Real-World Check:</strong> You have ${frac(3,4)} of a litre of juice. Each cup holds ${frac(1,4)} litre. How many cups can you fill?<br><br>
+    <strong>${frac(3,4)} ÷ ${frac(1,4)} = ${frac(3,4)} × ${frac(4,1)} = ${frac(12,4)} = 3 cups!</strong> 🥤🥤🥤
+  </div>
+  <p class="text-center c-gold" style="font-weight:800;">🚀 Next up: Mixed Numbers — the real challenge!</p>
+`},
+
+/* ── 20  LEVEL 5 CONCEPT: MIXED ÷ WHOLE/FRACTION ──── */
+{type:'info', render:()=>`
+  <h2>🦸 Level 5: Mixed Numbers Enter the Arena!</h2>
+  <p>The golden rule: <strong class="c-teal">convert mixed numbers to improper fractions FIRST</strong>, then Keep-Change-Flip.</p>
+  <div class="concept-box">
+    <p class="text-center c-gold" style="font-weight:800;">Mixed ÷ Whole: ${mixed(2,1,2)} ÷ 3</p>
+    <ul class="steps mt-8">
+      <li style="--i:1"><span class="step-num">①</span><div>Convert: ${mixed(2,1,2)} = ${frac(5,2)}</div></li>
+      <li style="--i:2"><span class="step-num">🙃</span><div>Keep-Change-Flip: ${frac(5,2)} × ${frac(1,3)}</div></li>
+      <li style="--i:3"><span class="step-num">✅</span><div>= ${frac(5,6)}</div></li>
+    </ul>
+  </div>
+  <div class="concept-box mt-8">
+    <p class="text-center c-sky" style="font-weight:800;">Mixed ÷ Fraction: ${mixed(1,1,2)} ÷ ${frac(1,4)}</p>
+    <p class="text-center mt-8">${frac(3,2)} × ${frac(4,1)} = ${frac(12,2)} = <strong class="c-grass" style="font-family:'Fredoka One';font-size:1.3rem;">6</strong></p>
+  </div>
+`},
+
+/* ── 21  QUIZ 12 ───────────────────────────────────── */
+{type:'quiz',
+ question:`${mixed(2,1,4)} ÷ 3 = ?`,
+ options:[`${frac(3,4)}`,`${mixed(6,3,4)}`,`${mixed(1,1,4)}`,`${frac(4,3)}`],
+ correct:0,
+ hint:`Convert: 2¼ = 9/4. Keep-Change-Flip: 9/4 × 1/3 = 9/12 = 3/4.`,
+ explanation:`✅ ${mixed(2,1,4)} = ${frac(9,4)}. Then ${frac(9,4)} × ${frac(1,3)} = ${frac(9,12)} = ${frac(3,4)}`},
+
+/* ── 22  QUIZ 13 ───────────────────────────────────── */
+{type:'quiz',
+ question:`${mixed(1,1,3)} ÷ ${frac(1,2)} = ?`,
+ options:[`${mixed(2,2,3)}`,`${frac(2,3)}`,`${mixed(1,2,3)}`,`8`],
+ correct:0,
+ hint:`Convert: 1⅓ = 4/3. Flip 1/2 → 2/1. So 4/3 × 2/1 = 8/3 = 2⅔.`,
+ explanation:`✅ ${mixed(1,1,3)} = ${frac(4,3)}. Then ${frac(4,3)} × ${frac(2,1)} = ${frac(8,3)} = ${mixed(2,2,3)}`},
+
+/* ── 23  LEVEL 6 PEAK INTRO ────────────────────────── */
+{type:'info', render:()=>`
+  <h2>👑 Level 6 — PEAK SKILL: Mixed ÷ Mixed!</h2>
+  <span class="emoji-big">🏔️</span>
+  <p class="text-center">You've reached the summit! <strong class="c-gold">Mixed Number ÷ Mixed Number</strong> is today's toughest skill — and you have every tool you need!</p>
+  <div class="concept-box">
+    <p class="text-center c-gold" style="font-weight:800;">The 4-Step Champion Method:</p>
+    <ul class="steps mt-8">
+      <li style="--i:1"><span class="step-num">①</span><div>Convert <strong>BOTH</strong> mixed numbers to improper fractions</div></li>
+      <li style="--i:2"><span class="step-num">🙃</span><div><strong>Keep, Change, Flip</strong> the second fraction</div></li>
+      <li style="--i:3"><span class="step-num">✂️</span><div><strong>Cross-cancel</strong>, then multiply across</div></li>
+      <li style="--i:4"><span class="step-num">④</span><div>Convert the answer <strong>back to a mixed number</strong> if needed</div></li>
+    </ul>
+  </div>
+`},
+
+/* ── 24  LEVEL 6 WALKTHROUGH ──────────────────────── */
+{type:'info', render:()=>`
+  <h2>🎬 Walkthrough: ${mixed(2,1,2)} ÷ ${mixed(1,1,4)}</h2>
+  <ul class="steps">
+    <li style="--i:1"><span class="step-num">①</span><div>Convert both:<br>${mixed(2,1,2)} = ${frac(5,2)} &nbsp;|&nbsp; ${mixed(1,1,4)} = ${frac(5,4)}</div></li>
+    <li style="--i:2"><span class="step-num">🙃</span><div>Keep-Change-Flip: ${frac(5,2)} × ${frac(4,5)}</div></li>
+    <li style="--i:3"><span class="step-num">✂️</span><div>Cancel: 5 & 5 → 1,1. Then 4 & 2 → 2,1.</div></li>
+    <li style="--i:4"><span class="step-num">✅</span><div>${frac(1,1)} × ${frac(2,1)} = <strong class="c-grass" style="font-family:'Fredoka One';font-size:1.4rem;">2</strong></div></li>
+  </ul>
+  <div class="concept-box text-center"><p style="font-family:'Fredoka One';font-size:1.5rem;color:var(--gold);">${mixed(2,1,2)} ÷ ${mixed(1,1,4)} = 2</p></div>
+`},
+
+/* ── 25  QUIZ 14 ───────────────────────────────────── */
+{type:'quiz',
+ question:`${mixed(2,1,2)} ÷ ${mixed(1,1,2)} = ?`,
+ options:[`${mixed(1,2,3)}`,`${mixed(3,3,4)}`,`${mixed(1,1,3)}`,`${frac(2,3)}`],
+ correct:0,
+ hint:`Convert: 2½=5/2, 1½=3/2. Flip: 5/2 × 2/3. Cancel 2s → 5/1 × 1/3 = 5/3 = 1⅔.`,
+ explanation:`✅ ${frac(5,2)} × ${frac(2,3)} → cancel 2s → ${frac(5,1)} × ${frac(1,3)} = ${frac(5,3)} = ${mixed(1,2,3)}`},
+
+/* ── 26  QUIZ 15 ───────────────────────────────────── */
+{type:'quiz',
+ question:`${mixed(3,1,3)} ÷ ${mixed(1,1,9)} = ?`,
+ options:[`3`,`${mixed(3,19,27)}`,`9`,`${frac(1,3)}`],
+ correct:0,
+ hint:`Convert: 3⅓=10/3, 1 1/9=10/9. Flip: 10/3 × 9/10. Cancel 10s, cancel 9&3 → 3.`,
+ explanation:`✅ ${frac(10,3)} × ${frac(9,10)} → cancel → ${frac(1,1)} × ${frac(3,1)} = 3`},
+
+/* ── 27  SECTION BADGE ─────────────────────────────── */
+{type:'info', render:()=>`
+  <h2 class="text-center">🏅 Section Complete!</h2>
+  <span class="emoji-big">🎉</span>
+  <div class="concept-box text-center">
+    <p style="font-size:1.1rem;font-weight:800;color:var(--gold);">All division levels mastered!</p>
+    <ul style="list-style:none;margin-top:10px;text-align:left;display:flex;flex-direction:column;gap:8px;">
+      <li>✅ <strong>Level 1</strong> — Fraction ÷ Whole Number</li>
+      <li>✅ <strong>Level 2</strong> — Whole ÷ Fraction (Keep-Change-Flip)</li>
+      <li>✅ <strong>Level 3</strong> — Fraction ÷ Fraction</li>
+      <li>✅ <strong>Level 4</strong> — Simplify / Cross-Cancel</li>
+      <li>✅ <strong>Level 5</strong> — Mixed ÷ Whole & Mixed ÷ Fraction</li>
+      <li>✅ <strong>Level 6</strong> — Mixed ÷ Mixed 👑</li>
+    </ul>
+  </div>
+  <p class="text-center" style="font-family:'Fredoka One';font-size:1.3rem;color:var(--teal);">🔥 Ready for the FINAL CHALLENGE? 15 Questions await!</p>
+`},
+
+/* ── 28 – 42  FINAL CHALLENGE (15 questions) ─────── */
+/* FC[0] */  {type:'fc', q:`${frac(1,4)} ÷ 2 = ?`,                                  opts:[`${frac(1,8)}`,`${frac(1,2)}`,`${frac(2,4)}`,`8`],                ans:0},
+/* FC[1] */  {type:'fc', q:`${frac(3,5)} ÷ 3 = ?`,                                  opts:[`${frac(1,5)}`,`${frac(9,5)}`,`5`,`${frac(3,8)}`],                ans:0},
+/* FC[2] */  {type:'fc', q:`8 ÷ ${frac(1,2)} = ?`,                                  opts:[`16`,`4`,`8`,`${frac(1,16)}`],                                   ans:0},
+/* FC[3] */  {type:'fc', q:`6 ÷ ${frac(1,4)} = ?`,                                  opts:[`24`,`${mixed(1,1,2)}`,`10`,`${frac(6,4)}`],                     ans:0},
+/* FC[4] */  {type:'fc', q:`${frac(1,2)} ÷ ${frac(1,8)} = ?`,                       opts:[`4`,`${frac(1,16)}`,`16`,`${frac(1,4)}`],                        ans:0},
+/* FC[5] */  {type:'fc', q:`${frac(3,4)} ÷ ${frac(1,4)} = ?`,                       opts:[`3`,`${frac(3,16)}`,`1`,`12`],                                   ans:0},
+/* FC[6] */  {type:'fc', q:`${frac(5,6)} ÷ ${frac(1,3)} = ?`,                       opts:[`${mixed(2,1,2)}`,`${frac(5,18)}`,`2`,`15`],                     ans:0},
+/* FC[7] */  {type:'fc', q:`${frac(4,5)} ÷ ${frac(2,5)} = ?`,                       opts:[`2`,`${frac(8,25)}`,`${frac(1,2)}`,`${frac(8,10)}`],             ans:0},
+/* FC[8] */  {type:'fc', q:`${frac(3,8)} ÷ ${frac(9,16)} = ?`,                      opts:[`${frac(2,3)}`,`${frac(27,128)}`,`${frac(3,2)}`,`${frac(6,8)}`], ans:0},
+/* FC[9] */  {type:'fc', q:`${mixed(2,1,2)} ÷ 5 = ?`,                               opts:[`${frac(1,2)}`,`${mixed(12,1,2)}`,`2`,`${frac(1,10)}`],          ans:0},
+/* FC[10] */ {type:'fc', q:`${mixed(3,3,4)} ÷ 3 = ?`,                               opts:[`${mixed(1,1,4)}`,`${mixed(11,1,4)}`,`${mixed(1,1,2)}`,`${frac(3,4)}`], ans:0},
+/* FC[11] */ {type:'fc', q:`${mixed(1,1,2)} ÷ ${frac(1,4)} = ?`,                    opts:[`6`,`${frac(3,8)}`,`3`,`${mixed(1,1,2)}`],                       ans:0},
+/* FC[12] */ {type:'fc', q:`🍰 You have ${mixed(4,1,2)} cups of flour. Each batch needs ${frac(3,4)} cup. How many batches?`,
+                                                                                     opts:[`6 batches`,`${mixed(3,3,8)} batches`,`4 batches`,`12 batches`], ans:0},
+/* FC[13] */ {type:'fc', q:`📏 A ${mixed(5,1,4)} m ribbon is cut into ${frac(3,4)} m pieces. How many pieces?`,
+                                                                                     opts:[`7 pieces`,`${mixed(3,15,16)} pieces`,`5 pieces`,`14 pieces`],   ans:0},
+/* FC[14] */ {type:'fc', q:`${mixed(3,1,3)} ÷ ${mixed(1,2,3)} = ?`,                  opts:[`2`,`${mixed(5,5,9)}`,`3`,`${frac(1,2)}`],                       ans:0},
+
+/* ── 43  CELEBRATION ───────────────────────────────── */
+{type:'celebration', render:()=>''}
+];
+
+// ===================================================
+//  R E N D E R   E N G I N E
+// ===================================================
+function renderSlide(){
+  const slide=slides[state.currentSlide];
+  state.quizAnswered=false;
+  let html='<div class="slide">';
+  if(slide.type==='info')              html+=slide.render();
+  else if(slide.type==='quiz')         html+=renderQuiz(slide);
+  else if(slide.type==='trueFalse')    html+=renderTF(slide);
+  else if(slide.type==='fc')           html+=renderFC(slide, state.currentSlide-FC_START);
+  else if(slide.type==='celebration')  html+=renderCelebration();
+  html+='</div>';
+  document.getElementById('slide-content').innerHTML=html;
+  updateProgress();
+  document.getElementById('slide-wrap').scrollTop=0;
+
+  if(slide.type==='celebration'){ setTimeout(()=>launchConfetti(90),300); checkChampBadge(); }
+  if(state.currentSlide===23) setTimeout(checkDynamoBadge, 800); // Level 6 peak skill reached
+  if(slide.type==='quiz')      bindQuizEvents(slide);
+  if(slide.type==='trueFalse') bindTFEvents(slide);
+  if(slide.type==='fc')        bindFCEvents(slide, state.currentSlide-FC_START);
+
+  document.getElementById('prev-btn').style.visibility=state.currentSlide===0?'hidden':'visible';
+  document.getElementById('next-btn').textContent=state.currentSlide===slides.length-1?'🎉 Finish':'Next →';
+}
+
+function updateProgress(){
+  const total=slides.length, cur=state.currentSlide+1;
+  const pct=Math.round((cur/total)*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-pct').textContent=pct+'%';
+  document.getElementById('prog-label').textContent=`Slide ${cur} of ${total}`;
+}
+
+// ── Quiz renderer
+function renderQuiz(slide){
+  return `
+    <p class="quiz-question">${slide.question}</p>
+    <div class="options-grid">
+      ${slide.options.map((o,i)=>`<button class="opt-btn" data-i="${i}">${o}</button>`).join('')}
+    </div>
+    <div class="hint-wrap mt-8">
+      <button class="hint-btn" onclick="toggleHint(this)">💡 Show Hint</button>
+      <div class="hint-text">${slide.hint}</div>
+    </div>
+    <div id="feedback"></div>`;
+}
+function bindQuizEvents(slide){
+  document.querySelectorAll('.opt-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      if(state.quizAnswered) return; state.quizAnswered=true;
+      const i=parseInt(btn.dataset.i), correct=i===slide.correct;
+      btn.classList.add(correct?'correct':'wrong');
+      if(!correct) document.querySelectorAll('.opt-btn')[slide.correct].classList.add('correct');
+      document.querySelectorAll('.opt-btn').forEach(b=>b.disabled=true);
+      showFeedback(correct,slide.explanation);
+      if(correct){addPoints(10);playSound('correct');}else playSound('wrong');
+      updateStreak(correct); checkBadges();
+    });
+  });
+}
+
+// ── True/False renderer
+function renderTF(slide){
+  return `
+    <p class="quiz-question">${slide.question}</p>
+    <div class="tf-row">
+      <button class="tf-btn true-btn" data-v="true">✅ TRUE</button>
+      <button class="tf-btn false-btn" data-v="false">❌ FALSE</button>
+    </div>
+    <div id="feedback"></div>`;
+}
+function bindTFEvents(slide){
+  document.querySelectorAll('.tf-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      if(state.quizAnswered) return; state.quizAnswered=true;
+      const val=btn.dataset.v==='true', correct=val===slide.correct;
+      btn.style.outline=correct?'3px solid #7fffd4':'3px solid #ffa9ae';
+      if(!correct) btn.style.opacity='.4';
+      document.querySelectorAll('.tf-btn').forEach(b=>b.disabled=true);
+      showFeedback(correct,slide.explanation);
+      if(correct){addPoints(10);playSound('correct');}else playSound('wrong');
+      updateStreak(correct); checkBadges();
+    });
+  });
+}
+
+// ── Final Challenge renderer
+function renderFC(slide,idx){
+  if(idx<0||idx>=FC_TOTAL) return '<p>Error</p>';
+  const q=fcState.answered[idx]; const answered=q!==null;
+  return `
+    <div id="fc-bar">
+      <span id="fc-progress">Question ${idx+1} / ${FC_TOTAL}</span>
+      <span id="fc-score">✅ ${fcState.correct} correct</span>
+    </div>
+    <p class="quiz-question" style="margin-top:14px;">${slide.q}</p>
+    <div class="options-grid">
+      ${slide.opts.map((o,i)=>`<button class="opt-btn ${answered?(i===slide.ans?'correct':(i===q?'wrong':'')):''}" data-i="${i}" ${answered?'disabled':''}>${o}</button>`).join('')}
+    </div>
+    <div id="feedback" class="${answered?(q===slide.ans?'show correct-fb':'show wrong-fb'):''}">
+      ${answered?(q===slide.ans?'✅ Correct! +15 points!':`❌ The answer was: ${slide.opts[slide.ans]}`):''}
+    </div>`;
+}
+function bindFCEvents(slide,idx){
+  if(idx<0||idx>=FC_TOTAL) return;
+  document.querySelectorAll('.opt-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      if(fcState.answered[idx]!==null) return;
+      const i=parseInt(btn.dataset.i), correct=i===slide.ans;
+      fcState.answered[idx]=i;
+      if(correct){fcState.correct++;addPoints(15);playSound('correct');}else playSound('wrong');
+      updateStreak(correct); checkBadges();
+      document.getElementById('slide-content').innerHTML='<div class="slide">'+renderFC(slide,idx)+'</div>';
+      bindFCEvents(slide,idx);
+    });
+  });
+}
+
+// ── Celebration renderer
+function renderCelebration(){
+  const total=FC_TOTAL, correct=fcState.correct;
+  const pct=Math.round((correct/total)*100);
+  const grade=pct>=90?'🌟 Outstanding!':pct>=80?'🎉 Excellent!':pct>=70?'👍 Great Job!':pct>=60?'💪 Keep Going!':'🔄 Try Again!';
+  const earnedBadges=state.badges.map(id=>{
+    const b=BADGES.find(x=>x.id===id); return b?`<div class="earned-badge">${b.icon} ${b.title}</div>`:'';
+  }).join('');
+  return `
+    <h1 class="text-center">🎉 Division Quest Complete!</h1>
+    <div class="text-center" style="font-size:2.8rem;">${grade}</div>
+    <div class="score-big">${pct}%</div>
+    <div class="score-breakdown">
+      <div class="score-item"><div class="val">${correct}/${total}</div><div class="lbl">Final Challenge</div></div>
+      <div class="score-item"><div class="val">${state.points}</div><div class="lbl">Total Points ⭐</div></div>
+      <div class="score-item"><div class="val">${state.maxStreak}</div><div class="lbl">Best Streak 🔥</div></div>
+      <div class="score-item"><div class="val">Lv ${state.level}</div><div class="lbl">Level Reached 🚀</div></div>
+    </div>
+    ${earnedBadges?`<div class="badges-earned">${earnedBadges}</div>`:''}
+    <div class="concept-box mt-12 text-center">
+      <p style="font-weight:800;color:var(--gold);">Today you mastered:</p>
+      <p class="mt-8">✅ Fraction ÷ Whole &nbsp; ✅ Whole ÷ Fraction<br>
+         ✅ Keep-Change-Flip 🔄 &nbsp; ✅ Cross-cancelling<br>
+         ✅ Mixed ÷ Whole/Fraction &nbsp; ✅ Mixed ÷ Mixed 👑</p>
+    </div>
+    <div class="text-center mt-12">
+      <button onclick="restartLesson()" style="background:linear-gradient(135deg,var(--emerald),var(--teal));color:#fff;border:none;padding:14px 32px;border-radius:99px;font-family:'Fredoka One',cursive;font-size:1.1rem;cursor:pointer;">🔄 Play Again!</button>
+    </div>`;
+}
+
+// ── Feedback
+function showFeedback(correct,explanation){
+  const fb=document.getElementById('feedback');
+  fb.className='show '+(correct?'correct-fb':'wrong-fb');
+  fb.innerHTML=correct?`✅ <strong>Correct!</strong> +10 points! ${explanation}`:`❌ <strong>Not quite.</strong> ${explanation}`;
+}
+
+// ── Hint
+function toggleHint(btn){
+  const ht=btn.nextElementSibling; ht.classList.toggle('show');
+  btn.textContent=ht.classList.contains('show')?'🙈 Hide Hint':'💡 Show Hint';
+}
+
+// ── Nav
+document.getElementById('next-btn').addEventListener('click',()=>{
+  if(state.currentSlide<slides.length-1){
+    state.currentSlide++; renderSlide();
+    const i=state.currentSlide;
+    if(i===6||i===11||i===16||i===20||i===23||i===27) launchConfetti(35);
+  }
+});
+document.getElementById('prev-btn').addEventListener('click',()=>{
+  if(state.currentSlide>0){state.currentSlide--;renderSlide();}
+});
+
+// ── Division Dynamo badge (peak-skill reached)
+function checkDynamoBadge(){
+  if(!state.badges.includes('div_dynamo')){
+    state.badges.push('div_dynamo'); renderBadgesHUD();
+    showBadgeModal({icon:'🦸',title:'Division Dynamo!',desc:'You reached Mixed ÷ Mixed — the peak skill! Incredible!'});
+  }
+}
+// ── Division Champion badge (80%+ on Final Challenge)
+function checkChampBadge(){
+  const pct=Math.round((fcState.correct/FC_TOTAL)*100);
+  if(pct>=80&&!state.badges.includes('fraction_champ')){
+    state.badges.push('fraction_champ'); renderBadgesHUD();
+    setTimeout(()=>showBadgeModal({icon:'🏆',title:'Division Champion!',desc:`You scored ${pct}% on the Final Challenge! You're a true Division Master!`}),1500);
+  }
+}
+
+// ── Keyboard navigation
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown') document.getElementById('next-btn').click();
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp') document.getElementById('prev-btn').click();
+});
+
+// ── Sound toggle
+document.getElementById('sound-btn').addEventListener('click',()=>{
+  state.soundOn=!state.soundOn;
+  document.getElementById('sound-btn').textContent=state.soundOn?'🔊':'🔇';
+  if(state.soundOn) document.getElementById('audio-bg').play().catch(()=>{});
+  else document.getElementById('audio-bg').pause();
+});
+
+// ── Restart
+function restartLesson(){
+  state.currentSlide=0;state.points=0;state.streak=0;state.maxStreak=0;
+  state.badges=[];state.xp=0;state.level=1;
+  fcState.correct=0;fcState.answered.fill(null);
+  document.getElementById('points-display').textContent='0';
+  document.getElementById('streak-display').textContent='0';
+  document.getElementById('xp-bar').style.width='0%';
+  document.getElementById('level-display').textContent='Lv 1 🌱';
+  document.getElementById('badges-hud').innerHTML='';
+  shuffleAllSlides();
+  renderSlide();
+}
+
+// ── Shuffle answer positions
+/* Randomizes option order so the correct answer isn't always first.
+   Runs before each game start; Final-Challenge re-renders stay consistent
+   because the shuffle happens once per playthrough, not per render.
+   True/False slides are left untouched (their buttons are fixed). */
+function shuffleAllSlides(){
+  slides.forEach(slide=>{
+    if(slide.type==='quiz'){
+      const correctVal=slide.options[slide.correct];
+      shuffleArray(slide.options);
+      slide.correct=slide.options.indexOf(correctVal);
+    }else if(slide.type==='fc'){
+      const correctVal=slide.opts[slide.ans];
+      shuffleArray(slide.opts);
+      slide.ans=slide.opts.indexOf(correctVal);
+    }
+  });
+}
+function shuffleArray(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+}
+
+// ── Floating division symbols (decorative)
+function makeFloatingSymbols(){
+  const syms=['÷','½','¼','⅓','⅔','¾','🔄','='];
+  const bg=document.getElementById('bg');
+  for(let i=0;i<18;i++){
+    const el=document.createElement('div'); el.className='float-sym';
+    el.textContent=syms[Math.floor(Math.random()*syms.length)];
+    el.style.cssText=`left:${Math.random()*100}vw;animation-duration:${18+Math.random()*14}s;animation-delay:${Math.random()*12}s;font-size:${1.2+Math.random()*1.4}rem;`;
+    bg.appendChild(el);
+  }
+}
+
+// ── Starfield
+function makeStars(){
+  const bg=document.getElementById('bg');
+  for(let i=0;i<130;i++){
+    const s=document.createElement('div'); s.className='star';
+    const sz=1+Math.random()*2.5;
+    s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;animation-delay:${Math.random()*4}s;animation-duration:${2+Math.random()*3}s;`;
+    bg.appendChild(s);
+  }
+}
+
+// ── INIT
+shuffleAllSlides();
+makeStars();
+makeFloatingSymbols();
+renderSlide();
+</script>
+</body>
+</html>

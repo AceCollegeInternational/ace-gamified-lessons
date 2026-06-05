@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>🔒 Division Step Trainer — Flip the RIGHT One!</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --sun:#FFD93D;--sky:#4FC3F7;--grass:#56C596;--coral:#FF6B6B;--purple:#A78BFA;
+  --orange:#FF9F43;--pink:#FF6EB4;--dark:#0a1f1c;--white:#fff;
+  --emerald:#2ecc71;--teal:#26d0ce;--gold:#FFC93C;
+}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background:var(--dark);}
+#bg{position:fixed;inset:0;background:linear-gradient(135deg,#06201c,#0a3d33,#072a3e);z-index:0;}
+.star{position:absolute;border-radius:50%;background:#fff;animation:twinkle 3s infinite alternate;}
+@keyframes twinkle{0%{opacity:.2;transform:scale(1);}100%{opacity:1;transform:scale(1.5);}}
+
+#app{position:relative;z-index:1;width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:14px;}
+#slide-wrap{width:min(860px,96vw);max-height:calc(100vh - 28px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.15) transparent;}
+#slide-wrap::-webkit-scrollbar{width:4px;}
+#slide-wrap::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18);border-radius:99px;}
+
+.slide{background:rgba(255,255,255,.055);backdrop-filter:blur(18px);border:1.5px solid rgba(255,255,255,.1);border-radius:28px;padding:26px 32px;display:flex;flex-direction:column;gap:16px;}
+h1{font-family:'Fredoka One',cursive;font-size:clamp(1.4rem,3.2vw,2rem);color:var(--gold);line-height:1.2;text-align:center;}
+.subtitle{text-align:center;color:rgba(255,255,255,.75);font-size:.95rem;margin-top:-6px;}
+
+/* ===== STEP RAIL ===== */
+.step-rail{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin:4px 0;}
+.rail-step{display:flex;flex-direction:column;align-items:center;gap:3px;opacity:.35;transition:opacity .3s;min-width:62px;}
+.rail-step.active{opacity:1;}
+.rail-step.done{opacity:1;}
+.rail-dot{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.2);transition:all .3s;}
+.rail-step.active .rail-dot{background:linear-gradient(135deg,var(--gold),var(--orange));border-color:var(--gold);color:var(--dark);transform:scale(1.12);box-shadow:0 0 18px rgba(255,201,60,.5);}
+.rail-step.done .rail-dot{background:linear-gradient(135deg,var(--emerald),var(--teal));border-color:var(--emerald);color:#fff;}
+.rail-label{font-size:.68rem;font-weight:800;color:rgba(255,255,255,.8);text-align:center;}
+
+/* ===== PROBLEM DISPLAY ===== */
+.problem-area{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;background:rgba(0,0,0,.2);border-radius:18px;padding:18px;min-height:120px;}
+.fraction-display{display:inline-flex;flex-direction:column;align-items:center;line-height:1.1;padding:0 4px;vertical-align:middle;position:relative;}
+.fraction-display .top,.fraction-display .bot{font-family:'Fredoka One',cursive;font-size:clamp(1.4rem,4vw,2.4rem);color:var(--white);transition:transform .5s;}
+.fraction-display .line{width:100%;height:3px;background:var(--white);border-radius:2px;margin:4px 0;}
+
+/* the locked (first) fraction */
+.frac-box{position:relative;border-radius:14px;padding:10px 14px;border:2px solid transparent;transition:all .3s;}
+.frac-box.locked{border-color:var(--sky);background:rgba(79,195,247,.12);}
+.frac-box.flippable{border-color:var(--pink);background:rgba(255,110,180,.12);}
+.lock-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--sky);color:var(--dark);font-size:.62rem;font-weight:900;padding:2px 8px;border-radius:99px;white-space:nowrap;}
+.flip-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--pink);color:var(--dark);font-size:.62rem;font-weight:900;padding:2px 8px;border-radius:99px;white-space:nowrap;}
+
+.op-sym{font-family:'Fredoka One',cursive;font-size:clamp(1.6rem,4vw,2.4rem);color:var(--coral);padding:0 4px;transition:color .3s,transform .3s;}
+.op-sym.changed{color:var(--gold);animation:popBig .4s ease;}
+@keyframes popBig{0%{transform:scale(.6) rotate(-20deg);}60%{transform:scale(1.3) rotate(8deg);}100%{transform:scale(1) rotate(0);}}
+
+/* flip animation: vertical 180° to show numerator/denominator swapping */
+.flipping{animation:flipVert .6s ease;}
+@keyframes flipVert{0%{transform:rotateX(0);}50%{transform:rotateX(90deg);}100%{transform:rotateX(0);}}
+
+/* ===== INSTRUCTION PANEL ===== */
+.instruction{background:linear-gradient(135deg,rgba(46,204,113,.15),rgba(38,208,206,.15));border:1.5px solid rgba(46,204,113,.3);border-radius:16px;padding:16px 20px;}
+.instruction h2{font-family:'Fredoka One',cursive;font-size:clamp(1.05rem,2.4vw,1.4rem);color:var(--gold);margin-bottom:6px;}
+.instruction p{color:rgba(255,255,255,.92);font-size:clamp(.88rem,1.8vw,1.02rem);line-height:1.65;}
+
+/* ===== ACTION BUTTONS ===== */
+.actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+.act-btn{font-family:'Nunito',sans-serif;font-weight:800;font-size:clamp(.9rem,1.9vw,1.05rem);padding:13px 22px;border-radius:14px;border:2px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#fff;cursor:pointer;transition:all .2s;}
+.act-btn:hover{background:rgba(255,255,255,.18);transform:scale(1.04);}
+.act-btn.primary{background:linear-gradient(135deg,var(--emerald),var(--teal));border-color:transparent;box-shadow:0 4px 16px rgba(46,204,113,.35);}
+.act-btn.primary:hover{transform:scale(1.06);}
+.act-btn.wrong-pick{background:linear-gradient(135deg,#ff4757,#ee5a24)!important;border-color:#ff4757!important;animation:shake .4s ease;}
+.act-btn.right-pick{background:linear-gradient(135deg,#0db887,#00c9a7)!important;border-color:#0db887!important;animation:pop .3s ease;}
+@keyframes pop{0%{transform:scale(.8);}60%{transform:scale(1.12);}100%{transform:scale(1);}}
+@keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-8px);}40%{transform:translateX(8px);}60%{transform:translateX(-5px);}80%{transform:translateX(5px);}}
+
+/* ===== FEEDBACK ===== */
+.feedback{border-radius:14px;padding:13px 18px;text-align:center;font-weight:800;font-size:.95rem;display:none;animation:pop .3s ease;line-height:1.6;}
+.feedback.show{display:block;}
+.feedback.good{background:linear-gradient(135deg,rgba(13,184,135,.22),rgba(0,201,167,.08));border:1.5px solid #0db887;color:#7fffd4;}
+.feedback.bad{background:linear-gradient(135deg,rgba(255,71,87,.22),rgba(238,90,36,.08));border:1.5px solid #ff4757;color:#ffa9ae;}
+
+.mnemonic{text-align:center;font-family:'Fredoka One',cursive;font-size:clamp(1rem,2.2vw,1.3rem);letter-spacing:.5px;}
+.mn-keep{color:var(--sky);} .mn-change{color:var(--orange);} .mn-flip{color:var(--pink);}
+
+.lock-tip{text-align:center;font-size:.82rem;color:rgba(255,255,255,.55);}
+
+#newprob-btn{font-family:'Fredoka One',cursive;font-size:1rem;padding:11px 26px;border-radius:99px;border:none;background:linear-gradient(135deg,var(--gold),var(--orange));color:var(--dark);cursor:pointer;transition:transform .2s;}
+#newprob-btn:hover{transform:scale(1.06);}
+
+.confetti-piece{position:fixed;width:10px;height:10px;border-radius:2px;z-index:300;animation:cf 2.5s ease-out forwards;pointer-events:none;}
+@keyframes cf{0%{transform:translateY(-20px) rotate(0);opacity:1;}100%{transform:translateY(110vh) rotate(720deg);opacity:0;}}
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<div id="app">
+  <div id="slide-wrap">
+    <div class="slide">
+      <h1>🔒 Division Step Trainer</h1>
+      <p class="subtitle" id="subtitle">Follow every step in order. You can't skip ahead until each step is correct!</p>
+
+      <div class="mnemonic">
+        <span class="mn-keep">KEEP the first</span> ·
+        <span class="mn-change">CHANGE the sign</span> ·
+        <span class="mn-flip">FLIP the LAST</span>
+      </div>
+
+      <!-- step rail -->
+      <div class="step-rail" id="rail"></div>
+
+      <!-- the live problem -->
+      <div class="problem-area" id="problem"></div>
+
+      <!-- instruction + actions -->
+      <div class="instruction" id="instruction"></div>
+      <div class="actions" id="actions"></div>
+      <div class="feedback" id="feedback"></div>
+
+      <p class="lock-tip">💡 The <span style="color:var(--sky);font-weight:800;">blue padlocked</span> fraction NEVER changes. We only ever flip the <span style="color:var(--pink);font-weight:800;">pink</span> one after the ÷ sign.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =====================================================
+   DIVISION STEP TRAINER
+   Targets the specific error of flipping the FIRST
+   fraction (dividend) instead of the SECOND (divisor).
+
+   Design principles:
+   - STEP-GATING: next step unlocks only when the current
+     one is answered correctly. The pupil is forced through
+     Keep -> Change -> Flip -> Multiply -> Simplify in order.
+   - FLIP-AS-DECISION: at the flip step the pupil must CHOOSE
+     which fraction to flip. Picking the first gives a
+     targeted correction and does NOT advance.
+   - VISUAL LOCK: the first fraction wears a padlock the
+     whole time so it's obvious it never changes.
+   ===================================================== */
+
+// problem bank: a/b ÷ c/d  (all 20 verified; ordered easy → harder)
+const PROBLEMS=[
+  {a:1,b:2,c:1,d:3},   // = 1 1/2
+  {a:2,b:3,c:4,d:5},   // = 5/6
+  {a:1,b:2,c:3,d:4},   // = 2/3
+  {a:3,b:5,c:2,d:7},   // = 2 1/10
+  {a:1,b:4,c:1,d:2},   // = 1/2
+  {a:2,b:5,c:3,d:4},   // = 8/15
+  {a:3,b:4,c:2,d:3},   // = 1 1/8
+  {a:1,b:3,c:2,d:5},   // = 5/6
+  {a:4,b:5,c:2,d:3},   // = 1 1/5
+  {a:5,b:6,c:1,d:2},   // = 1 2/3
+  {a:2,b:7,c:3,d:4},   // = 8/21
+  {a:3,b:8,c:1,d:4},   // = 1 1/2
+  {a:5,b:8,c:3,d:4},   // = 5/6
+  {a:1,b:2,c:5,d:6},   // = 3/5
+  {a:4,b:9,c:2,d:3},   // = 2/3
+  {a:7,b:10,c:1,d:2},  // = 1 2/5
+  {a:3,b:4,c:5,d:8},   // = 1 1/5
+  {a:2,b:3,c:5,d:9},   // = 1 1/5
+  {a:5,b:12,c:5,d:6},  // = 1/2
+  {a:7,b:8,c:7,d:16},  // = 2
+];
+const TOTAL=PROBLEMS.length;
+let pIndex=0;
+let P=PROBLEMS[0];
+let step=0;          // 0 keep,1 change,2 flip,3 multiply,4 simplify(done)
+let signChanged=false;
+let flipped=false;
+
+const STEPS=[
+  {icon:'🤚',label:'KEEP'},
+  {icon:'🔁',label:'CHANGE'},
+  {icon:'🙃',label:'FLIP'},
+  {icon:'✖️',label:'MULTIPLY'},
+  {icon:'✅',label:'ANSWER'},
+];
+
+// ---- helpers ----
+function gcd(x,y){return y?gcd(y,x%y):x;}
+function simplify(n,d){const k=gcd(n,d);return [n/k,d/k];}
+function asMixed(n,d){
+  const [sn,sd]=simplify(n,d);
+  if(sd===1) return sn+'';
+  if(sn>sd){const w=Math.floor(sn/sd);return `<span style="font-family:'Fredoka One';color:var(--gold);">${w}</span>`+fracHTML(sn-w*sd,sd);}
+  return fracHTML(sn,sd);
+}
+function fracHTML(top,bot,extraClass=''){
+  return `<span class="fraction-display ${extraClass}"><span class="top">${top}</span><span class="line"></span><span class="bot">${bot}</span></span>`;
+}
+
+// ---- render the step rail ----
+function renderRail(){
+  document.getElementById('rail').innerHTML=STEPS.map((s,i)=>{
+    const cls=i<step?'done':(i===step?'active':'');
+    return `<div class="rail-step ${cls}"><div class="rail-dot">${i<step?'✓':s.icon}</div><div class="rail-label">${s.label}</div></div>`;
+  }).join('');
+}
+
+// ---- render the problem in its current state ----
+function renderProblem(){
+  // first fraction: locked unless we've moved past everything
+  const firstBox=`<div class="frac-box locked">
+     <span class="lock-badge">🔒 KEEP</span>
+     ${fracHTML(P.a,P.b)}
+   </div>`;
+
+  // operator
+  const op=signChanged
+    ? `<span class="op-sym changed" id="op">×</span>`
+    : `<span class="op-sym" id="op">÷</span>`;
+
+  // second fraction: flippable; after flip it shows reciprocal
+  const secondInner = flipped ? fracHTML(P.d,P.c,'flipping') : fracHTML(P.c,P.d);
+  const secondBadge = step===2 ? `<span class="flip-badge">🙃 FLIP ME</span>` : (flipped?`<span class="flip-badge">✓ FLIPPED</span>`:'');
+  const secondCls = (step>=2)?'flippable':'';
+  const secondBox=`<div class="frac-box ${secondCls}">${secondBadge}${secondInner}</div>`;
+
+  document.getElementById('problem').innerHTML=firstBox+op+secondBox;
+}
+
+// ---- render instruction + actions for the current step ----
+function renderStep(){
+  renderRail();
+  renderProblem();
+  // live problem counter
+  const sub=document.getElementById('subtitle');
+  if(sub) sub.innerHTML=`Problem <strong style="color:var(--gold);">${pIndex+1}</strong> of ${TOTAL} — follow every step in order. You can't skip ahead until each step is correct!`;
+  const instr=document.getElementById('instruction');
+  const acts=document.getElementById('actions');
+  const fb=document.getElementById('feedback');
+  fb.className='feedback'; fb.innerHTML='';
+  acts.innerHTML='';
+
+  if(step===0){ // KEEP
+    instr.innerHTML=`<h2>Step 1 — 🤚 KEEP</h2><p>The <strong style="color:var(--sky);">first fraction stays exactly the same</strong>. We never touch it. It's locked! 🔒</p>`;
+    acts.innerHTML=`<button class="act-btn primary" onclick="doKeep()">Got it — keep ${P.a}/${P.b} ✓</button>`;
+  }
+  else if(step===1){ // CHANGE
+    instr.innerHTML=`<h2>Step 2 — 🔁 CHANGE</h2><p>Change the <strong style="color:var(--coral);">÷ sign</strong> into a <strong style="color:var(--gold);">× sign</strong>. Tap the sign to change it!</p>`;
+    acts.innerHTML=`<button class="act-btn primary" onclick="doChange()">Change ÷ into × 🔁</button>`;
+  }
+  else if(step===2){ // FLIP — the crux
+    instr.innerHTML=`<h2>Step 3 — 🙃 FLIP</h2><p><strong>Which fraction do we flip upside-down?</strong><br>Remember: we flip the <strong style="color:var(--pink);">LAST</strong> one — the fraction <em>after</em> the sign.</p>`;
+    acts.innerHTML=`
+      <button class="act-btn" onclick="pickFlip(this,false)">Flip the FIRST one (${P.a}/${P.b})</button>
+      <button class="act-btn" onclick="pickFlip(this,true)">Flip the LAST one (${P.c}/${P.d})</button>`;
+  }
+  else if(step===3){ // MULTIPLY
+    const np=P.a*P.d, dp=P.b*P.c;
+    // build distractor where pupil flipped the first instead (b*d over a*c style) -> common wrong product
+    const wrong1=`${P.b*P.c}/${P.a*P.d}`;       // upside-down
+    const correct=`${np}/${dp}`;
+    instr.innerHTML=`<h2>Step 4 — ✖️ MULTIPLY</h2><p>Now multiply straight across: tops × tops, bottoms × bottoms.<br><strong>${P.a}×${P.d}</strong> over <strong>${P.b}×${P.c}</strong>. Pick the correct product:</p>`;
+    // shuffle the two options
+    const opts=[{t:correct,ok:true},{t:wrong1,ok:false}];
+    if(Math.random()<0.5) opts.reverse();
+    acts.innerHTML=opts.map(o=>`<button class="act-btn" onclick="pickMultiply(this,${o.ok})">${fracHTML(...o.t.split('/'))}</button>`).join('');
+  }
+  else if(step===4){ // DONE
+    const np=P.a*P.d, dp=P.b*P.c;
+    instr.innerHTML=`<h2>✅ Solved — step by step!</h2><p>You kept the first, changed the sign, and flipped the <strong style="color:var(--pink);">correct</strong> fraction. That's the whole secret!</p>`;
+    document.getElementById('problem').innerHTML=`
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;">
+        ${fracHTML(P.a,P.b)} <span class="op-sym">÷</span> ${fracHTML(P.c,P.d)}
+        <span class="op-sym" style="color:var(--grass);">=</span>
+        ${fracHTML(P.a,P.b)} <span class="op-sym changed">×</span> ${fracHTML(P.d,P.c)}
+        <span class="op-sym" style="color:var(--grass);">=</span>
+        ${fracHTML(np,dp)}
+        <span class="op-sym" style="color:var(--grass);">=</span>
+        <span style="font-family:'Fredoka One';font-size:2rem;color:var(--gold);">${asMixed(np,dp)}</span>
+      </div>`;
+    const isLast = pIndex === TOTAL-1;
+    acts.innerHTML = isLast
+      ? `<button id="newprob-btn" onclick="showHomework()">📋 Finish → Homework</button>`
+      : `<button id="newprob-btn" onclick="nextProblem()">🔄 Next Problem (${pIndex+2} of ${TOTAL})</button>`;
+    fb.className='feedback good show';
+    fb.innerHTML=`🎉 Brilliant! ${P.a}/${P.b} ÷ ${P.c}/${P.d} = <strong>${asMixed(np,dp)}</strong>`;
+    launchConfetti(50);
+  }
+}
+
+// ---- step actions ----
+function doKeep(){ step=1; renderStep(); }
+function doChange(){
+  signChanged=true; step=2; renderStep();
+}
+function pickFlip(btn,isSecond){
+  const fb=document.getElementById('feedback');
+  if(!isSecond){
+    // THE targeted correction for his exact mistake
+    btn.classList.add('wrong-pick');
+    fb.className='feedback bad show';
+    fb.innerHTML=`🚫 Careful! That's the <strong>first</strong> fraction — it's locked 🔒 and never flips.<br>We flip the <strong style="color:var(--pink);">LAST</strong> fraction, the one <em>after</em> the × sign. Try again!`;
+    // DO NOT advance — pupil stays on the flip step
+    setTimeout(()=>btn.classList.remove('wrong-pick'),500);
+    return;
+  }
+  // correct choice
+  btn.classList.add('right-pick');
+  flipped=true;
+  fb.className='feedback good show';
+  fb.innerHTML=`✅ Yes! We flip the LAST fraction: ${P.c}/${P.d} becomes ${P.d}/${P.c}.`;
+  renderProblem(); // show the flip animation
+  setTimeout(()=>{ step=3; renderStep(); }, 1100);
+}
+function pickMultiply(btn,ok){
+  const fb=document.getElementById('feedback');
+  if(!ok){
+    btn.classList.add('wrong-pick');
+    fb.className='feedback bad show';
+    fb.innerHTML=`🚫 That fraction is upside-down. Multiply <strong>tops × tops</strong> (${P.a}×${P.d}) and <strong>bottoms × bottoms</strong> (${P.b}×${P.c}). Try again!`;
+    setTimeout(()=>btn.classList.remove('wrong-pick'),500);
+    return;
+  }
+  btn.classList.add('right-pick');
+  setTimeout(()=>{ step=4; renderStep(); }, 600);
+}
+
+// ---- next problem ----
+function nextProblem(){
+  pIndex=(pIndex+1)%PROBLEMS.length;
+  P=PROBLEMS[pIndex];
+  step=0; signChanged=false; flipped=false;
+  renderStep();
+}
+
+// ---- homework slide (final slide; questions to copy from screen) ----
+/* No answers shown — the pupil copies these into their book and solves
+   them using the same Keep-Change-Flip process, showing all working. */
+const HOMEWORK=[
+  {a:3,b:4,c:2,d:5},   // 3/4 ÷ 2/5
+  {a:5,b:6,c:1,d:3},   // 5/6 ÷ 1/3
+  {a:2,b:3,c:4,d:9},   // 2/3 ÷ 4/9
+];
+function showHomework(){
+  launchConfetti(70);
+  const slide=document.querySelector('.slide');
+  const hwHTML=HOMEWORK.map((h,i)=>`
+    <div style="display:flex;align-items:center;gap:14px;background:rgba(0,0,0,.22);border:1.5px solid rgba(255,201,60,.3);border-radius:16px;padding:16px 20px;">
+      <span style="font-family:'Fredoka One';font-size:1.6rem;color:var(--gold);min-width:34px;">${i+1}.</span>
+      <div style="display:flex;align-items:center;gap:8px;">
+        ${fracHTML(h.a,h.b)}<span class="op-sym" style="font-size:1.8rem;">÷</span>${fracHTML(h.c,h.d)}
+        <span class="op-sym" style="color:var(--grass);font-size:1.8rem;">=</span>
+        <span style="font-family:'Fredoka One';font-size:1.6rem;color:rgba(255,255,255,.35);">?</span>
+      </div>
+    </div>`).join('');
+  slide.innerHTML=`
+    <h1>📋 Homework — Copy These Into Your Book</h1>
+    <p class="subtitle">You finished all ${TOTAL} trainer problems! 🎉 Now show what you've learned.</p>
+    <div class="instruction">
+      <h2>✍️ Your Task</h2>
+      <p>Copy the <strong>3 questions</strong> below into your exercise book. Solve each one and <strong>show every step</strong>: Keep, Change, Flip, Multiply, then simplify your answer.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;">${hwHTML}</div>
+    <div class="mnemonic" style="margin-top:4px;">
+      <span class="mn-keep">KEEP the first</span> ·
+      <span class="mn-change">CHANGE the sign</span> ·
+      <span class="mn-flip">FLIP the LAST</span>
+    </div>
+    <p class="lock-tip">🔒 Remember: only flip the <span style="color:var(--pink);font-weight:800;">second</span> fraction — the one after the ÷ sign. The first one always stays the same!</p>
+    <div class="actions">
+      <button class="act-btn" onclick="restartTrainer()">↩️ Back to the Trainer</button>
+    </div>`;
+}
+function restartTrainer(){
+  pIndex=0; P=PROBLEMS[0]; step=0; signChanged=false; flipped=false;
+  location.reload();
+}
+
+// ---- confetti ----
+function launchConfetti(n){
+  const cols=['#FFD93D','#FF6B6B','#4FC3F7','#A78BFA','#56C596','#2ecc71','#26d0ce','#FF6EB4'];
+  for(let i=0;i<n;i++){
+    const el=document.createElement('div'); el.className='confetti-piece';
+    el.style.cssText=`left:${Math.random()*100}vw;top:-10px;background:${cols[Math.floor(Math.random()*cols.length)]};width:${6+Math.random()*9}px;height:${6+Math.random()*9}px;border-radius:${Math.random()>.5?'50%':'2px'};animation-delay:${Math.random()*.7}s;animation-duration:${2+Math.random()}s;`;
+    document.body.appendChild(el); setTimeout(()=>el.remove(),3400);
+  }
+}
+
+// ---- starfield ----
+(function(){
+  const bg=document.getElementById('bg');
+  for(let i=0;i<110;i++){
+    const s=document.createElement('div'); s.className='star';
+    const sz=1+Math.random()*2.4;
+    s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;animation-delay:${Math.random()*4}s;animation-duration:${2+Math.random()*3}s;`;
+    bg.appendChild(s);
+  }
+})();
+
+// ---- init ----
+renderStep();
+</script>
+</body>
+</html>

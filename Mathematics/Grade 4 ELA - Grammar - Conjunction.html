@@ -1,0 +1,2127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌉 Junction City – Conjunctions · Grade 4</title>
+<style>
+/* ─────────────────────────────────────
+   FONTS  — Righteous (display) + Poppins (body)
+   Both unused in previous decks → fresh identity
+───────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Righteous&family=Poppins:wght@400;600;700;800&display=swap');
+
+/* ─────────────────────────────────────
+   DESIGN TOKENS — "Junction City at Twilight"
+   Deep purple sky · Hot-pink neon · Gold rewards
+───────────────────────────────────── */
+:root {
+  --deep:   #1E0A3C;      /* deepest purple background */
+  --mid:    #3A0D6E;      /* mid purple */
+  --glow:   #7B2FBE;      /* neon glow purple */
+  --hot:    #F72585;      /* hot pink — primary accent */
+  --sky:    #4CC9F0;      /* sky blue — secondary accent */
+  --gold:   #FFD60A;      /* reward gold */
+  --mint:   #06D6A0;      /* correct green */
+  --brick:  #FF6B6B;      /* wrong coral-red */
+  --amber:  #FFBE0B;      /* warm amber for highlights */
+  --card:   rgba(255,255,255,0.98); /* clean white card */
+  --parch:  #FFF5FB;      /* pink-tinted parchment for passages */
+  --soft:   #F3E8FF;      /* soft lavender for info boxes */
+  --radius: 22px;
+  --shadow: 0 10px 45px rgba(30,10,60,0.35);
+  --font-h: 'Righteous', 'Comic Sans MS', cursive;
+  --font-b: 'Poppins', 'Segoe UI', sans-serif;
+}
+
+/* ─────────────────────────────────────  RESET  ─ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{
+  width:100%;height:100%;overflow:hidden;
+  font-family:var(--font-b);
+  background:radial-gradient(ellipse at 25% 60%,#3A0D6E 0%,#1E0A3C 55%,#0A0320 100%);
+}
+
+/* ─────────────────────────────────────
+   FLOATING CONJUNCTION WORDS BACKGROUND
+   Purpose: Thematic immersion — the words themselves float and glow
+───────────────────────────────────── */
+#word-bg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.word-float{
+  position:absolute;
+  color:rgba(247,37,133,0.18);
+  font-family:var(--font-h);
+  font-size:1.4rem;
+  animation:wordRise linear infinite;
+  white-space:nowrap;
+}
+@keyframes wordRise{
+  0%  {transform:translateY(110vh) rotate(-6deg);opacity:0;}
+  8%  {opacity:1;}
+  92% {opacity:.6;}
+  100%{transform:translateY(-80px) rotate(6deg);opacity:0;}
+}
+
+/* Twinkling city lights */
+.city-light{
+  position:fixed;pointer-events:none;z-index:0;
+  border-radius:50%;
+  animation:lightPulse ease-in-out infinite alternate;
+}
+@keyframes lightPulse{from{opacity:.15;}to{opacity:.55;}}
+
+/* ─────────────────────────────────────  HUD  ─ */
+#hud{
+  position:fixed;top:0;left:0;right:0;z-index:300;
+  display:flex;align-items:center;gap:12px;
+  padding:7px 20px;
+  background:rgba(10,3,32,0.94);
+  backdrop-filter:blur(14px);
+  border-bottom:2px solid rgba(247,37,133,.3);
+  font-family:var(--font-h);
+}
+#hud-title{color:var(--hot);font-size:1.1rem;flex:0 0 auto;}
+#pb-wrap{
+  flex:1;height:13px;background:rgba(255,255,255,.1);
+  border-radius:10px;overflow:hidden;
+}
+/* Purpose: Glowing progress bar = tangible sense of advancement */
+#pb{
+  height:100%;width:0%;
+  background:linear-gradient(90deg,var(--hot),var(--gold));
+  border-radius:10px;
+  transition:width .65s cubic-bezier(.4,0,.2,1);
+  box-shadow:0 0 12px var(--hot);
+}
+#hud-score {color:var(--gold);font-size:1rem;white-space:nowrap;}
+#hud-streak{color:var(--hot);font-size:1rem;white-space:nowrap;}
+#snd-btn{
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);
+  color:#fff;border-radius:8px;padding:3px 10px;cursor:pointer;font-size:1rem;
+  transition:background .2s;
+}
+#snd-btn:hover{background:rgba(255,255,255,.22);}
+
+/* ─────────────────────────────────────  LAYOUT  ─ */
+#app{
+  position:relative;z-index:10;
+  width:100vw;height:100vh;
+  display:flex;align-items:center;justify-content:center;
+}
+#slide-wrap{
+  margin-top:54px;
+  width:100%;height:calc(100vh - 54px);
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* ─────────────────────────────────────  SLIDE CARD  ─ */
+.slide{
+  display:none;
+  width:min(880px,96vw);
+  max-height:calc(100vh - 86px);
+  overflow-y:auto;
+  background:var(--card);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow),0 0 0 3px rgba(247,37,133,.15);
+  padding:28px 36px 24px;
+  position:relative;
+  scrollbar-width:thin;scrollbar-color:var(--hot) transparent;
+  border-top:5px solid var(--hot);
+}
+/* Purpose: Slide-in with bounce = spatial memory + playful energy */
+.slide.active{
+  display:block;
+  animation:citySlide .48s cubic-bezier(.34,1.42,.64,1);
+}
+@keyframes citySlide{
+  from{opacity:0;transform:translateX(65px) scale(.97);}
+  to  {opacity:1;transform:translateX(0)    scale(1);}
+}
+.slide::-webkit-scrollbar{width:6px;}
+.slide::-webkit-scrollbar-thumb{background:var(--hot);border-radius:6px;}
+
+/* ─────────────────────────────────────  TYPOGRAPHY  ─ */
+.slide-title{font-family:var(--font-h);font-size:1.95rem;color:var(--mid);margin-bottom:7px;line-height:1.2;}
+.slide-sub  {font-size:.97rem;color:#667;margin-bottom:14px;}
+.slide-body {font-size:1rem;color:#2a2a2a;line-height:1.78;}
+
+/* Big emoji with bounce — curiosity hook entrance */
+.big-emoji{
+  font-size:3.2rem;display:block;text-align:center;margin-bottom:7px;
+  animation:emoBounce 2.5s ease-in-out infinite alternate;
+}
+@keyframes emoBounce{from{transform:translateY(0);}to{transform:translateY(-14px);}}
+
+.level-tag{
+  position:absolute;top:14px;right:16px;
+  background:linear-gradient(135deg,var(--mid),var(--deep));
+  color:var(--gold);font-family:var(--font-h);font-size:.8rem;
+  padding:3px 13px;border-radius:50px;
+  box-shadow:0 3px 10px rgba(0,0,0,.3);
+}
+.slide-num{font-size:.82rem;color:#99a;text-align:center;margin-top:8px;}
+
+/* ─────────────────────────────────────  INFO BOXES  ─ */
+.box{border-radius:14px;padding:13px 17px;margin:11px 0;font-size:.97rem;}
+.box-k{background:linear-gradient(135deg,#EDE9FF,#F3E8FF);border-left:5px solid var(--glow);}
+.box-e{background:linear-gradient(135deg,#FFF5F9,#FFE8F4);border-left:5px solid var(--hot);}
+.box-t{background:linear-gradient(135deg,#E8FFF8,#F0FFF8);border-left:5px solid var(--mint);}
+.box-w{background:linear-gradient(135deg,#FFF5E0,#FFF8E1);border-left:5px solid var(--gold);}
+.box-s{background:linear-gradient(135deg,#E8F6FF,#EBF8FF);border-left:5px solid var(--sky);}
+
+/* ─────────────────────────────────────  NAVIGATION  ─ */
+.nav-row{display:flex;gap:12px;align-items:center;justify-content:center;margin-top:18px;flex-wrap:wrap;}
+.btn{
+  font-family:var(--font-h);font-size:1.05rem;padding:10px 28px;border-radius:50px;
+  border:none;cursor:pointer;transition:transform .15s,box-shadow .15s;
+  box-shadow:0 4px 16px rgba(0,0,0,.2);
+}
+/* Purpose: Upward lift on hover = playful, game-like interactivity */
+.btn:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 8px 24px rgba(0,0,0,.25);}
+.btn:active{transform:scale(.97);}
+.btn-p{background:linear-gradient(135deg,var(--mid),var(--deep));color:var(--gold);}
+.btn-n{background:linear-gradient(135deg,var(--hot),var(--glow));color:#fff;}
+.btn-b{background:rgba(0,0,0,.07);color:#555;}
+.btn-h{background:linear-gradient(135deg,var(--gold),var(--amber));color:var(--deep);font-size:.9rem;padding:8px 18px;}
+.btn-r{background:linear-gradient(135deg,var(--brick),#c1121f);color:#fff;}
+
+/* ─────────────────────────────────────  QUIZ SHELL  ─ */
+.section-tag{
+  display:inline-flex;align-items:center;gap:6px;
+  background:linear-gradient(135deg,var(--hot),#9d0208);
+  color:#fff;font-family:var(--font-h);font-size:.92rem;
+  padding:4px 15px;border-radius:50px;margin-bottom:10px;
+}
+.quiz-hdr{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.qbadge{
+  background:linear-gradient(135deg,var(--mid),var(--deep));
+  color:var(--gold);font-family:var(--font-h);
+  border-radius:50px;padding:4px 14px;font-size:.84rem;
+}
+.q-text{font-family:var(--font-b);font-size:1.1rem;font-weight:700;color:var(--deep);margin-bottom:14px;line-height:1.55;}
+
+/* ─────────────────────────────────────  OPTION BUTTONS  ─ */
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.opt{
+  font-family:var(--font-b);font-size:.97rem;font-weight:600;
+  padding:11px 14px;border-radius:13px;
+  border:2.5px solid #DDD3F8;background:var(--soft);
+  cursor:pointer;text-align:left;
+  transition:all .17s;color:#2a2a2a;
+  display:flex;align-items:center;gap:8px;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+}
+.opt:hover:not(:disabled){border-color:var(--glow);background:#EDE9FF;transform:scale(1.02);}
+/* Purpose: Green/red instant feedback → active recall reinforcement */
+.opt.correct {border-color:var(--mint);background:#D4FFF0;color:#035A42;}
+.opt.wrong   {border-color:var(--brick);background:#FFE8DD;color:#8B1A00;}
+.opt:disabled{cursor:default;}
+.opt-l{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:27px;height:27px;border-radius:50%;
+  background:rgba(0,0,0,.09);font-size:.82rem;font-weight:800;flex-shrink:0;
+}
+.opt.correct .opt-l{background:#95F5D0;color:#035A42;}
+.opt.wrong   .opt-l{background:#FFBE9D;color:#8B1A00;}
+
+/* ─────────────────────────────────────  FEEDBACK  ─ */
+.fb{
+  border-radius:13px;padding:10px 15px;margin-top:8px;
+  font-size:.95rem;font-weight:600;display:none;
+  animation:riseIn .3s ease forwards;
+}
+@keyframes riseIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.fb.show{display:block;}
+.fb-ok {background:#D4FFF0;border:2px solid var(--mint);color:#035A42;}
+.fb-err{background:#FFE8DD;border:2px solid var(--brick);color:#8B1A00;}
+
+/* Hint */
+.hint-txt{
+  display:none;margin-top:8px;padding:10px 14px;
+  background:#FFFBDD;border:2px dashed var(--gold);
+  border-radius:12px;font-size:.9rem;color:#5c4a00;
+}
+.hint-txt.open{display:block;animation:riseIn .3s ease;}
+
+/* ─────────────────────────────────────  SHAKE & POP ANIMATIONS  ─ */
+/* Purpose: Kinesthetic feedback strengthens error memory */
+@keyframes quake{0%,100%{transform:translateX(0);}20%{transform:translateX(-9px);}40%{transform:translateX(9px);}60%{transform:translateX(-5px);}80%{transform:translateX(5px);}}
+.quake{animation:quake .45s ease;}
+@keyframes springPop{0%{transform:scale(1);}40%{transform:scale(1.09);}100%{transform:scale(1);}}
+.spring{animation:springPop .3s ease;}
+
+/* ─────────────────────────────────────  TRUE / FALSE  ─ */
+.tf-row{display:flex;gap:14px;justify-content:center;margin:14px 0;}
+.tf-btn{
+  font-family:var(--font-h);font-size:1.2rem;padding:13px 36px;
+  border-radius:16px;border:3px solid transparent;cursor:pointer;
+  transition:all .18s;box-shadow:0 4px 14px rgba(0,0,0,.15);
+}
+.tf-t{background:linear-gradient(135deg,var(--mint),#0096C7);color:#fff;}
+.tf-f{background:linear-gradient(135deg,var(--brick),#c1121f);color:#fff;}
+.tf-btn:hover:not(:disabled){transform:scale(1.07);}
+.tf-btn:disabled{opacity:.75;cursor:default;}
+.tf-sel-t{border-color:var(--mint);box-shadow:0 0 0 5px rgba(6,214,160,.3);}
+.tf-sel-f{border-color:var(--brick);box-shadow:0 0 0 5px rgba(255,107,107,.3);}
+
+/* ─────────────────────────────────────
+   FLIP CARDS — concept reveal, active recall
+   Purpose: Spaced retrieval — student self-quizzes before answer appears
+───────────────────────────────────── */
+.flip-card{width:100%;height:115px;perspective:800px;margin:8px 0;cursor:pointer;}
+.flip-inner{width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d;position:relative;}
+.flip-card.flipped .flip-inner{transform:rotateY(180deg);}
+.flip-f,.flip-b{
+  position:absolute;inset:0;backface-visibility:hidden;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;padding:14px;text-align:center;
+}
+.flip-f{background:linear-gradient(135deg,var(--mid),var(--deep));color:var(--gold);font-family:var(--font-h);font-size:1.1rem;}
+.flip-b{background:linear-gradient(135deg,var(--hot),#9d0208);color:#fff;font-family:var(--font-b);font-size:.93rem;font-weight:700;transform:rotateY(180deg);}
+
+/* ─────────────────────────────────────
+   SENTENCE CLICK-HIGHLIGHT
+   Purpose: Tactile identification of conjunctions in context
+───────────────────────────────────── */
+.sentence-lab{
+  background:var(--parch);border:2px solid #F7C7E0;border-radius:16px;
+  padding:16px 20px;margin:12px 0;font-size:1.05rem;line-height:2;
+  color:#2a2a2a;
+  box-shadow:inset 0 2px 8px rgba(0,0,0,.04);
+}
+.conj-word{
+  display:inline-block;
+  background:linear-gradient(135deg,var(--hot),var(--glow));
+  color:#fff;font-family:var(--font-h);
+  padding:2px 10px;border-radius:8px;
+  font-size:.95rem;margin:0 2px;
+  box-shadow:0 2px 8px rgba(247,37,133,.35);
+}
+/* Click-to-reveal conjunction highlight */
+.reveal-word{
+  display:inline-block;cursor:pointer;
+  background:rgba(247,37,133,.12);
+  border:2px dashed rgba(247,37,133,.4);
+  padding:2px 8px;border-radius:8px;margin:0 2px;
+  font-weight:700;transition:all .22s;
+}
+.reveal-word:hover{background:rgba(247,37,133,.22);transform:scale(1.05);}
+.reveal-word.revealed{
+  background:linear-gradient(135deg,var(--hot),var(--glow));
+  color:#fff;border-color:transparent;
+  box-shadow:0 2px 8px rgba(247,37,133,.4);
+  animation:springPop .3s ease;
+}
+
+/* ─────────────────────────────────────
+   FANBOYS GRID — visual mnemonic
+   Purpose: Chunking — one card per letter for easy memorisation
+───────────────────────────────────── */
+.fanboys-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin:12px 0;}
+.fb-card{
+  display:flex;flex-direction:column;align-items:center;
+  padding:10px 6px;border-radius:13px;text-align:center;
+  box-shadow:0 3px 10px rgba(0,0,0,.12);transition:transform .18s;cursor:default;
+}
+.fb-card:hover{transform:translateY(-4px) scale(1.04);}
+.fb-letter{font-family:var(--font-h);font-size:1.6rem;color:#fff;line-height:1;}
+.fb-word  {font-family:var(--font-b);font-size:.7rem;font-weight:700;color:rgba(255,255,255,.9);margin-top:4px;}
+
+/* Colour per FANBOYS letter */
+.fb-f{background:linear-gradient(135deg,#F72585,#7209B7);}
+.fb-a{background:linear-gradient(135deg,#4CC9F0,#4361EE);}
+.fb-n{background:linear-gradient(135deg,#F77F00,#D62828);}
+.fb-b{background:linear-gradient(135deg,#3A86FF,#023E8A);}
+.fb-o{background:linear-gradient(135deg,#06D6A0,#0096C7);}
+.fb-y{background:linear-gradient(135deg,#FFD60A,#F77F00);}
+.fb-s{background:linear-gradient(135deg,#7B2FBE,#480CA8);}
+
+/* ─────────────────────────────────────
+   SUBORDINATING GROUPS TABLE
+───────────────────────────────────── */
+.sub-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0;}
+.sub-group{border-radius:13px;padding:12px 14px;border:2px solid transparent;}
+.sg-time{background:#E8F6FF;border-color:#4CC9F0;}
+.sg-cause{background:#E8FFF8;border-color:#06D6A0;}
+.sg-contrast{background:#FFF5F9;border-color:#F72585;}
+.sg-condition{background:#FFF5E0;border-color:#FFD60A;}
+.sg-label{font-family:var(--font-h);font-size:.85rem;margin-bottom:5px;}
+.sg-time .sg-label{color:#0077B6;}
+.sg-cause .sg-label{color:#048A6F;}
+.sg-contrast .sg-label{color:#B5179E;}
+.sg-condition .sg-label{color:#9A6500;}
+.sg-words{font-size:.88rem;font-weight:600;color:#333;line-height:1.7;}
+
+/* ─────────────────────────────────────
+   CORRELATIVE PAIRS VISUAL
+───────────────────────────────────── */
+.corr-row{display:flex;align-items:center;gap:10px;margin:8px 0;flex-wrap:wrap;}
+.corr-chip{
+  display:inline-flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,var(--mid),var(--deep));
+  color:var(--gold);font-family:var(--font-h);font-size:.95rem;
+  padding:6px 16px;border-radius:50px;
+  box-shadow:0 3px 10px rgba(0,0,0,.2);
+}
+.corr-dots{
+  display:flex;gap:4px;align-items:center;
+}
+.corr-dot{width:6px;height:6px;border-radius:50%;background:var(--hot);animation:dotPulse 1.2s ease-in-out infinite;}
+.corr-dot:nth-child(2){animation-delay:.2s;background:var(--gold);}
+.corr-dot:nth-child(3){animation-delay:.4s;background:var(--sky);}
+@keyframes dotPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.5);}}
+.corr-chip2{
+  display:inline-flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,var(--hot),#9d0208);
+  color:#fff;font-family:var(--font-h);font-size:.95rem;
+  padding:6px 16px;border-radius:50px;
+  box-shadow:0 3px 10px rgba(0,0,0,.2);
+}
+
+/* ─────────────────────────────────────  CONCEPT TABLE  ─ */
+.c-table{width:100%;border-collapse:collapse;margin:10px 0;font-size:.92rem;}
+.c-table th{background:linear-gradient(135deg,var(--mid),var(--deep));color:var(--gold);padding:8px 12px;text-align:left;font-family:var(--font-h);}
+.c-table td{padding:7px 12px;border-bottom:1px solid #EDE0FF;}
+.c-table tr:nth-child(even) td{background:#F9F5FF;}
+.c-table tr:hover td{background:#EDE9FF;}
+
+/* ─────────────────────────────────────  TOAST & BADGES  ─ */
+#toast{
+  position:fixed;top:68px;left:50%;
+  transform:translateX(-50%) translateY(-80px);
+  background:linear-gradient(135deg,var(--hot),#9d0208);
+  color:#fff;font-family:var(--font-h);font-size:1.1rem;
+  padding:10px 28px;border-radius:50px;z-index:9999;
+  box-shadow:0 8px 30px rgba(0,0,0,.3);
+  transition:transform .42s cubic-bezier(.34,1.56,.64,1),opacity .42s;
+  opacity:0;white-space:nowrap;
+}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+
+.badges-row{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;}
+.badge-el{
+  background:linear-gradient(135deg,var(--gold),var(--amber));
+  color:var(--deep);font-family:var(--font-h);font-size:.8rem;
+  padding:5px 14px;border-radius:50px;
+  box-shadow:0 3px 10px rgba(0,0,0,.18);
+  display:flex;align-items:center;gap:5px;
+  animation:badgePop .5s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes badgePop{from{transform:scale(0);opacity:0;}to{transform:scale(1);opacity:1;}}
+
+/* ─────────────────────────────────────  CELEBRATION OVERLAY  ─ */
+#cel-overlay{
+  display:none;position:fixed;inset:0;z-index:9998;
+  background:rgba(10,3,32,.75);align-items:center;justify-content:center;
+}
+#cel-overlay.show{display:flex;}
+.cel-card{
+  background:#fff;border-radius:24px;padding:28px 38px;text-align:center;
+  box-shadow:0 20px 60px rgba(0,0,0,.4);
+  animation:celPop .5s cubic-bezier(.34,1.56,.64,1);
+  max-width:410px;width:90%;border-top:6px solid var(--hot);
+}
+@keyframes celPop{from{transform:scale(.5);opacity:0;}to{transform:scale(1);opacity:1;}}
+.cel-card h2{font-family:var(--font-h);font-size:1.9rem;color:var(--mid);margin:10px 0;}
+.cel-card p{font-size:1rem;color:#555;}
+
+/* ─────────────────────────────────────  SCORE & STARS  ─ */
+.score-card{
+  background:linear-gradient(135deg,var(--mid),var(--deep));
+  border-radius:16px;color:#fff;padding:16px 20px;text-align:center;margin:10px 0;
+}
+.score-big{font-family:var(--font-h);font-size:3.8rem;color:var(--gold);line-height:1;margin:6px 0;}
+.stars-row{display:flex;justify-content:center;gap:6px;margin:10px 0;}
+.star-ic{
+  font-size:2.3rem;
+  animation:starBurst .5s cubic-bezier(.34,1.56,.64,1) forwards;opacity:0;
+}
+@keyframes starBurst{from{transform:rotate(-180deg) scale(0);opacity:0;}to{transform:rotate(0) scale(1);opacity:1;}}
+
+/* ─────────────────────────────────────  REVIEW  ─ */
+.rev-item{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid #EDE0FF;font-size:.86rem;}
+
+/* Confetti canvas */
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:9999;}
+
+/* ─────────────────────────────────────  HOOK HERO  ─ */
+.hook-hero{text-align:center;padding:6px 0;}
+.hero-h{font-family:var(--font-h);font-size:2.6rem;color:var(--mid);line-height:1.15;margin-bottom:8px;}
+
+/* ─────────────────────────────────────
+   SENTENCE BRIDGE VISUAL
+   Purpose: Concrete metaphor — conjunctions literally bridge two ideas
+───────────────────────────────────── */
+.bridge-demo{
+  display:flex;align-items:center;gap:0;margin:14px 0;flex-wrap:wrap;justify-content:center;
+}
+.bridge-block{
+  background:linear-gradient(135deg,var(--mid),var(--deep));
+  color:#fff;font-family:var(--font-h);
+  padding:10px 18px;border-radius:12px;
+  font-size:.95rem;text-align:center;
+  box-shadow:0 4px 12px rgba(0,0,0,.2);min-width:90px;
+}
+.bridge-connector{
+  background:linear-gradient(90deg,var(--hot),var(--gold));
+  color:var(--deep);font-family:var(--font-h);
+  padding:10px 14px;
+  font-size:1rem;text-align:center;
+  box-shadow:0 4px 12px rgba(247,37,133,.3);
+  position:relative;white-space:nowrap;
+}
+.bridge-connector::before{
+  content:'';position:absolute;left:-10px;top:0;bottom:0;width:10px;
+  background:linear-gradient(90deg,transparent,var(--hot));
+}
+.bridge-connector::after{
+  content:'';position:absolute;right:-10px;top:0;bottom:0;width:10px;
+  background:linear-gradient(90deg,var(--gold),transparent);
+}
+.bridge-arrow{color:rgba(247,37,133,.5);font-size:1.5rem;margin:0 4px;}
+
+/* Inline highlight tags */
+.hl-conj{background:linear-gradient(135deg,var(--hot),var(--glow));color:#fff;padding:1px 8px;border-radius:7px;font-weight:700;font-size:.95em;}
+.hl-part1{background:#E8F4FF;color:#023E8A;padding:1px 6px;border-radius:6px;font-weight:700;}
+.hl-part2{background:#FFF0FF;color:#7B2D8B;padding:1px 6px;border-radius:6px;font-weight:700;}
+
+/* FC progress bar */
+.fc-prog{height:9px;background:#EDE0FF;border-radius:6px;overflow:hidden;margin-bottom:12px;}
+.fc-prog-bar{height:100%;background:linear-gradient(90deg,var(--hot),var(--gold));border-radius:6px;transition:width .35s;}
+
+/* ─────────────────────────────────────  RESPONSIVE  ─ */
+@media(max-width:600px){
+  .slide{padding:16px 13px;}
+  .opts{grid-template-columns:1fr;}
+  .hero-h{font-size:1.9rem;}
+  .fanboys-grid{grid-template-columns:repeat(4,1fr);}
+  .sub-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- ░░ ANIMATED WORD BACKGROUND ░░ -->
+<div id="word-bg"></div>
+
+<!-- ░░ CONFETTI ░░ -->
+<canvas id="confetti"></canvas>
+
+<!-- ░░ TOAST ░░ -->
+<div id="toast">🎉</div>
+
+<!-- ░░ CELEBRATION OVERLAY ░░ -->
+<div id="cel-overlay">
+  <div class="cel-card">
+    <div style="font-size:3rem" id="cel-em">🌉</div>
+    <h2 id="cel-title">Bridge Built!</h2>
+    <p id="cel-msg">Your sentence connections are strong!</p>
+    <button class="btn btn-n" onclick="closeCel()" style="margin-top:14px">Keep Connecting! 🌉</button>
+  </div>
+</div>
+
+<!-- ░░ HUD ░░ -->
+<div id="hud">
+  <div id="hud-title">🌉 Junction City</div>
+  <div id="pb-wrap"><div id="pb"></div></div>
+  <div id="hud-score">⭐ 0 pts</div>
+  <div id="hud-streak">🔥 0</div>
+  <button id="snd-btn" onclick="toggleSound()">🔇</button>
+</div>
+
+<!-- ░░ APP ░░ -->
+<div id="app"><div id="slide-wrap">
+
+<!-- ══════════════════════════════════════
+     S0 — HOOK: Welcome to Junction City
+════════════════════════════════════════ -->
+<div class="slide" id="s0">
+  <div class="hook-hero">
+    <span class="big-emoji">🌉</span>
+    <h1 class="hero-h">
+      Welcome to<br>
+      <span style="color:var(--hot)">JUNCTION</span>
+      <span style="color:var(--sky)"> CITY!</span><br>
+      <span style="font-size:1.8rem;color:var(--glow)">Where Words Connect</span>
+    </h1>
+    <p style="font-size:1rem;color:#667;margin:8px 0">Grade 4 · Conjunctions · Baltimore, Maryland 🦀</p>
+
+    <!-- City with word bridges SVG -->
+    <div style="display:flex;justify-content:center;margin:12px 0">
+      <svg viewBox="0 0 360 210" width="340" height="198" xmlns="http://www.w3.org/2000/svg">
+        <!-- Night sky -->
+        <rect width="360" height="210" rx="18" fill="#0F0626"/>
+        <!-- Stars -->
+        <circle cx="30" cy="22" r="1.5" fill="#FFD60A" opacity=".9"/>
+        <circle cx="80" cy="14" r="1" fill="#fff" opacity=".7"/>
+        <circle cx="130" cy="20" r="1.5" fill="#FFD60A" opacity=".6"/>
+        <circle cx="200" cy="10" r="1" fill="#fff" opacity=".8"/>
+        <circle cx="270" cy="18" r="1.5" fill="#FFD60A" opacity=".7"/>
+        <circle cx="320" cy="12" r="1" fill="#fff" opacity=".6"/>
+        <!-- Buildings left cluster -->
+        <rect x="10"  y="90" width="45" height="105" rx="4" fill="#2D0D5C"/>
+        <rect x="10"  y="90" width="45" height="8" rx="2" fill="#F72585"/>
+        <rect x="20"  y="100" width="10" height="12" rx="2" fill="#FFD60A" opacity=".9"/>
+        <rect x="38"  y="100" width="10" height="12" rx="2" fill="#4CC9F0" opacity=".8"/>
+        <rect x="20"  y="118" width="10" height="12" rx="2" fill="#4CC9F0" opacity=".7"/>
+        <rect x="38"  y="118" width="10" height="12" rx="2" fill="#FFD60A" opacity=".6"/>
+        <!-- Tall building left -->
+        <rect x="60"  y="55" width="55" height="140" rx="4" fill="#1A0439"/>
+        <rect x="60"  y="55" width="55" height="10" rx="2" fill="#4CC9F0"/>
+        <rect x="70"  y="70" width="12" height="14" rx="2" fill="#FFD60A" opacity=".9"/>
+        <rect x="90"  y="70" width="12" height="14" rx="2" fill="#F72585" opacity=".8"/>
+        <rect x="70"  y="92" width="12" height="14" rx="2" fill="#4CC9F0" opacity=".9"/>
+        <rect x="90"  y="92" width="12" height="14" rx="2" fill="#FFD60A" opacity=".7"/>
+        <rect x="70"  y="114" width="12" height="14" rx="2" fill="#F72585" opacity=".8"/>
+        <rect x="90"  y="114" width="12" height="14" rx="2" fill="#4CC9F0" opacity=".9"/>
+        <!-- Word block: "I love cats" -->
+        <rect x="115" y="90" width="115" height="55" rx="8" fill="#3A0D6E"/>
+        <rect x="115" y="90" width="115" height="10" rx="4" fill="#F72585"/>
+        <text x="172" y="120" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="12" fill="#FFD60A">I love cats</text>
+        <text x="172" y="136" text-anchor="middle" font-family="Arial" font-size="10" fill="rgba(255,255,255,.7)">CLAUSE 1</text>
+        <!-- Bridge (conjunction) -->
+        <rect x="230" y="108" width="50" height="24" rx="5" fill="#F72585"/>
+        <text x="255" y="124" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="12" fill="#fff">AND</text>
+        <!-- Bridge pillars -->
+        <rect x="235" y="132" width="5" height="18" fill="#9d0208"/>
+        <rect x="270" y="132" width="5" height="18" fill="#9d0208"/>
+        <!-- Word block: "dogs" -->
+        <rect x="280" y="90" width="70" height="55" rx="8" fill="#3A0D6E"/>
+        <rect x="280" y="90" width="70" height="10" rx="4" fill="#F72585"/>
+        <text x="315" y="120" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="12" fill="#FFD60A">dogs.</text>
+        <text x="315" y="136" text-anchor="middle" font-family="Arial" font-size="10" fill="rgba(255,255,255,.7)">CLAUSE 2</text>
+        <!-- Buildings right cluster -->
+        <rect x="295" y="65" width="50" height="130" rx="4" fill="#2D0D5C"/>
+        <rect x="295" y="65" width="50" height="10" rx="2" fill="#FFD60A"/>
+        <rect x="305" y="82" width="10" height="12" rx="2" fill="#4CC9F0" opacity=".9"/>
+        <rect x="322" y="82" width="10" height="12" rx="2" fill="#F72585" opacity=".8"/>
+        <!-- Ground -->
+        <rect x="0" y="195" width="360" height="15" rx="0" fill="#1A0A30"/>
+        <!-- Ground glow -->
+        <rect x="0" y="193" width="360" height="4" fill="url(#groundGrad)" opacity=".6"/>
+        <defs>
+          <linearGradient id="groundGrad" x1="0" y1="0" x2="360" y2="0">
+            <stop offset="0%" stop-color="#4CC9F0" stop-opacity=".0"/>
+            <stop offset="20%" stop-color="#F72585" stop-opacity=".8"/>
+            <stop offset="50%" stop-color="#FFD60A" stop-opacity=".6"/>
+            <stop offset="80%" stop-color="#4CC9F0" stop-opacity=".8"/>
+            <stop offset="100%" stop-color="#F72585" stop-opacity=".0"/>
+          </linearGradient>
+        </defs>
+        <!-- Label bottom -->
+        <text x="180" y="208" text-anchor="middle" font-family="Arial" font-size="10" fill="rgba(255,255,255,.5)">Conjunctions = bridges between ideas 🌉</text>
+      </svg>
+    </div>
+
+    <div class="box box-w">
+      🤔 <strong>Curiosity Challenge:</strong> Can you turn these two sentences into <em>ONE</em>?<br>
+      <em>"I love pizza."</em> &nbsp; <em>"I love pasta."</em><br>
+      What tiny word do you need to connect them? 🍕🍝
+    </div>
+    <p style="font-size:.92rem;color:#889;margin-top:10px">
+      🕐 ~45 minutes · 5 topics · 30+ questions · Earn badges & points!
+    </p>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-n" onclick="goNext()">Enter Junction City! 🌉</button>
+  </div>
+  <div class="slide-num">Slide 1 of <span id="total-s">43</span></div>
+</div>
+
+<!-- ══════════════════════════════════════
+     S1 — HOW TO PLAY
+════════════════════════════════════════ -->
+<div class="slide" id="s1">
+  <div class="level-tag">🎮 Mission Brief</div>
+  <span class="big-emoji">🎯</span>
+  <h2 class="slide-title">Your Junction City Mission!</h2>
+  <div class="slide-body">
+    <table class="c-table">
+      <tr><th>🎮 Action</th><th>🏆 Reward</th></tr>
+      <tr><td>✅ Correct answer</td><td>+10 points</td></tr>
+      <tr><td>🔥 3 correct in a row</td><td>+15 bonus points!</td></tr>
+      <tr><td>🌉 Complete a topic</td><td>Earn a badge!</td></tr>
+      <tr><td>🌟 Perfect Final Challenge</td><td>Junction Master badge!</td></tr>
+      <tr><td>💡 Hint button</td><td>Always free to use!</td></tr>
+    </table>
+    <div class="box box-k">
+      <strong>✨ Special Activities on this deck:</strong><br>
+      👆 <strong>Click to Reveal</strong> — tap the dotted words to find the hidden conjunction<br>
+      🔄 <strong>Flip Cards</strong> — click to see the answer on the back<br>
+      📝 <strong>Sentence Bridge</strong> — see how conjunctions connect sentence halves
+    </div>
+    <div class="box box-t">
+      💡 Use <strong>Arrow Keys ←→</strong> or the buttons to navigate between slides.
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-b" onclick="goBack()">← Back</button>
+    <button class="btn btn-n" onclick="goNext()">Start Learning! 📚</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     S2 — CONCEPT: WHAT IS A CONJUNCTION?
+════════════════════════════════════════ -->
+<div class="slide" id="s2">
+  <div class="level-tag">📍 Topic 1</div>
+  <span class="big-emoji">🔗</span>
+  <h2 class="slide-title">What Is a Conjunction?</h2>
+  <p class="slide-sub">A joining word that connects words, phrases, or whole sentences</p>
+  <div class="slide-body">
+    <div class="box box-k">
+      A <strong>conjunction</strong> is a word that <strong>CONNECTS</strong> other words, phrases, or clauses.<br>
+      Think of it like a <strong>bridge</strong> 🌉 — it holds two sides together!
+    </div>
+
+    <!-- Three bridge demos -->
+    <p style="font-weight:700;font-size:.9rem;margin:10px 0 6px">📌 Conjunctions connect at three levels:</p>
+
+    <div class="bridge-demo">
+      <div class="bridge-block">cats</div>
+      <div class="bridge-connector">and</div>
+      <div class="bridge-block">dogs</div>
+      <span style="margin-left:12px;font-size:.85rem;color:#667;align-self:center">← connecting WORDS</span>
+    </div>
+    <div class="bridge-demo">
+      <div class="bridge-block">in the park</div>
+      <div class="bridge-connector">or</div>
+      <div class="bridge-block">at the beach</div>
+      <span style="margin-left:12px;font-size:.85rem;color:#667;align-self:center">← connecting PHRASES</span>
+    </div>
+    <div class="bridge-demo">
+      <div class="bridge-block">She was tired</div>
+      <div class="bridge-connector">but</div>
+      <div class="bridge-block">she kept going</div>
+      <span style="margin-left:12px;font-size:.85rem;color:#667;align-self:center">← connecting CLAUSES</span>
+    </div>
+
+    <div class="box box-e">
+      <strong>Three types of conjunctions:</strong><br>
+      1️⃣ <strong>Coordinating</strong> — join <em>equal</em> parts (FANBOYS: For, And, Nor, But, Or, Yet, So)<br>
+      2️⃣ <strong>Subordinating</strong> — join a main idea to a <em>dependent</em> idea (because, when, although…)<br>
+      3️⃣ <strong>Correlative</strong> — work in <em>pairs</em> (either…or, neither…nor, both…and)
+    </div>
+
+    <p style="font-weight:700;font-size:.9rem;margin:10px 0 5px">👆 Click each dotted word to reveal the conjunction!</p>
+    <div class="sentence-lab">
+      I wanted to play outside, <span class="reveal-word" onclick="this.classList.add('revealed')">but</span> it was raining.
+    </div>
+    <div class="sentence-lab">
+      <span class="reveal-word" onclick="this.classList.add('revealed')">Because</span> she studied hard, she passed the test.
+    </div>
+    <div class="sentence-lab">
+      <span class="reveal-word" onclick="this.classList.add('revealed')">Either</span> you can have cake <span class="reveal-word" onclick="this.classList.add('revealed')">or</span> ice cream.
+    </div>
+
+    <div class="box box-t">
+      💡 <strong>Memory Hook:</strong> A conjunction is a <strong>JUNCTION</strong> — like a road junction where two streets meet! 🚦
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-b" onclick="goBack()">← Back</button>
+    <button class="btn btn-n" onclick="goNext()">Mini Quiz! 🧠</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     S3 — QUIZ 1A
+════════════════════════════════════════ -->
+<div class="slide" id="s3">
+  <div class="section-tag">🧠 Mini Quiz — What Is a Conjunction?</div>
+  <div class="quiz-hdr"><span class="qbadge">Q 1 of 3</span><span style="font-size:.85rem;color:#889">Identification · +10 pts</span></div>
+  <p class="q-text">
+    Which word is the <strong>conjunction</strong> in this sentence?<br>
+    <span style="display:block;margin:10px 0;padding:12px 16px;background:var(--parch);border-radius:12px;font-style:italic;color:var(--mid)">
+      "Maya ran fast, <strong style="color:var(--hot)">???</strong> she missed the bus."
+    </span>
+  </p>
+  <div class="opts" id="q1-opts">
+    <button class="opt" onclick="chk(this,'q1','A')"><span class="opt-l">A</span> ran</button>
+    <button class="opt" onclick="chk(this,'q1','B')"><span class="opt-l">B</span> fast</button>
+    <button class="opt" onclick="chk(this,'q1','C')"><span class="opt-l">C</span> but</button>
+    <button class="opt" onclick="chk(this,'q1','D')"><span class="opt-l">D</span> missed</button>
+  </div>
+  <button class="btn btn-h" onclick="showHint('h1')">💡 Hint</button>
+  <div id="h1" class="hint-txt">A conjunction CONNECTS two parts of a sentence. Which word joins "Maya ran fast" to "she missed the bus"?</div>
+  <div id="fb-q1" class="fb"></div>
+  <div class="nav-row" id="nav-q1" style="display:none"><button class="btn btn-n" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- S4 — QUIZ 1B -->
+<div class="slide" id="s4">
+  <div class="section-tag">🧠 Mini Quiz — What Is a Conjunction?</div>
+  <div class="quiz-hdr"><span class="qbadge">Q 2 of 3</span><span style="font-size:.85rem;color:#889">Identification · +10 pts</span></div>
+  <p class="q-text">Which sentence <strong>contains a conjunction</strong>?</p>
+  <div class="opts" id="q2-opts">
+    <button class="opt" onclick="chk(this,'q2','A')"><span class="opt-l">A</span> The puppy barked loudly all night.</button>
+    <button class="opt" onclick="chk(this,'q2','B')"><span class="opt-l">B</span> She finished her homework quickly.</button>
+    <button class="opt" onclick="chk(this,'q2','C')"><span class="opt-l">C</span> He was tired, so he went to bed early.</button>
+    <button class="opt" onclick="chk(this,'q2','D')"><span class="opt-l">D</span> The bright stars lit the night sky.</button>
+  </div>
+  <button class="btn btn-h" onclick="showHint('h2')">💡 Hint</button>
+  <div id="h2" class="hint-txt">Look for a word that JOINS two ideas together. Words like "and", "but", "so", "or", "because" are conjunctions.</div>
+  <div id="fb-q2" class="fb"></div>
+  <div class="nav-row" id="nav-q2" style="display:none"><button class="btn btn-n" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- S5 — QUIZ 1C -->
+<div class="slide" id="s5">
+  <div class="section-tag">🧠 Mini Quiz — What Is a Conjunction?</div>
+  <div class="quiz-hdr"><span class="qbadge">Q 3 of 3</span><span style="font-size:.85rem;color:#889">True/False · +10 pts</span></div>
+  <p class="q-text">True or False:<br><strong>"A conjunction can join two complete sentences together."</strong></p>
+  <div class="tf-row">
+    <button class="tf-btn tf-t" onclick="chkTF(this,'q3',true)">TRUE ✓</button>
+    <button class="tf-btn tf-f" onclick="chkTF(this,'q3',false)">FALSE ✗</button>
+  </div>
+  <button class="btn btn-h" onclick="showHint('h3')">💡 Hint</button>
+  <div id="h3" class="hint-txt">Example: "I was hungry." + "I ate lunch." → "I was hungry, <strong>so</strong> I ate lunch." — one conjunction joins both!</div>
+  <div id="fb-q3" class="fb"></div>
+  <div class="nav-row" id="nav-q3" style="display:none"><button class="btn btn-n" onclick="goNext()">Topic 2: FANBOYS! 🎸</button></div>
+</div>
+
+<!-- ══════════════════════════════════════
+     S6 — CONCEPT: COORDINATING CONJUNCTIONS (FANBOYS)
+════════════════════════════════════════ -->
+<div class="slide" id="s6">
+  <div class="level-tag">📍 Topic 2</div>
+  <span class="big-emoji">🎸</span>
+  <h2 class="slide-title">Coordinating Conjunctions</h2>
+  <p class="slide-sub">The FANBOYS — 7 words that join EQUAL parts of a sentence</p>
+  <div class="slide-body">
+    <div class="box box-k">
+      Coordinating conjunctions join things of <strong>equal importance</strong>:<br>
+      two words, two phrases, or two complete sentences.<br>
+      Remember them with <strong>FANBOYS</strong>! 🎸
+    </div>
+
+    <!-- FANBOYS grid - each letter a coloured card -->
+    <div class="fanboys-grid">
+      <div class="fb-card fb-f"><span class="fb-letter">F</span><span class="fb-word">For</span></div>
+      <div class="fb-card fb-a"><span class="fb-letter">A</span><span class="fb-word">And</span></div>
+      <div class="fb-card fb-n"><span class="fb-letter">N</span><span class="fb-word">Nor</span></div>
+      <div class="fb-card fb-b"><span class="fb-letter">B</span><span class="fb-word">But</span></div>
+      <div class="fb-card fb-o"><span class="fb-letter">O</span><span class="fb-word">Or</span></div>
+      <div class="fb-card fb-y"><span class="fb-letter">Y</span><span class="fb-word">Yet</span></div>
+      <div class="fb-card fb-s"><span class="fb-letter">S</span><span class="fb-word">So</span></div>
+    </div>
+
+    <table class="c-table">
+      <tr><th>Conjunction</th><th>What it shows</th><th>Example</th></tr>
+      <tr><td><strong>For</strong></td><td>Reason</td><td><em>She rested, <strong>for</strong> she was tired.</em></td></tr>
+      <tr><td><strong>And</strong></td><td>Addition</td><td><em>I like cats <strong>and</strong> dogs.</em></td></tr>
+      <tr><td><strong>Nor</strong></td><td>Negative addition</td><td><em>He can't swim, <strong>nor</strong> can he float.</em></td></tr>
+      <tr><td><strong>But</strong></td><td>Contrast</td><td><em>She tried, <strong>but</strong> she failed.</em></td></tr>
+      <tr><td><strong>Or</strong></td><td>Choice/alternative</td><td><em>You can run <strong>or</strong> walk.</em></td></tr>
+      <tr><td><strong>Yet</strong></td><td>Unexpected contrast</td><td><em>He is tired, <strong>yet</strong> he keeps going.</em></td></tr>
+      <tr><td><strong>So</strong></td><td>Result</td><td><em>It rained, <strong>so</strong> we stayed inside.</em></td></tr>
+    </table>
+    <div class="box box-s">
+      ⚠️ <strong>Comma Rule:</strong> Use a comma <em>before</em> a FANBOYS conjunction when it joins TWO <strong>complete sentences</strong>.<br>
+      ✅ "I was cold<strong>, so</strong> I wore a coat." &nbsp;|&nbsp; ❌ "I wore a coat and scarf." (no comma — joining two words only)
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-b" onclick="goBack()">← Back</button>
+    <button class="btn btn-n" onclick="goNext()">FANBOYS in Action! ✨</button>
+  </div>
+</div>
+
+<!-- S7 — FANBOYS DETAIL + FLIP CARDS -->
+<div class="slide" id="s7">
+  <div class="level-tag">📍 Topic 2 (continued)</div>
+  <span class="big-emoji">💡</span>
+  <h2 class="slide-title">FANBOYS in Sentences</h2>
+  <p class="slide-sub">Practice spotting coordinating conjunctions — click to reveal!</p>
+  <div class="slide-body">
+    <p style="font-weight:700;font-size:.9rem;margin-bottom:8px">👆 Click the dotted words to highlight the conjunctions:</p>
+
+    <div class="sentence-lab">
+      I wanted a dog, <span class="reveal-word" onclick="this.classList.add('revealed')">but</span> my sister wanted a cat.
+    </div>
+    <div class="sentence-lab">
+      She packed her bag <span class="reveal-word" onclick="this.classList.add('revealed')">and</span> left for school early.
+    </div>
+    <div class="sentence-lab">
+      Do you want juice <span class="reveal-word" onclick="this.classList.add('revealed')">or</span> water with your lunch?
+    </div>
+    <div class="sentence-lab">
+      He practised every day, <span class="reveal-word" onclick="this.classList.add('revealed')">so</span> he made the team.
+    </div>
+
+    <p style="font-weight:700;font-size:.9rem;margin:12px 0 5px">🔄 Flip cards — test your knowledge:</p>
+    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-f">Which FANBOYS conjunction shows a RESULT or consequence?</div>
+        <div class="flip-b">✅ <strong>SO</strong> — "It snowed heavily, <em>so</em> school was cancelled." The result of heavy snow = cancelled school.</div>
+      </div>
+    </div>
+    <div class="flip-card" onclick="this.classList.toggle('flipped')" style="margin-top:8px">
+      <div class="flip-inner">
+        <div class="flip-f">What's the difference between BUT and YET?</div>
+        <div class="flip-b">Both show contrast. <strong>YET</strong> has a stronger sense of surprise: "She never trains, <em>yet</em> she always wins!" — unexpected!</div>
+      </div>
+    </div>
+    <div class="box box-t" style="margin-top:10px">
+      💡 <strong>Quick Test:</strong> Count the FANBOYS without looking → F-A-N-B-O-Y-S. Got all 7? ✅
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-b" onclick="goBack()">← Back</button>
+    <button class="btn btn-n" onclick="goNext()">Mini Quiz! 🧠</button>
+  </div>
+</div>
+
+<!-- S8 — QUIZ 2A -->
+<div class="slide" id="s8">
+  <div class="section-tag">🧠 Mini Quiz — FANBOYS</div>
+  <div class="quiz-hdr"><span class="qbadge">Q 1 of 3</span><span style="font-size:.85rem;color:#889">Coordinating · +10 pts</span></div>
+  <p class="q-text">Which of these is a <strong>coordinating conjunction (FANBOYS)</strong>?</p>
+  <div class="opts" id="q4-opts">
+    <button class="opt" onclick="chk(this,'q4','A')"><span class="opt-l">A</span> because</button>
+    <button class="opt" onclick="chk(this,'q4','B')"><span class="opt-l">B</span> although</button>
+    <button class="opt" onclick="chk(this,'q4','C')"><span class="opt-l">C</span> yet</button>
+    <button class="opt" onclick="chk(this,'q4','D')"><span class="opt-l">D</span> when</button>
+  </div>
+  <button class="btn btn-h" onclick="showHint('h4')">💡 Hint</button>
+  <div id="h4" class="hint-txt">Say FANBOYS: For, And, Nor, But, Or, <strong>Yet</strong>, So. "Because", "although", and "when" are subordinating conjunctions!</div>
+  <div id="fb-q4" class="fb"></div>
+  <div class="nav-row" id="nav-q4" style="display:none"><button class="btn btn-n" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- S9 — QUIZ 2B -->
+<div class="slide" id="s9">
+  <div class="section-tag">🧠 Mini Quiz — FANBOYS</div>
+  <div class="quiz-hdr"><span class="qbadge">Q 2 of 3</span><span style="font-size:.85rem;color:#889">Choose the best · +10 pts</span></div>
+  <p class="q-text">
+    Choose the best conjunction:<br>
+    <span style="display:block;margin:10px 0;padding:12px 16px;background:var(--parch);border-radius:12px;font-style:italic;color:var(--mid)">
+      "I studied hard, ___ I still failed the test."
+    </span>
+    Which word best shows that the result was <em>unexpected</em>?
+  </p>
+  <div class="opts" id="q5-opts">
+    <button class="opt" onclick="chk(this,'q5','A')"><span class="opt-l">A</span> and</button>
+    <button class="opt" onclick="chk(this,'q5','B')"><span class="opt-l">B</span> or</button>
+    <button class="opt" onclick="chk(this,'q5','C')"><span class="opt-l">C</span> yet</button>
+    <button class="opt" onclick="chk(this,'q5','D')"><span class="opt-l">D</span> nor</button>
+  </div>
+  <button class="btn btn-h" onclick="showHint('h5')">💡 Hint</button>
+  <div id="h5" class="hint-txt">"Yet" and "but" both show contrast. "Yet" is used for a <strong>surprising or unexpected</strong> result. Studying hard but still failing = surprising!</div>
+  <div id="fb-q5" class="fb"></div>
+  <div class="nav-row" id="nav-q5" style="display:none"><button class="btn btn-n" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- S10 — QUIZ 2C -->
+<div class="slide" id="s10">
+  <div class="section-tag">🧠 Mini Quiz — FANBOYS Comma Rule</div>
+  <div class="quiz-hdr"><span class="qbadge">Q 3 of 3</span><span style="font-size:.85rem;color:#889">Punctuation · +10 pts</span></div>
+  <p class="q-text">Which sentence uses a <strong>comma correctly</strong> with a coordinating conjunction?</p>
+  <div class="opts" id="q6-opts">
+    <button class="opt" onclick="chk(this,'q6','A')"><span class="opt-l">A</span> I was cold, and shivering.</button>
+    <button class="opt" onclick="chk(this,'q6','B')"><span class="opt-l">B</span> She was nervous, but she gave a great speech.</button>
+    <button class="opt" onclick="chk(this,'q6','C')"><span class="opt-l">C</span> He ate lunch, and was full.</button>
+    <button class="opt" onclick="chk(this,'q6','D')"><span class="opt-l">D</span> We ran, or jumped over puddles.</button>
+  </div>
+  <button class="btn btn-h" onclick="showHint('h6')">💡 Hint</button>
+  <div id="h6" class="hint-txt">Put a comma before FANBOYS ONLY when it joins two <strong>complete sentences</strong>. B has: "She was nervous" (complete) + "but" + "she gave a great speech" (complete). Both sides are full sentences → comma needed!</div>
+  <div id="fb-q6" class="fb"></div>
+  <div class="nav-row" id="nav-q6" style="display:none"><button class="btn btn-n" onclick="goNext()">Topic 3! 🌿</button></div>
+</div>
+
+<!-- ══════════════════════════════════════
+     S11 — CONCEPT: SUBORDINATING CONJUNCTIONS
+════════════════════════════════════════ -->
+<div class="slide" id="s11">
+  <div class="level-tag">📍 Topic 3</div>
+  <span class="big-emoji">🌿</span>
+  <h2 class="slide-title">Subordinating Conjunctions</h2>
+  <p class="slide-sub">Words that add a DEPENDENT idea to the main sentence</p>
+  <div class="slide-body">
+    <div class="box box-k">
+      A <strong>subordinating conjunction</strong> connects a <em>main clause</em> to a <em>dependent clause</em>.<br>
+      The dependent clause <strong>cannot stand alone</strong> — it needs the main clause to make sense!
+    </div>
+
+    <div class="bridge-demo">
+      <div class="bridge-block" style="background:linear-gradient(135deg,#4CC9F0,#023E8A)">She passed the test</div>
+      <div class="bridge-connector">because</div>
+      <div class="bridge-block" style="background:linear-gradient(135deg,#7B2FBE,#3A0D6E)">she studied hard</div>
+    </div>
+    <p style="text-align:center;font-size:.85rem;color:#667;margin-top:-4px">↑ Main clause &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↑ Subordinating conj. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↑ Dependent clause</p>
+
+    <!-- Grouped by function — chunking principle -->
+    <p style="font-weight:700;font-size:.9rem;margin:12px 0 6px">📦 Grouped by what they show:</p>
+    <div class="sub-grid">
+      <div class="sub-group sg-time">
+        <div class="sg-label">⏰ TIME</div>
+        <div class="sg-words">when · while · after · before · until · since · as soon as</div>
+      </div>
+      <div class="sub-group sg-cause">
+        <div class="sg-label">💡 CAUSE / REASON</div>
+        <div class="sg-words">because · since · as</div>
+      </div>
+      <div class="sub-group sg-contrast">
+        <div class="sg-label">⚡ CONTRAST</div>
+        <div class="sg-words">although · even though · though · while · whereas</div>
+      </div>
+      <div class="sub-group sg-condition">
+        <div class="sg-label">🎯 CONDITION</div>
+        <div class="sg-words">if · unless · provided that · as long as</div>
+      </div>
+    </div>
+    <div class="box box-s">
+      ⚠️ <strong>Comma Rule for Subordinating Conjunctions:</strong><br>
+      ✅ <strong>Comma when the subordinate clause comes FIRST:</strong><br>
+      &nbsp;&nbsp;&nbsp;<em>"<strong>Because</strong> it was raining<strong>,</strong> we stayed inside."</em><br>
+      ✅ <strong>No comma when the main clause comes FIRST:</strong><br>
+      &nbsp;&nbsp;&nbsp;<em>"We stayed inside <strong>because</strong> it was raining."</em>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-b" onclick="goBack()">← Back</button>
+    <button class="btn btn-n" onclick="goNext()">More Examples! ✨</button>
+  </div>
+</div>
+
+<!-- S12 — SUBORDINATING EXAMPLES + FLIP CARDS -->
+<div class="slide" id="s12">
+  <div class="level-tag">📍 Topic 3 (continued)</div>
+  <span class="big-emoji">🔄</span>
+  <h2 class="slide-title">Subordinating in Action</h2>
+  <p class="slide-sub">Spot the conjunction · understand the relationship · check the comma</p>
+  <div class="slide-body">
+    <p style="font-weight:700;font-size:.9rem;margin-bottom:8px">👆 Click to reveal the subordinating conjunctions:</p>
+    <div class="sentence-lab">
+      <span class="reveal-word" onclick="this.classList.add('revealed')">Although</span> the team lost, they played brilliantly.
+      <span style="font-size:.8rem;color:#999;margin-left:8px">[Contrast — comma after the subordinate clause]</span>
+    </div>
+    <div class="sentence-lab">
+      She put on a coat <span class="reveal-word" onclick="this.classList.add('revealed')">because</span> it was cold outside.
+      <span style="font-size:.8rem;color:#999;margin-left:8px">[Cause — main clause first, no comma]</span>
+    </div>
+    <div class="sentence-lab">
+      <span class="reveal-word" onclick="this.classList.add('revealed')">When</span> the bell rings, the students leave class.
+      <span style="font-size:.8rem;color:#999;margin-left:8px">[Time — comma after the subordinate clause]</span>
+    </div>
+    <div class="sentence-lab">
+      You won't pass <span class="reveal-word" onclick="this.classList.add('revealed')">unless</span> you study the material.
+      <span style="font-size:.8rem;color:#999;margin-left:8px">[Condition — main clause first, no comma]</span>
+    </div>
+
+    <p style="font-weight:700;font-size:.9rem;margin:12px 0 5px">🔄 Flip — test your understanding:</p>
+    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-f">"Unless" belongs to which group of subordinating conjunctions?</div>
+        <div class="flip-b">✅ <strong>CONDITION</strong> — "Unless" means "except if." It sets a condition: <em>"You can't go unless you finish first."</em></div>
+      </div>
+    </div>
+    <div class="flip-card" onclick="this.classList.toggle('flipped')" style="margin-top:8px">
+      <div class="flip-inner">
+        <div class="flip-f">Complete: "Because I was late<strong>,</strong> ___" OR "___ because I was late" — which needs a comma?</div>
+        <div class="flip-b">✅ The FIRST version needs a comma. When "because" starts the sentence, the dependent clause comes first → add a comma before the main clause!</div>
+      </div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-b" onclick="goBack()">← Back</button>
+    <button class="btn btn-n" onclick="goNext()">Mini Quiz! 🧠</button>
+  </div>
+</div>
+
+<!-- S13 — QUIZ 3A -->
+<div class="slide" id="s13">
+  <div class="section-tag">🧠 Mini Quiz — Subordinating</div>
+  <div class="quiz-hdr"><span class="qbadge">Q 1 of 3</span><span style="font-size:.85rem;color:#889">Identification · +10 pts</span></div>
+  <p class="q-text">Which of these is a <strong>subordinating conjunction</strong>?</p>
+  <div class="opts" id="q7-opts">
+    <button class="opt" onclick="chk(this,'q7','A')"><span class="opt-l">A</span> and</button>
+    <button class="opt" onclick="chk(this,'q7','B')"><span class="opt-l">B</span> but</button>
+    <button class="opt" onclick="chk(this,'q7','C')"><span class="opt-l">C</span> because</button>
+    <button class="opt" onclick="chk(this,'q7','D')"><span class="opt-l">D</span> or</button>
+  </div>
+  <button class="btn btn-h" onclick="showHint('h7')">💡 Hint</button>
+  <div id="h7" class="hint-txt">AND, BUT, OR are all FANBOYS (coordinating). BECAUSE introduces a <strong>dependent clause</strong> explaining a reason — that's subordinating!</div>
+  <div id="fb-q7" class="fb"></div>
+  <div class="nav-row" id="nav-q7" style="display:none"><button class="btn btn-n" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- S14 — QUIZ 3B -->
+<div class="slide" id="s14">
+  <div class="section-tag">🧠 Mini Quiz — Subordinating</div>
+  <div class="quiz-hdr"><span class="qbadge">Q 2 of 3</span><span style="font-size:.85rem;color:#889">Choose the best · +10 pts</span></div>
+  <p class="q-text">
+    Which sentence uses a conjunction to correctly show <strong>CAUSE</strong>?
+  </p>
+  <div class="opts" id="q8-opts">
+    <button class="opt" onclick="chk(this,'q8','A')"><span class="opt-l">A</span> I was happy because I won the prize.</button>
+    <button class="opt" onclick="chk(this,'q8','B')"><span class="opt-l">B</span> I was happy and I won the prize.</button>
+    <button class="opt" onclick="chk(this,'q8','C')"><span class="opt-l">C</span> I was happy or I won the prize.</button>
+    <button class="opt" onclick="chk(this,'q8','D')"><span class="opt-l">D</span> I was happy although I won the prize.</button>
+  </div>
+  <button class="btn btn-h" onclick="showHint('h8')">💡 Hint</button>
+  <div id="h8" class="hint-txt">"Because" introduces a REASON — the cause of being happy was winning the prize! "Although" would show contrast (unexpected). "And" just adds information.</div>
+  <div id="fb-q8" class="fb"></div>
+  <div class="nav-row" id="nav-q8" style="display:none"><button class="btn btn-n" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- S15 — QUIZ 3C -->
+<div class="slide" id="s15">
+  <div class="section-tag">🧠 Mini Quiz — Subordinating</div>
+  <div class="quiz-hdr"><span class="qbadge">Q 3 of 3</span><span style="font-size:.85rem;color:#889">True/False · +10 pts</span></div>
+  <p class="q-text">
+    True or False:<br>
+    <strong>"When a subordinating conjunction starts the sentence, a comma goes after the dependent clause."</strong>
+  </p>
+  <div class="tf-row">
+    <button class="tf-btn tf-t" onclick="chkTF(this,'q9',true)">TRUE ✓</button>
+    <button class="tf-btn tf-f" onclick="chkTF(this,'q9',false)">FALSE ✗</button>
+  </div>
+  <button class="btn btn-h" onclick="showHint('h9')">💡 Hint</button>
+  <div id="h9" class="hint-txt">Example: "<strong>Because it rained</strong>, we stayed inside." ← The comma separates the subordinate clause (Because it rained) from the main clause (we stayed inside).</div>
+  <div id="fb-q9" class="fb"></div>
+  <div class="nav-row" id="nav-q9" style="display:none"><button class="btn btn-n" onclick="goNext()">Topic 4: Pairs! 🔗</button></div>
+</div>
+
+<!-- ══════════════════════════════════════
+     S16 — CONCEPT: CORRELATIVE CONJUNCTIONS
+════════════════════════════════════════ -->
+<div class="slide" id="s16">
+  <div class="level-tag">📍 Topic 4</div>
+  <span class="big-emoji">🔗</span>
+  <h2 class="slide-title">Correlative Conjunctions</h2>
+  <p class="slide-sub">Conjunction PAIRS that always work together — two parts, one connection</p>
+  <div class="slide-body">
+    <div class="box box-k">
+      <strong>Correlative conjunctions</strong> always come in <em>pairs</em>.<br>
+      The first part sets up the sentence; the second part completes it. They're like a matching set! 🧤
+    </div>
+
+    <!-- Visual pairs with animated connector dots -->
+    <p style="font-weight:700;font-size:.9rem;margin:10px 0 6px">🔗 The main correlative pairs:</p>
+    <div class="corr-row">
+      <div class="corr-chip">either</div>
+      <div class="corr-dots"><div class="corr-dot"></div><div class="corr-dot"></div><div class="corr-dot"></div></div>
+      <div class="corr-chip2">or</div>
+      <span style="font-size:.85rem;color:#667;margin-left:8px">→ <em>"Either you study, <strong>or</strong> you fail."</em></span>
+    </div>
+    <div class="corr-row">
+      <div class="corr-chip">neither</div>
+      <div class="corr-dots"><div class="corr-dot"></div><div class="corr-dot"></div><div class="corr-dot"></div></div>
+      <div class="corr-chip2">nor</div>
+      <span style="font-size:.85rem;color:#667;margin-left:8px">→ <em>"<strong>Neither</strong> Jack <strong>nor</strong> Jill was there."</em></span>
+    </div>
+    <div class="corr-row">
+      <div class="corr-chip">both</div>
+      <div class="corr-dots"><div class="corr-dot"></div><div class="corr-dot"></div><div class="corr-dot"></div></div>
+      <div class="corr-chip2">and</div>
+      <span style="font-size:.85rem;color:#667;margin-left:8px">→ <em>"<strong>Both</strong> Maya <strong>and</strong> her brother won."</em></span>
+    </div>
+    <div class="corr-row">
+      <div class="corr-chip">not only</div>
+      <div class="corr-dots"><div class="corr-dot"></div><div class="corr-dot"></div><div class="corr-dot"></div></div>
+      <div class="corr-chip2">but also</div>
+      <span style="font-size:.85rem;color:#667;margin-left:8px">→ <em>"She is <strong>not only</strong> smart <strong>but also</strong> kind."</em></span>
+    </div>
+    <div class="corr-row">
+      <div class="corr-chip">whether</div>
+      <div class="corr-dots"><div class="corr-dot"></div><div class="corr-dot"></div><div class="corr-dot"></div></div>
+      <div class="corr-chip2">or</div>
+      <span style="font-size:.85rem;color:#667;margin-left:8px">→ <em>"<strong>Whether</strong> it rains <strong>or</strong> shines, we'll be there."</em></span>
+    </div>
+
+    <div class="box box-w">
+      ⚠️ <strong>Remember the pair rule:</strong><br>
+      NEVER use only one half! ❌ "Neither Jack was there." (missing "nor")<br>
+      ✅ "Neither Jack <strong>nor</strong> Jill was there."
+    </div>
+    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-f">Why do we call them CORRELATIVE conjunctions?</div>
+        <div class="flip-b">✅ "Correlative" comes from "correlate" — to have a mutual relationship. These conjunctions <strong>relate</strong> to each other; they must always appear together as a team! 🤝</div>
+      </div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-b" onclick="goBack()">← Back</button>
+    <button class="btn btn-n" onclick="goNext()">Mini Quiz! 🧠</button>
+  </div>
+</div>
+
+<!-- S17 — QUIZ 4A -->
+<div class="slide" id="s17">
+  <div class="section-tag">🧠 Mini Quiz — Correlative</div>
+  <div class="quiz-hdr"><span class="qbadge">Q 1 of 3</span><span style="font-size:.85rem;color:#889">Complete the pair · +10 pts</span></div>
+  <p class="q-text">
+    Complete the sentence with the correct conjunction pair:<br>
+    <span style="display:block;margin:10px 0;padding:12px 16px;background:var(--parch);border-radius:12px;font-style:italic;color:var(--mid)">
+      "Neither Marcus ___ his sister wanted to leave the party early."
+    </span>
+  </p>
+  <div class="opts" id="q10-opts">
+    <button class="opt" onclick="chk(this,'q10','A')"><span class="opt-l">A</span> and</button>
+    <button class="opt" onclick="chk(this,'q10','B')"><span class="opt-l">B</span> nor</button>
+    <button class="opt" onclick="chk(this,'q10','C')"><span class="opt-l">C</span> or</button>
+    <button class="opt" onclick="chk(this,'q10','D')"><span class="opt-l">D</span> but</button>
+  </div>
+  <button class="btn btn-h" onclick="showHint('h10')">💡 Hint</button>
+  <div id="h10" class="hint-txt">NEITHER always pairs with NOR. Think of them as twins — "neither…nor" is the pair. "Either…or" is the other set!</div>
+  <div id="fb-q10" class="fb"></div>
+  <div class="nav-row" id="nav-q10" style="display:none"><button class="btn btn-n" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- S18 — QUIZ 4B -->
+<div class="slide" id="s18">
+  <div class="section-tag">🧠 Mini Quiz — Correlative</div>
+  <div class="quiz-hdr"><span class="qbadge">Q 2 of 3</span><span style="font-size:.85rem;color:#889">Identification · +10 pts</span></div>
+  <p class="q-text">Which of these is a <strong>correlative conjunction pair</strong>?</p>
+  <div class="opts" id="q11-opts">
+    <button class="opt" onclick="chk(this,'q11','A')"><span class="opt-l">A</span> and … but</button>
+    <button class="opt" onclick="chk(this,'q11','B')"><span class="opt-l">B</span> because … so</button>
+    <button class="opt" onclick="chk(this,'q11','C')"><span class="opt-l">C</span> both … and</button>
+    <button class="opt" onclick="chk(this,'q11','D')"><span class="opt-l">D</span> when … while</button>
+  </div>
+  <button class="btn btn-h" onclick="showHint('h11')">💡 Hint</button>
+  <div id="h11" class="hint-txt">Correlative pairs: either/or · neither/nor · <strong>both/and</strong> · not only/but also · whether/or. These are the five main sets.</div>
+  <div id="fb-q11" class="fb"></div>
+  <div class="nav-row" id="nav-q11" style="display:none"><button class="btn btn-n" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- S19 — QUIZ 4C -->
+<div class="slide" id="s19">
+  <div class="section-tag">🧠 Mini Quiz — Correlative</div>
+  <div class="quiz-hdr"><span class="qbadge">Q 3 of 3</span><span style="font-size:.85rem;color:#889">True/False · +10 pts</span></div>
+  <p class="q-text">True or False:<br><strong>"Correlative conjunctions always work in pairs."</strong></p>
+  <div class="tf-row">
+    <button class="tf-btn tf-t" onclick="chkTF(this,'q12',true)">TRUE ✓</button>
+    <button class="tf-btn tf-f" onclick="chkTF(this,'q12',false)">FALSE ✗</button>
+  </div>
+  <div id="fb-q12" class="fb"></div>
+  <div class="nav-row" id="nav-q12" style="display:none"><button class="btn btn-n" onclick="goNext()">Topic 5: Action! 🚀</button></div>
+</div>
+
+<!-- ══════════════════════════════════════
+     S20 — CONCEPT: CONJUNCTIONS IN ACTION
+════════════════════════════════════════ -->
+<div class="slide" id="s20">
+  <div class="level-tag">📍 Topic 5</div>
+  <span class="big-emoji">🚀</span>
+  <h2 class="slide-title">Conjunctions in Action!</h2>
+  <p class="slide-sub">Choosing the RIGHT conjunction for the RIGHT relationship</p>
+  <div class="slide-body">
+    <div class="box box-k">
+      Different conjunctions show different <strong>relationships between ideas</strong>.<br>
+      Choose wisely — the wrong conjunction can change the whole meaning!
+    </div>
+
+    <table class="c-table">
+      <tr><th>Relationship</th><th>Conjunctions to use</th><th>Example</th></tr>
+      <tr>
+        <td>➕ <strong>Addition</strong></td>
+        <td>and, both…and, not only…but also</td>
+        <td><em>She sings <strong>and</strong> dances.</em></td>
+      </tr>
+      <tr>
+        <td>⚡ <strong>Contrast</strong></td>
+        <td>but, yet, although, even though, however</td>
+        <td><em>I was tired, <strong>but</strong> I kept going.</em></td>
+      </tr>
+      <tr>
+        <td>💡 <strong>Cause</strong></td>
+        <td>because, since, as, for</td>
+        <td><em>I smiled <strong>because</strong> I won.</em></td>
+      </tr>
+      <tr>
+        <td>🎯 <strong>Result</strong></td>
+        <td>so, so that, therefore</td>
+        <td><em>It rained, <strong>so</strong> we went inside.</em></td>
+      </tr>
+      <tr>
+        <td>⏰ <strong>Time</strong></td>
+        <td>when, while, before, after, until</td>
+        <td><em>I read <strong>while</strong> she cooked.</em></td>
+      </tr>
+      <tr>
+        <td>🔮 <strong>Condition</strong></td>
+        <td>if, unless, as long as</td>
+        <td><em>You can go <strong>if</strong> you finish first.</em></td>
+      </tr>
+      <tr>
+        <td>🔀 <strong>Choice</strong></td>
+        <td>or, either…or, whether…or</td>
+        <td><em>Would you like tea <strong>or</strong> coffee?</em></td>
+      </tr>
+    </table>
+    <div class="box box-t">
+      💡 <strong>Sentence Combining Power:</strong><br>
+      Weak: <em>"It rained. We stayed inside."</em> (choppy!)<br>
+      Strong: <em>"Because it rained, we stayed inside."</em> (connected, flowing!)
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-b" onclick="goBack()">← Back</button>
+    <button class="btn btn-n" onclick="goNext()">Combining Sentences! ✍️</button>
+  </div>
+</div>
+
+<!-- S21 — COMBINING SENTENCES PRACTICE -->
+<div class="slide" id="s21">
+  <div class="level-tag">📍 Topic 5 (continued)</div>
+  <span class="big-emoji">✍️</span>
+  <h2 class="slide-title">Combining Sentences</h2>
+  <p class="slide-sub">See how the right conjunction changes the meaning — click to reveal each version!</p>
+  <div class="slide-body">
+    <div class="box box-e">
+      <strong>Two sentences:</strong> &nbsp; "I was nervous." &nbsp; + &nbsp; "I gave a great speech."
+    </div>
+    <p style="font-weight:700;font-size:.9rem;margin:10px 0 5px">How does the conjunction change the meaning?</p>
+    <div class="sentence-lab">
+      I was nervous, <span class="conj-word">and</span> I gave a great speech.
+      <span style="font-size:.8rem;color:#999;margin-left:6px">← Addition (just lists both facts)</span>
+    </div>
+    <div class="sentence-lab">
+      I was nervous, <span class="conj-word">but</span> I gave a great speech.
+      <span style="font-size:.8rem;color:#999;margin-left:6px">← Contrast (surprising result!)</span>
+    </div>
+    <div class="sentence-lab">
+      <span class="conj-word">Although</span> I was nervous, I gave a great speech.
+      <span style="font-size:.8rem;color:#999;margin-left:6px">← Contrast (same meaning, subordinating style)</span>
+    </div>
+    <div class="sentence-lab">
+      I was nervous, <span class="conj-word">so</span> I practised more before I gave my speech.
+      <span style="font-size:.8rem;color:#999;margin-left:6px">← Result (nervousness caused extra practice)</span>
+    </div>
+
+    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-f">How do you know which conjunction to pick when combining sentences?</div>
+        <div class="flip-b">✅ Ask: What is the RELATIONSHIP between the two ideas? Is it contrast? Addition? Cause? Result? The relationship tells you which conjunction to use!</div>
+      </div>
+    </div>
+    <div class="box box-t" style="margin-top:10px">
+      💡 <strong>MCAP tip:</strong> Questions often ask you to combine two sentences. Always identify the relationship first, THEN pick your conjunction!
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-b" onclick="goBack()">← Back</button>
+    <button class="btn btn-n" onclick="goNext()">Mini Quiz! 🧠</button>
+  </div>
+</div>
+
+<!-- S22 — QUIZ 5A -->
+<div class="slide" id="s22">
+  <div class="section-tag">🧠 Mini Quiz — Conjunctions in Action</div>
+  <div class="quiz-hdr"><span class="qbadge">Q 1 of 3</span><span style="font-size:.85rem;color:#889">Relationship · +10 pts</span></div>
+  <p class="q-text">Which conjunction shows <strong>CAUSE</strong>?</p>
+  <div class="opts" id="q13-opts">
+    <button class="opt" onclick="chk(this,'q13','A')"><span class="opt-l">A</span> although</button>
+    <button class="opt" onclick="chk(this,'q13','B')"><span class="opt-l">B</span> because</button>
+    <button class="opt" onclick="chk(this,'q13','C')"><span class="opt-l">C</span> when</button>
+    <button class="opt" onclick="chk(this,'q13','D')"><span class="opt-l">D</span> or</button>
+  </div>
+  <button class="btn btn-h" onclick="showHint('h13')">💡 Hint</button>
+  <div id="h13" class="hint-txt">"Although" shows contrast. "When" shows time. "Or" shows choice. Which one introduces a REASON or explanation for something happening?</div>
+  <div id="fb-q13" class="fb"></div>
+  <div class="nav-row" id="nav-q13" style="display:none"><button class="btn btn-n" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- S23 — QUIZ 5B -->
+<div class="slide" id="s23">
+  <div class="section-tag">🧠 Mini Quiz — Sentence Combining</div>
+  <div class="quiz-hdr"><span class="qbadge">Q 2 of 3</span><span style="font-size:.85rem;color:#889">Combining · +10 pts</span></div>
+  <p class="q-text">
+    Combine these two sentences to show <strong>cause and effect</strong>:<br>
+    <span style="display:block;margin:8px 0;padding:10px 14px;background:var(--parch);border-radius:10px;color:var(--mid)">"It rained all day." &nbsp;+&nbsp; "We stayed inside."</span>
+    Which option BEST shows that the rain <em>caused</em> them to stay inside?
+  </p>
+  <div class="opts" id="q14-opts">
+    <button class="opt" onclick="chk(this,'q14','A')"><span class="opt-l">A</span> It rained all day and we stayed inside.</button>
+    <button class="opt" onclick="chk(this,'q14','B')"><span class="opt-l">B</span> Because it rained all day, we stayed inside.</button>
+    <button class="opt" onclick="chk(this,'q14','C')"><span class="opt-l">C</span> It rained all day, yet we stayed inside.</button>
+    <button class="opt" onclick="chk(this,'q14','D')"><span class="opt-l">D</span> It rained all day while we stayed inside.</button>
+  </div>
+  <button class="btn btn-h" onclick="showHint('h14')">💡 Hint</button>
+  <div id="h14" class="hint-txt">"And" = addition. "Yet" = contrast (we stayed inside even though it rained — implies something odd). "While" = at the same time. "Because" = this is the REASON we stayed → cause!</div>
+  <div id="fb-q14" class="fb"></div>
+  <div class="nav-row" id="nav-q14" style="display:none"><button class="btn btn-n" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- S24 — QUIZ 5C -->
+<div class="slide" id="s24">
+  <div class="section-tag">🧠 Mini Quiz — Relationship</div>
+  <div class="quiz-hdr"><span class="qbadge">Q 3 of 3</span><span style="font-size:.85rem;color:#889">True/False · +10 pts</span></div>
+  <p class="q-text">
+    True or False:<br>
+    <span style="display:block;margin:8px 0;padding:10px 14px;background:var(--parch);border-radius:10px;color:var(--mid);font-style:italic">
+      "I was scared, <strong>although</strong> I pretended to be brave."
+    </span>
+    <strong>The word "although" shows CONTRAST in this sentence.</strong>
+  </p>
+  <div class="tf-row">
+    <button class="tf-btn tf-t" onclick="chkTF(this,'q15',true)">TRUE ✓</button>
+    <button class="tf-btn tf-f" onclick="chkTF(this,'q15',false)">FALSE ✗</button>
+  </div>
+  <button class="btn btn-h" onclick="showHint('h15')">💡 Hint</button>
+  <div id="h15" class="hint-txt">"Although" means "even though" — it connects two ideas that seem to <strong>contradict</strong> each other. Being scared BUT pretending to be brave is a contrast!</div>
+  <div id="fb-q15" class="fb"></div>
+  <div class="nav-row" id="nav-q15" style="display:none"><button class="btn btn-n" onclick="goNext()">🏆 Final Challenge!</button></div>
+</div>
+
+<!-- ══════════════════════════════════════
+     S25 — FINAL CHALLENGE INTRO
+════════════════════════════════════════ -->
+<div class="slide" id="s25">
+  <div style="text-align:center;padding:6px 0">
+    <span style="font-size:4rem;display:block;animation:emoBounce 1.5s ease-in-out infinite alternate">🏆</span>
+    <h2 style="font-family:var(--font-h);font-size:2.4rem;color:var(--mid)">FINAL CHALLENGE!</h2>
+    <p style="font-size:1.05rem;color:#667;margin:10px 0">
+      15 questions across all 5 topics.<br>Show every skill, Word Connector! 🌉
+    </p>
+    <div class="score-card">
+      <div style="font-size:1rem;opacity:.9">Your score so far</div>
+      <div class="score-big" id="fc-score-now">0</div>
+      <div style="font-size:.95rem;opacity:.9">points</div>
+    </div>
+    <div class="badges-row" id="badges-preview" style="justify-content:center;margin-top:8px"></div>
+    <div class="box box-k" style="text-align:left;margin-top:12px">
+      📋 <strong>Quick Reminders:</strong><br>
+      • <strong>FANBOYS</strong> = For, And, Nor, But, Or, Yet, So (coordinating)<br>
+      • <strong>Comma before FANBOYS</strong> only when joining two complete sentences<br>
+      • <strong>Subordinating</strong> = begins a dependent clause (because, when, if, although…)<br>
+      • <strong>Comma after</strong> a subordinate clause when it starts the sentence<br>
+      • <strong>Correlative</strong> = always in pairs (either/or · neither/nor · both/and)
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-b" onclick="goBack()">← Review</button>
+    <button class="btn btn-n" style="font-size:1.15rem;padding:12px 36px" onclick="goNext()">Begin Final! 🚀</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     FINAL CHALLENGE  FC Q1–Q15  (S26–S40)
+════════════════════════════════════════ -->
+
+<!-- FC Q1 -->
+<div class="slide" id="s26">
+  <div class="section-tag">🏆 Final Challenge</div>
+  <div class="fc-prog"><div class="fc-prog-bar" style="width:6.67%"></div></div>
+  <div class="quiz-hdr"><span class="qbadge">FC Q1/15</span><span style="font-size:.85rem;color:#889">+10 pts</span></div>
+  <p class="q-text">
+    Which word is the <strong>conjunction</strong> in this sentence?<br>
+    <span style="display:block;margin:8px 0;padding:10px 14px;background:var(--parch);border-radius:10px;font-style:italic;color:var(--mid)">"She sings and dances on stage every Friday."</span>
+  </p>
+  <div class="opts" id="fcq1-opts">
+    <button class="opt" onclick="chk(this,'fcq1','A')"><span class="opt-l">A</span> She</button>
+    <button class="opt" onclick="chk(this,'fcq1','B')"><span class="opt-l">B</span> sings</button>
+    <button class="opt" onclick="chk(this,'fcq1','C')"><span class="opt-l">C</span> and</button>
+    <button class="opt" onclick="chk(this,'fcq1','D')"><span class="opt-l">D</span> stage</button>
+  </div>
+  <div id="fb-fcq1" class="fb"></div>
+  <div class="nav-row" id="nav-fcq1" style="display:none"><button class="btn btn-n" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- FC Q2 -->
+<div class="slide" id="s27">
+  <div class="section-tag">🏆 Final Challenge</div>
+  <div class="fc-prog"><div class="fc-prog-bar" style="width:13.34%"></div></div>
+  <div class="quiz-hdr"><span class="qbadge">FC Q2/15</span></div>
+  <p class="q-text">What <strong>type</strong> of conjunction is the word <strong>"when"</strong>?</p>
+  <div class="opts" id="fcq2-opts">
+    <button class="opt" onclick="chk(this,'fcq2','A')"><span class="opt-l">A</span> Coordinating</button>
+    <button class="opt" onclick="chk(this,'fcq2','B')"><span class="opt-l">B</span> Subordinating</button>
+    <button class="opt" onclick="chk(this,'fcq2','C')"><span class="opt-l">C</span> Correlative</button>
+    <button class="opt" onclick="chk(this,'fcq2','D')"><span class="opt-l">D</span> Descriptive</button>
+  </div>
+  <button class="btn btn-h" onclick="showHint('hfc2')">💡 Hint</button>
+  <div id="hfc2" class="hint-txt">"When" introduces a dependent time clause — it creates a relationship between a main idea and a dependent idea. That's the job of a subordinating conjunction!</div>
+  <div id="fb-fcq2" class="fb"></div>
+  <div class="nav-row" id="nav-fcq2" style="display:none"><button class="btn btn-n" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- FC Q3 -->
+<div class="slide" id="s28">
+  <div class="section-tag">🏆 Final Challenge</div>
+  <div class="fc-prog"><div class="fc-prog-bar" style="width:20%"></div></div>
+  <div class="quiz-hdr"><span class="qbadge">FC Q3/15</span></div>
+  <p class="q-text">In the mnemonic <strong>FANBOYS</strong>, what does the letter <strong>F</strong> stand for?</p>
+  <div class="opts" id="fcq3-opts">
+    <button class="opt" onclick="chk(this,'fcq3','A')"><span class="opt-l">A</span> From</button>
+    <button class="opt" onclick="chk(this,'fcq3','B')"><span class="opt-l">B</span> For</button>
+    <button class="opt" onclick="chk(this,'fcq3','C')"><span class="opt-l">C</span> First</button>
+    <button class="opt" onclick="chk(this,'fcq3','D')"><span class="opt-l">D</span> Further</button>
+  </div>
+  <div id="fb-fcq3" class="fb"></div>
+  <div class="nav-row" id="nav-fcq3" style="display:none"><button class="btn btn-n" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- FC Q4 -->
+<div class="slide" id="s29">
+  <div class="section-tag">🏆 Final Challenge</div>
+  <div class="fc-prog"><div class="fc-prog-bar" style="width:26.67%"></div></div>
+  <div class="quiz-hdr"><span class="qbadge">FC Q4/15</span></div>
+  <p class="q-text">
+    Choose the conjunction that shows <strong>CONTRAST</strong>:<br>
+    <span style="display:block;margin:8px 0;padding:10px 14px;background:var(--parch);border-radius:10px;font-style:italic;color:var(--mid)">"I was hungry, ___ there was no food in the house."</span>
+  </p>
+  <div class="opts" id="fcq4-opts">
+    <button class="opt" onclick="chk(this,'fcq4','A')"><span class="opt-l">A</span> and</button>
+    <button class="opt" onclick="chk(this,'fcq4','B')"><span class="opt-l">B</span> so</button>
+    <button class="opt" onclick="chk(this,'fcq4','C')"><span class="opt-l">C</span> but</button>
+    <button class="opt" onclick="chk(this,'fcq4','D')"><span class="opt-l">D</span> or</button>
+  </div>
+  <div id="fb-fcq4" class="fb"></div>
+  <div class="nav-row" id="nav-fcq4" style="display:none"><button class="btn btn-n" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- FC Q5 -->
+<div class="slide" id="s30">
+  <div class="section-tag">🏆 Final Challenge</div>
+  <div class="fc-prog"><div class="fc-prog-bar" style="width:33.34%"></div></div>
+  <div class="quiz-hdr"><span class="qbadge">FC Q5/15</span></div>
+  <p class="q-text">
+    Complete the correlative pair:<br>
+    <span style="display:block;margin:8px 0;padding:10px 14px;background:var(--parch);border-radius:10px;font-style:italic;color:var(--mid)">"Either you apologise, ___ I'm leaving."</span>
+  </p>
+  <div class="opts" id="fcq5-opts">
+    <button class="opt" onclick="chk(this,'fcq5','A')"><span class="opt-l">A</span> nor</button>
+    <button class="opt" onclick="chk(this,'fcq5','B')"><span class="opt-l">B</span> and</button>
+    <button class="opt" onclick="chk(this,'fcq5','C')"><span class="opt-l">C</span> or</button>
+    <button class="opt" onclick="chk(this,'fcq5','D')"><span class="opt-l">D</span> because</button>
+  </div>
+  <button class="btn btn-h" onclick="showHint('hfc5')">💡 Hint</button>
+  <div id="hfc5" class="hint-txt">EITHER always pairs with OR. "Neither" pairs with "nor". Which pairing matches "either"?</div>
+  <div id="fb-fcq5" class="fb"></div>
+  <div class="nav-row" id="nav-fcq5" style="display:none"><button class="btn btn-n" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- FC Q6 -->
+<div class="slide" id="s31">
+  <div class="section-tag">🏆 Final Challenge</div>
+  <div class="fc-prog"><div class="fc-prog-bar" style="width:40%"></div></div>
+  <div class="quiz-hdr"><span class="qbadge">FC Q6/15</span></div>
+  <p class="q-text">Which sentence has <strong>correct punctuation</strong>?</p>
+  <div class="opts" id="fcq6-opts">
+    <button class="opt" onclick="chk(this,'fcq6','A')"><span class="opt-l">A</span> She studied hard, but she still failed the test.</button>
+    <button class="opt" onclick="chk(this,'fcq6','B')"><span class="opt-l">B</span> He likes cats and, dogs very much.</button>
+    <button class="opt" onclick="chk(this,'fcq6','C')"><span class="opt-l">C</span> I was tired so, I decided to nap.</button>
+    <button class="opt" onclick="chk(this,'fcq6','D')"><span class="opt-l">D</span> We sang, or danced at the party.</button>
+  </div>
+  <button class="btn btn-h" onclick="showHint('hfc6')">💡 Hint</button>
+  <div id="hfc6" class="hint-txt">Comma goes BEFORE the conjunction, not after it. And you only use a comma when joining two COMPLETE sentences. A: "She studied hard" (complete) + "but" + "she still failed" (complete) → comma before "but" is correct!</div>
+  <div id="fb-fcq6" class="fb"></div>
+  <div class="nav-row" id="nav-fcq6" style="display:none"><button class="btn btn-n" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- FC Q7 -->
+<div class="slide" id="s32">
+  <div class="section-tag">🏆 Final Challenge</div>
+  <div class="fc-prog"><div class="fc-prog-bar" style="width:46.67%"></div></div>
+  <div class="quiz-hdr"><span class="qbadge">FC Q7/15</span></div>
+  <p class="q-text">
+    Which conjunction best fills the blank?<br>
+    <span style="display:block;margin:8px 0;padding:10px 14px;background:var(--parch);border-radius:10px;font-style:italic;color:var(--mid)">"___ you finish your homework, you can watch television."</span>
+  </p>
+  <div class="opts" id="fcq7-opts">
+    <button class="opt" onclick="chk(this,'fcq7','A')"><span class="opt-l">A</span> But</button>
+    <button class="opt" onclick="chk(this,'fcq7','B')"><span class="opt-l">B</span> Or</button>
+    <button class="opt" onclick="chk(this,'fcq7','C')"><span class="opt-l">C</span> If</button>
+    <button class="opt" onclick="chk(this,'fcq7','D')"><span class="opt-l">D</span> And</button>
+  </div>
+  <button class="btn btn-h" onclick="showHint('hfc7')">💡 Hint</button>
+  <div id="hfc7" class="hint-txt">This sentence sets a CONDITION — one thing must happen before the other. Which conjunction group does condition belong to?</div>
+  <div id="fb-fcq7" class="fb"></div>
+  <div class="nav-row" id="nav-fcq7" style="display:none"><button class="btn btn-n" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- FC Q8 -->
+<div class="slide" id="s33">
+  <div class="section-tag">🏆 Final Challenge</div>
+  <div class="fc-prog"><div class="fc-prog-bar" style="width:53.34%"></div></div>
+  <div class="quiz-hdr"><span class="qbadge">FC Q8/15</span></div>
+  <p class="q-text">True or False:<br><strong>"Not only…but also" is a correlative conjunction.</strong></p>
+  <div class="tf-row">
+    <button class="tf-btn tf-t" onclick="chkTF(this,'fcq8',true)">TRUE ✓</button>
+    <button class="tf-btn tf-f" onclick="chkTF(this,'fcq8',false)">FALSE ✗</button>
+  </div>
+  <button class="btn btn-h" onclick="showHint('hfc8')">💡 Hint</button>
+  <div id="hfc8" class="hint-txt">Correlative conjunctions come in pairs. Does "not only…but also" come in two matching parts? Example: "She is not only kind but also generous."</div>
+  <div id="fb-fcq8" class="fb"></div>
+  <div class="nav-row" id="nav-fcq8" style="display:none"><button class="btn btn-n" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- FC Q9 -->
+<div class="slide" id="s34">
+  <div class="section-tag">🏆 Final Challenge</div>
+  <div class="fc-prog"><div class="fc-prog-bar" style="width:60%"></div></div>
+  <div class="quiz-hdr"><span class="qbadge">FC Q9/15</span></div>
+  <p class="q-text">What kind of clause does a <strong>subordinating conjunction</strong> introduce?</p>
+  <div class="opts" id="fcq9-opts">
+    <button class="opt" onclick="chk(this,'fcq9','A')"><span class="opt-l">A</span> Independent clause</button>
+    <button class="opt" onclick="chk(this,'fcq9','B')"><span class="opt-l">B</span> Simple sentence</button>
+    <button class="opt" onclick="chk(this,'fcq9','C')"><span class="opt-l">C</span> Dependent clause</button>
+    <button class="opt" onclick="chk(this,'fcq9','D')"><span class="opt-l">D</span> Main clause</button>
+  </div>
+  <button class="btn btn-h" onclick="showHint('hfc9')">💡 Hint</button>
+  <div id="hfc9" class="hint-txt">A subordinating conjunction makes one clause DEPEND on another. "Because I was tired" cannot stand alone — it depends on the main clause. What do we call a clause that depends on another?</div>
+  <div id="fb-fcq9" class="fb"></div>
+  <div class="nav-row" id="nav-fcq9" style="display:none"><button class="btn btn-n" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- FC Q10 -->
+<div class="slide" id="s35">
+  <div class="section-tag">🏆 Final Challenge</div>
+  <div class="fc-prog"><div class="fc-prog-bar" style="width:66.67%"></div></div>
+  <div class="quiz-hdr"><span class="qbadge">FC Q10/15</span></div>
+  <p class="q-text">Which conjunction shows <strong>TIME</strong>?</p>
+  <div class="opts" id="fcq10-opts">
+    <button class="opt" onclick="chk(this,'fcq10','A')"><span class="opt-l">A</span> because</button>
+    <button class="opt" onclick="chk(this,'fcq10','B')"><span class="opt-l">B</span> although</button>
+    <button class="opt" onclick="chk(this,'fcq10','C')"><span class="opt-l">C</span> after</button>
+    <button class="opt" onclick="chk(this,'fcq10','D')"><span class="opt-l">D</span> unless</button>
+  </div>
+  <div id="fb-fcq10" class="fb"></div>
+  <div class="nav-row" id="nav-fcq10" style="display:none"><button class="btn btn-n" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- FC Q11 -->
+<div class="slide" id="s36">
+  <div class="section-tag">🏆 Final Challenge</div>
+  <div class="fc-prog"><div class="fc-prog-bar" style="width:73.34%"></div></div>
+  <div class="quiz-hdr"><span class="qbadge">FC Q11/15</span></div>
+  <p class="q-text">
+    Combine: <em>"I was nervous."</em> + <em>"I performed well."</em> showing <strong>CONTRAST</strong>.<br>
+    Which is the best option?
+  </p>
+  <div class="opts" id="fcq11-opts">
+    <button class="opt" onclick="chk(this,'fcq11','A')"><span class="opt-l">A</span> I was nervous, so I performed well.</button>
+    <button class="opt" onclick="chk(this,'fcq11','B')"><span class="opt-l">B</span> I was nervous, although I performed well.</button>
+    <button class="opt" onclick="chk(this,'fcq11','C')"><span class="opt-l">C</span> I was nervous because I performed well.</button>
+    <button class="opt" onclick="chk(this,'fcq11','D')"><span class="opt-l">D</span> I was nervous and performed well.</button>
+  </div>
+  <button class="btn btn-h" onclick="showHint('hfc11')">💡 Hint</button>
+  <div id="hfc11" class="hint-txt">"So" = result. "Because" = cause. "And" = addition. "Although" = contrast (I was nervous, yet I still performed well — unexpected!).</div>
+  <div id="fb-fcq11" class="fb"></div>
+  <div class="nav-row" id="nav-fcq11" style="display:none"><button class="btn btn-n" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- FC Q12 -->
+<div class="slide" id="s37">
+  <div class="section-tag">🏆 Final Challenge</div>
+  <div class="fc-prog"><div class="fc-prog-bar" style="width:80%"></div></div>
+  <div class="quiz-hdr"><span class="qbadge">FC Q12/15</span></div>
+  <p class="q-text">Which word is <strong>NOT</strong> a subordinating conjunction?</p>
+  <div class="opts" id="fcq12-opts">
+    <button class="opt" onclick="chk(this,'fcq12','A')"><span class="opt-l">A</span> unless</button>
+    <button class="opt" onclick="chk(this,'fcq12','B')"><span class="opt-l">B</span> while</button>
+    <button class="opt" onclick="chk(this,'fcq12','C')"><span class="opt-l">C</span> but</button>
+    <button class="opt" onclick="chk(this,'fcq12','D')"><span class="opt-l">D</span> since</button>
+  </div>
+  <button class="btn btn-h" onclick="showHint('hfc12')">💡 Hint</button>
+  <div id="hfc12" class="hint-txt">Unless, while, and since are all subordinating conjunctions. One of these four words belongs to the FANBOYS group instead. Which one?</div>
+  <div id="fb-fcq12" class="fb"></div>
+  <div class="nav-row" id="nav-fcq12" style="display:none"><button class="btn btn-n" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- FC Q13 -->
+<div class="slide" id="s38">
+  <div class="section-tag">🏆 Final Challenge</div>
+  <div class="fc-prog"><div class="fc-prog-bar" style="width:86.67%"></div></div>
+  <div class="quiz-hdr"><span class="qbadge">FC Q13/15</span></div>
+  <p class="q-text">True or False:<br><strong>"FANBOYS stands for: For, And, Nor, But, Or, Yet, So."</strong></p>
+  <div class="tf-row">
+    <button class="tf-btn tf-t" onclick="chkTF(this,'fcq13',true)">TRUE ✓</button>
+    <button class="tf-btn tf-f" onclick="chkTF(this,'fcq13',false)">FALSE ✗</button>
+  </div>
+  <div id="fb-fcq13" class="fb"></div>
+  <div class="nav-row" id="nav-fcq13" style="display:none"><button class="btn btn-n" onclick="goNext()">Next →</button></div>
+</div>
+
+<!-- FC Q14 -->
+<div class="slide" id="s39">
+  <div class="section-tag">🏆 Final Challenge</div>
+  <div class="fc-prog"><div class="fc-prog-bar" style="width:93.34%"></div></div>
+  <div class="quiz-hdr"><span class="qbadge">FC Q14/15</span></div>
+  <p class="q-text">
+    Which conjunction best shows a <strong>RESULT</strong>?<br>
+    <span style="display:block;margin:8px 0;padding:10px 14px;background:var(--parch);border-radius:10px;font-style:italic;color:var(--mid)">"She practised every day, ___ she became an excellent pianist."</span>
+  </p>
+  <div class="opts" id="fcq14-opts">
+    <button class="opt" onclick="chk(this,'fcq14','A')"><span class="opt-l">A</span> but</button>
+    <button class="opt" onclick="chk(this,'fcq14','B')"><span class="opt-l">B</span> yet</button>
+    <button class="opt" onclick="chk(this,'fcq14','C')"><span class="opt-l">C</span> so</button>
+    <button class="opt" onclick="chk(this,'fcq14','D')"><span class="opt-l">D</span> for</button>
+  </div>
+  <button class="btn btn-h" onclick="showHint('hfc14')">💡 Hint</button>
+  <div id="hfc14" class="hint-txt">"But" and "yet" show contrast. "For" introduces a reason. "So" shows the RESULT or consequence of something — she practised → the result is becoming excellent!</div>
+  <div id="fb-fcq14" class="fb"></div>
+  <div class="nav-row" id="nav-fcq14" style="display:none"><button class="btn btn-n" onclick="goNext()">LAST ONE! 💪</button></div>
+</div>
+
+<!-- FC Q15 (FINAL) -->
+<div class="slide" id="s40">
+  <div class="section-tag">🏆 Final Challenge — LAST QUESTION! 🌟</div>
+  <div class="fc-prog"><div class="fc-prog-bar" style="width:100%"></div></div>
+  <div class="quiz-hdr"><span class="qbadge">FC Q15/15 🌟</span></div>
+  <p class="q-text">
+    Read the sentence:<br>
+    <span style="display:block;margin:8px 0;padding:12px 16px;background:var(--parch);border-radius:10px;font-style:italic;color:var(--mid)">
+      "<strong>Although</strong> the test was very hard, Jamal got a perfect score."
+    </span>
+    The word <strong>"although"</strong> in this sentence shows:
+  </p>
+  <div class="opts" id="fcq15-opts">
+    <button class="opt" onclick="chk(this,'fcq15','A')"><span class="opt-l">A</span> Time</button>
+    <button class="opt" onclick="chk(this,'fcq15','B')"><span class="opt-l">B</span> Cause</button>
+    <button class="opt" onclick="chk(this,'fcq15','C')"><span class="opt-l">C</span> Contrast</button>
+    <button class="opt" onclick="chk(this,'fcq15','D')"><span class="opt-l">D</span> Condition</button>
+  </div>
+  <button class="btn btn-h" onclick="showHint('hfc15')">💡 Hint</button>
+  <div id="hfc15" class="hint-txt">"Although" = "even though." A hard test AND a perfect score seem like opposites — they contrast with each other. The score was unexpected given how hard the test was.</div>
+  <div id="fb-fcq15" class="fb"></div>
+  <div class="nav-row" id="nav-fcq15" style="display:none">
+    <button class="btn btn-n" style="font-size:1.1rem;padding:12px 30px;background:linear-gradient(135deg,var(--hot),var(--glow))" onclick="goNext()">
+      🎊 See My Results!
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     S41 — FINAL RESULTS
+════════════════════════════════════════ -->
+<div class="slide" id="s41">
+  <div style="text-align:center">
+    <div class="stars-row" id="stars-row"></div>
+    <h2 style="font-family:var(--font-h);font-size:2.1rem;color:var(--mid);text-align:center" id="result-title">🌉 Junction Master!</h2>
+    <p id="result-msg" style="font-size:1rem;color:#667;margin-bottom:12px"></p>
+    <div class="score-card">
+      <div style="font-size:1rem;opacity:.9">Final Score</div>
+      <div class="score-big" id="final-score">0</div>
+      <div style="font-size:.95rem;opacity:.9">/ 300 points</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:12px 0">
+      <div style="background:#D4FFF0;border-radius:12px;padding:12px;text-align:center">
+        <div style="font-size:1.8rem;font-family:var(--font-h);color:var(--mid)" id="stat-ok">0</div>
+        <div style="font-size:.8rem;color:#557">Correct ✅</div>
+      </div>
+      <div style="background:#FFE8DD;border-radius:12px;padding:12px;text-align:center">
+        <div style="font-size:1.8rem;font-family:var(--font-h);color:#8B1A00" id="stat-err">0</div>
+        <div style="font-size:.8rem;color:#557">Incorrect ❌</div>
+      </div>
+      <div style="background:var(--soft);border-radius:12px;padding:12px;text-align:center">
+        <div style="font-size:1.8rem;font-family:var(--font-h);color:var(--mid)" id="stat-pct">0%</div>
+        <div style="font-size:.8rem;color:#557">Score %</div>
+      </div>
+    </div>
+    <h3 style="font-family:var(--font-h);color:var(--mid);margin:10px 0 5px">🏅 Badges Earned</h3>
+    <div class="badges-row" id="final-badges" style="justify-content:center"></div>
+    <h3 style="font-family:var(--font-h);color:var(--mid);margin:10px 0 5px;text-align:left">📝 Answer Review</h3>
+    <div id="review-list"></div>
+  </div>
+  <div class="nav-row" style="margin-top:16px">
+    <button class="btn btn-r" onclick="restart()">🔄 Play Again!</button>
+    <button class="btn btn-p" onclick="window.print()">🖨️ Print Results</button>
+  </div>
+</div>
+
+</div></div><!-- /slide-wrap /app -->
+
+<!-- ══════════════════════════════════════
+     JAVASCRIPT ENGINE
+════════════════════════════════════════ -->
+<script>
+// ──────────────────────── STATE ─
+let cur=0, score=0, streak=0, maxStreak=0, soundOn=false;
+let audioCtx=null;
+const qLog={};
+const TOTAL=42;
+
+// ──────────────────────── ANSWER KEY ─
+// a: correct letter OR boolean (TF questions)
+// e: explanation shown after answering
+const AK={
+  // Topic 1 — What is a conjunction?
+  q1: {a:'C', e:'✅ "But" is the conjunction — it connects "Maya ran fast" to "she missed the bus." It bridges the two ideas!'},
+  q2: {a:'C', e:'✅ "So" is a coordinating conjunction (FANBOYS) connecting "He was tired" and "he went to bed early."'},
+  q3: {a:true, e:'✅ TRUE! Conjunctions can join two complete sentences: "I was tired, so I rested." — "so" bridges both complete sentences.'},
+  // Topic 2 — FANBOYS
+  q4: {a:'C', e:'✅ "Yet" is a FANBOYS conjunction (For, And, Nor, But, Or, Yet, So). "Because", "although", and "when" are subordinating.'},
+  q5: {a:'C', e:'✅ "Yet" shows an unexpected or surprising result — studying hard but still failing is surprising. "But" also works, but "yet" emphasises the surprise more strongly.'},
+  q6: {a:'B', e:'✅ B is correct: "She was nervous" (complete sentence) + "but" + "she gave a great speech" (complete sentence) → comma before "but". A joins two words (no comma needed); C & D have misplaced commas.'},
+  // Topic 3 — Subordinating
+  q7: {a:'C', e:'✅ "Because" is subordinating — it introduces a dependent clause explaining a reason. AND, BUT, OR are FANBOYS (coordinating).'},
+  q8: {a:'A', e:'✅ "Because" introduces the REASON for being happy. "Although" would show contrast, "and" just adds information, "or" shows choice — none of those express cause.'},
+  q9: {a:true, e:'✅ TRUE! Example: "Because it rained, we stayed inside." The comma separates the subordinate clause at the start from the main clause.'},
+  // Topic 4 — Correlative
+  q10:{a:'B', e:'✅ "Nor" — NEITHER always pairs with NOR. "Neither Marcus nor his sister…" is the correct correlative pair.'},
+  q11:{a:'C', e:'✅ "Both…and" is a correlative pair. "And…but" are two separate FANBOYS; "because…so" are separate conjunctions; "when…while" are both subordinating but not a correlative pair.'},
+  q12:{a:true, e:'✅ TRUE! Correlative conjunctions ALWAYS come in pairs — either/or, neither/nor, both/and, not only/but also, whether/or.'},
+  // Topic 5 — In action
+  q13:{a:'B', e:'✅ "Because" shows CAUSE — it introduces the reason why something happened. "Although" = contrast; "when" = time; "or" = choice.'},
+  q14:{a:'B', e:'✅ "Because it rained all day, we stayed inside." — "because" introduces the CAUSE (rain). "And" just lists; "yet" would suggest staying inside was surprising; "while" shows simultaneous time.'},
+  q15:{a:true, e:'✅ TRUE! "Although" shows contrast — being scared AND pretending to be brave are opposing ideas. The conjunction highlights that unexpected contrast.'},
+  // Final Challenge
+  fcq1: {a:'C', e:'✅ "And" is the conjunction — it connects "sings" and "dances." Conjunctions are joining words.'},
+  fcq2: {a:'B', e:'✅ "When" is a subordinating conjunction — it introduces a dependent time clause. It is NOT in the FANBOYS group.'},
+  fcq3: {a:'B', e:'✅ F = For. FANBOYS: For, And, Nor, But, Or, Yet, So.'},
+  fcq4: {a:'C', e:'✅ "But" shows contrast — being hungry contrasts with having no food. "And" = addition; "so" = result; "or" = choice.'},
+  fcq5: {a:'C', e:'✅ EITHER always pairs with OR. "Either you apologise, or I\'m leaving."'},
+  fcq6: {a:'A', e:'✅ A is correct: comma BEFORE "but" joining two complete sentences. B puts the comma after "and" (wrong position). C puts the comma after "so" (wrong side). D is joining verbs only — no comma needed.'},
+  fcq7: {a:'C', e:'✅ "If" shows CONDITION — one thing must happen before the other can. It introduces the dependent condition clause.'},
+  fcq8: {a:true, e:'✅ TRUE! "Not only…but also" is a correlative pair: "She is not only kind but also generous." It always comes in two parts.'},
+  fcq9: {a:'C', e:'✅ A subordinating conjunction introduces a DEPENDENT clause — a clause that cannot stand alone and depends on the main clause for full meaning.'},
+  fcq10:{a:'C', e:'✅ "After" shows TIME — it tells when something happened in relation to something else. "Because" = cause; "although" = contrast; "unless" = condition.'},
+  fcq11:{a:'B', e:'✅ "Although" shows CONTRAST — being nervous yet still performing well is an unexpected, contrasting result. "So" = result; "because" = cause; "and" = addition.'},
+  fcq12:{a:'C', e:'✅ "But" is a FANBOYS (coordinating) conjunction, NOT subordinating. Unless, while, and since are all subordinating conjunctions.'},
+  fcq13:{a:true, e:'✅ TRUE! F=For, A=And, N=Nor, B=But, O=Or, Y=Yet, S=So. Seven coordinating conjunctions, one great mnemonic!'},
+  fcq14:{a:'C', e:'✅ "So" shows RESULT — practising every day RESULTED in becoming an excellent pianist. "But"/"yet" = contrast; "for" = reason/cause.'},
+  fcq15:{a:'C', e:'✅ CONTRAST — the test being "very hard" and Jamal getting "a perfect score" are opposite/unexpected ideas. "Although" highlights that surprising contrast.'},
+};
+
+// ──────────────────────── BADGES ─
+const BADGE_DEFS=[
+  {id:'first_word',   ic:'🔤',label:'First Answer!',    ok:()=>Object.keys(qLog).length>=1},
+  {id:'on_fire',      ic:'🔥',label:'On Fire! (x3)',    ok:()=>maxStreak>=3},
+  {id:'word_spotter', ic:'🔍',label:'Word Spotter',     ok:()=>['q1','q2','q3'].every(k=>qLog[k]?.ok)},
+  {id:'fanboys_fan',  ic:'🎸',label:'FANBOYS Fan!',     ok:()=>['q4','q5','q6'].every(k=>qLog[k]?.ok)},
+  {id:'clause_cap',   ic:'🌿',label:'Clause Captain',   ok:()=>['q7','q8','q9'].every(k=>qLog[k]?.ok)},
+  {id:'pair_pro',     ic:'🔗',label:'Pair Pro!',        ok:()=>['q10','q11','q12'].every(k=>qLog[k]?.ok)},
+  {id:'sent_star',    ic:'🚀',label:'Sentence Star',    ok:()=>['q13','q14','q15'].every(k=>qLog[k]?.ok)},
+  {id:'conj_hero',    ic:'🏆',label:'Conjunction Hero', ok:()=>score>=150},
+  {id:'lightning',    ic:'⚡',label:'Lightning Thinker',ok:()=>streak>=5},
+  {id:'junc_master',  ic:'🌉',label:'Junction Master!', ok:()=>{
+    const fc=['fcq1','fcq2','fcq3','fcq4','fcq5','fcq6','fcq7','fcq8',
+              'fcq9','fcq10','fcq11','fcq12','fcq13','fcq14','fcq15'];
+    return fc.every(k=>qLog[k]?.ok);
+  }},
+];
+const earnedBadges=new Set();
+
+function checkBadges(){
+  BADGE_DEFS.forEach(b=>{
+    if(!earnedBadges.has(b.id)&&b.ok()){
+      earnedBadges.add(b.id);
+      showToast(`${b.ic} Badge: ${b.label}!`);
+      playSound('levelup');
+    }
+  });
+}
+
+// ──────────────────────── AUDIO ─
+function getAC(){if(!audioCtx){try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}return audioCtx;}
+function playSound(t){
+  if(!soundOn)return; const ac=getAC(); if(!ac)return;
+  const o=ac.createOscillator(),g=ac.createGain();
+  o.connect(g);g.connect(ac.destination);const n=ac.currentTime;
+  if(t==='correct'){
+    o.type='sine';
+    [523,659,784,1047].forEach((f,i)=>o.frequency.setValueAtTime(f,n+i*.1));
+    g.gain.setValueAtTime(.24,n);g.gain.exponentialRampToValueAtTime(.001,n+.6);
+    o.start(n);o.stop(n+.6);
+  } else if(t==='wrong'){
+    o.type='sawtooth';
+    [300,240,200].forEach((f,i)=>o.frequency.setValueAtTime(f,n+i*.13));
+    g.gain.setValueAtTime(.18,n);g.gain.exponentialRampToValueAtTime(.001,n+.45);
+    o.start(n);o.stop(n+.45);
+  } else if(t==='levelup'){
+    o.type='sine';
+    [523,587,659,784,1047].forEach((f,i)=>o.frequency.setValueAtTime(f,n+i*.1));
+    g.gain.setValueAtTime(.22,n);g.gain.exponentialRampToValueAtTime(.001,n+.75);
+    o.start(n);o.stop(n+.75);
+  } else {
+    o.type='sine';o.frequency.value=440;
+    g.gain.setValueAtTime(.08,n);g.gain.exponentialRampToValueAtTime(.001,n+.1);
+    o.start(n);o.stop(n+.1);
+  }
+}
+function toggleSound(){
+  soundOn=!soundOn;
+  document.getElementById('snd-btn').textContent=soundOn?'🔊':'🔇';
+  if(soundOn){getAC();playSound('click');}
+}
+
+// ──────────────────────── NAVIGATION ─
+// Section celebrations after last quiz of each topic
+const SECTION_CEL={
+  5:  {em:'🔍',t:'Word Detective!',    m:'You found conjunctions like a pro! Topic 1 complete! 🕵️'},
+  10: {em:'🎸',t:'FANBOYS Champ!',     m:'You know your FANBOYS cold! Topic 2 crushed! 🎸'},
+  15: {em:'🌿',t:'Clause Captain!',    m:'Subordinating conjunctions — no problem for you! 🌿'},
+  19: {em:'🔗',t:'Pair Perfect!',      m:'Correlative pairs — you matched them all! 🔗'},
+  24: {em:'🚀',t:'Sentence Superstar!',m:'Conjunctions in action — you chose them all correctly! 🚀'},
+};
+
+function showSlide(i){
+  document.querySelectorAll('.slide').forEach((s,j)=>{
+    s.classList.remove('active');
+    if(j===i)s.classList.add('active');
+  });
+  cur=i;updateHUD();
+  if(i===25){
+    document.getElementById('fc-score-now').textContent=score;
+    renderBadgesPreview();
+  }
+  if(i===41)buildResults();
+  const a=document.querySelector('.slide.active');
+  if(a)a.scrollTop=0;
+}
+
+function goNext(){
+  playSound('click');
+  if(cur>=TOTAL-1)return;
+  const cel=SECTION_CEL[cur];
+  if(cel){
+    triggerCel(cel.em,cel.t,cel.m);
+    setTimeout(()=>{closeCel();showSlide(cur+1);},120);
+  } else {
+    showSlide(cur+1);
+  }
+}
+function goBack(){playSound('click');if(cur>0)showSlide(cur-1);}
+
+function updateHUD(){
+  const p=Math.round((cur/(TOTAL-1))*100);
+  document.getElementById('pb').style.width=p+'%';
+  document.getElementById('hud-score').textContent=`⭐ ${score} pts`;
+  document.getElementById('hud-streak').textContent=`🔥 ${streak}`;
+}
+
+// ──────────────────────── ANSWER CHECKING ─
+function chk(btn,qId,sel){
+  const ans=AK[qId]; if(!ans)return;
+  const opts=btn.parentElement.querySelectorAll('.opt');
+  opts.forEach(b=>b.disabled=true);
+  const ok=(sel===ans.a);
+  qLog[qId]={ok,sel,explanation:ans.e};
+  if(ok){
+    btn.classList.add('correct','spring');
+    handleOk();
+  } else {
+    btn.classList.add('wrong','quake');
+    opts.forEach(b=>{if(b.querySelector('.opt-l').textContent===ans.a)b.classList.add('correct');});
+    handleErr();
+  }
+  const fb=document.getElementById(`fb-${qId}`);
+  if(fb){fb.textContent=(ok?'✅ ':'❌ ')+ans.e;fb.className=`fb show ${ok?'fb-ok':'fb-err'}`;}
+  const nav=document.getElementById(`nav-${qId}`);
+  if(nav)nav.style.display='flex';
+  checkBadges();
+}
+
+function chkTF(btn,qId,sel){
+  const ans=AK[qId]; if(!ans)return;
+  const tfBtns=btn.parentElement.querySelectorAll('.tf-btn');
+  tfBtns.forEach(b=>b.disabled=true);
+  const ok=(sel===ans.a);
+  qLog[qId]={ok,sel,explanation:ans.e};
+  btn.classList.add(sel?'tf-sel-t':'tf-sel-f');
+  if(ok){
+    btn.style.outline='4px solid var(--mint)';
+    handleOk();
+  } else {
+    btn.classList.add('quake');
+    tfBtns.forEach(b=>{if(b.classList.contains('tf-t')===ans.a)b.style.outline='4px solid var(--mint)';});
+    handleErr();
+  }
+  const fb=document.getElementById(`fb-${qId}`);
+  if(fb){fb.textContent=(ok?'✅ ':'❌ ')+ans.e;fb.className=`fb show ${ok?'fb-ok':'fb-err'}`;}
+  const nav=document.getElementById(`nav-${qId}`);
+  if(nav)nav.style.display='flex';
+  checkBadges();
+}
+
+function handleOk(){
+  streak++; if(streak>maxStreak)maxStreak=streak;
+  let pts=10;
+  if(streak>=3){pts+=15; showToast(`🔥 ${streak} Streak! +15 Bonus!`);}
+  score+=pts; playSound('correct'); updateHUD();
+  if([30,90,150,210,270].includes(score))triggerConfetti();
+}
+function handleErr(){streak=0;playSound('wrong');updateHUD();}
+
+function showHint(id){const h=document.getElementById(id);if(h)h.classList.toggle('open');}
+
+// ──────────────────────── TOAST ─
+function showToast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._tmr);t._tmr=setTimeout(()=>t.classList.remove('show'),2600);
+}
+
+// ──────────────────────── CONFETTI ─
+// Purpose: Positive reinforcement at score milestones
+let cPts=[],cAnim=null;
+function triggerConfetti(){
+  const cv=document.getElementById('confetti');
+  cv.width=innerWidth;cv.height=innerHeight;
+  const cx=cv.getContext('2d');
+  const cols=['#F72585','#FFD60A','#4CC9F0','#06D6A0','#FF6B6B','#7B2FBE','#FFBE0B'];
+  for(let i=0;i<130;i++)
+    cPts.push({
+      x:Math.random()*cv.width,y:Math.random()*cv.height-cv.height,
+      r:Math.random()*7+3,col:cols[~~(Math.random()*cols.length)],
+      vx:Math.random()*4-2,vy:Math.random()*3+1.5,
+      spin:Math.random()*.3-.15,angle:Math.random()*Math.PI*2,grav:.12
+    });
+  function draw(){
+    cx.clearRect(0,0,cv.width,cv.height);
+    cPts.forEach(p=>{
+      cx.save();cx.translate(p.x,p.y);cx.rotate(p.angle);
+      cx.fillStyle=p.col;cx.beginPath();cx.rect(-p.r/2,-p.r/2,p.r,p.r*.5);cx.fill();cx.restore();
+      p.x+=p.vx;p.y+=p.vy;p.vy+=p.grav;p.angle+=p.spin;
+    });
+    cPts=cPts.filter(p=>p.y<cv.height+50);
+    if(cPts.length>0)cAnim=requestAnimationFrame(draw);
+    else cx.clearRect(0,0,cv.width,cv.height);
+  }
+  if(cAnim)cancelAnimationFrame(cAnim);
+  cAnim=requestAnimationFrame(draw);
+}
+
+// ──────────────────────── CELEBRATION OVERLAY ─
+function triggerCel(em,title,msg){
+  document.getElementById('cel-em').textContent=em;
+  document.getElementById('cel-title').textContent=title;
+  document.getElementById('cel-msg').textContent=msg;
+  document.getElementById('cel-overlay').classList.add('show');
+  triggerConfetti();playSound('levelup');
+}
+function closeCel(){document.getElementById('cel-overlay').classList.remove('show');}
+
+// ──────────────────────── BADGES PREVIEW ─
+function renderBadgesPreview(){
+  const w=document.getElementById('badges-preview');if(!w)return;w.innerHTML='';
+  earnedBadges.forEach(bid=>{
+    const d=BADGE_DEFS.find(b=>b.id===bid);if(!d)return;
+    const el=document.createElement('div');el.className='badge-el';
+    el.textContent=`${d.ic} ${d.label}`;w.appendChild(el);
+  });
+}
+
+// ──────────────────────── RESULTS ─
+// Purpose: End-of-lesson score summary = mastery encouragement (retry allowed)
+function buildResults(){
+  checkBadges();triggerConfetti();
+  const total=30;
+  const correct=Object.values(qLog).filter(q=>q.ok).length;
+  const wrong=Object.keys(qLog).length-correct;
+  const pct=Math.round((correct/total)*100);
+
+  document.getElementById('final-score').textContent=score;
+  document.getElementById('stat-ok').textContent=correct;
+  document.getElementById('stat-err').textContent=wrong;
+  document.getElementById('stat-pct').textContent=pct+'%';
+
+  // Animated stars — spaced timing creates delight
+  const sr=document.getElementById('stars-row');sr.innerHTML='';
+  const ns=pct>=90?5:pct>=70?4:pct>=50?3:pct>=30?2:1;
+  for(let i=0;i<5;i++){
+    const s=document.createElement('span');s.className='star-ic';
+    s.textContent=i<ns?'⭐':'☆';s.style.animationDelay=(i*.2)+'s';
+    sr.appendChild(s);
+  }
+
+  const tEl=document.getElementById('result-title'),mEl=document.getElementById('result-msg');
+  if(pct>=90){tEl.textContent='🌉 Junction Master!';mEl.textContent='Incredible! You\'ve mastered conjunctions! MCAP-ready! 🏆';}
+  else if(pct>=70){tEl.textContent='🎸 FANBOYS Star!';mEl.textContent='Great work! A little more practice and you\'ll be unstoppable! 💪';}
+  else if(pct>=50){tEl.textContent='🌿 Clause Explorer!';mEl.textContent='Good effort! Review the topics you missed and try again!';}
+  else{tEl.textContent='🔗 Keep Connecting!';mEl.textContent='Every great writer starts somewhere! Review the lessons — you\'ve got this!';}
+
+  // Badges
+  const bw=document.getElementById('final-badges');bw.innerHTML='';
+  if(!earnedBadges.size){
+    bw.innerHTML='<span style="color:#889;font-size:.9rem">Keep going to earn badges! 🏅</span>';
+  } else {
+    earnedBadges.forEach(bid=>{
+      const d=BADGE_DEFS.find(b=>b.id===bid);if(!d)return;
+      const el=document.createElement('div');el.className='badge-el';
+      el.textContent=`${d.ic} ${d.label}`;bw.appendChild(el);
+    });
+  }
+
+  // Review list — active recall: see what was right and wrong
+  const rl=document.getElementById('review-list');rl.innerHTML='';
+  const labels={
+    q1:'What Is a Conj. Q1',q2:'What Is a Conj. Q2',q3:'What Is a Conj. Q3',
+    q4:'FANBOYS Q1',q5:'FANBOYS Q2',q6:'FANBOYS Q3',
+    q7:'Subordinating Q1',q8:'Subordinating Q2',q9:'Subordinating Q3',
+    q10:'Correlative Q1',q11:'Correlative Q2',q12:'Correlative Q3',
+    q13:'In Action Q1',q14:'In Action Q2',q15:'In Action Q3',
+    fcq1:'FC Q1',fcq2:'FC Q2',fcq3:'FC Q3',fcq4:'FC Q4',fcq5:'FC Q5',
+    fcq6:'FC Q6',fcq7:'FC Q7',fcq8:'FC Q8',fcq9:'FC Q9',fcq10:'FC Q10',
+    fcq11:'FC Q11',fcq12:'FC Q12',fcq13:'FC Q13',fcq14:'FC Q14',fcq15:'FC Q15',
+  };
+  Object.entries(qLog).forEach(([k,v])=>{
+    const item=document.createElement('div');item.className='rev-item';
+    item.innerHTML=`<span style="font-size:1.1rem;flex-shrink:0">${v.ok?'✅':'❌'}</span>
+      <div><strong>${labels[k]||k}:</strong> ${v.explanation}</div>`;
+    rl.appendChild(item);
+  });
+}
+
+// ──────────────────────── RESTART ─
+function restart(){
+  score=0;streak=0;maxStreak=0;
+  earnedBadges.clear();
+  Object.keys(qLog).forEach(k=>delete qLog[k]);
+  document.querySelectorAll('.opt').forEach(b=>{
+    b.disabled=false;b.classList.remove('correct','wrong','spring','quake');b.style.outline='';
+  });
+  document.querySelectorAll('.tf-btn').forEach(b=>{
+    b.disabled=false;b.style.outline='';b.classList.remove('tf-sel-t','tf-sel-f','quake');
+  });
+  document.querySelectorAll('.fb').forEach(f=>{f.classList.remove('show');f.textContent='';});
+  document.querySelectorAll('[id^="nav-"]').forEach(n=>n.style.display='none');
+  document.querySelectorAll('.hint-txt').forEach(h=>h.classList.remove('open'));
+  document.querySelectorAll('.flip-card').forEach(f=>f.classList.remove('flipped'));
+  document.querySelectorAll('.reveal-word').forEach(w=>w.classList.remove('revealed'));
+  updateHUD();showSlide(0);
+}
+
+// ──────────────────────── KEYBOARD ─
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')goNext();
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')goBack();
+  if(e.key===' '){e.preventDefault();goNext();}
+});
+
+// ──────────────────────── FLOATING WORD BACKGROUND ─
+// Purpose: Thematic atmosphere — the words themselves are the subject matter
+function buildWordBg(){
+  const bg=document.getElementById('word-bg');
+  const words=['and','but','or','yet','so','for','nor',
+               'because','although','when','while','if',
+               'unless','since','after','before','until',
+               'either…or','neither…nor','both…and','not only…but also'];
+  for(let i=0;i<40;i++){
+    const w=document.createElement('div');w.className='word-float';
+    w.textContent=words[~~(Math.random()*words.length)];
+    const sz=0.7+Math.random()*1.2;
+    w.style.cssText=`
+      left:${Math.random()*100}%;
+      font-size:${sz}rem;
+      animation-duration:${10+Math.random()*14}s;
+      animation-delay:${Math.random()*10}s;
+      opacity:${0.08+Math.random()*0.14};
+    `;
+    bg.appendChild(w);
+  }
+  // City lights (small fixed glowing dots)
+  const cols=['#F72585','#FFD60A','#4CC9F0','#06D6A0','#7B2FBE','#FF6B6B'];
+  for(let i=0;i<20;i++){
+    const l=document.createElement('div');l.className='city-light';
+    const sz=Math.random()*4+1;
+    l.style.cssText=`
+      width:${sz}px;height:${sz}px;
+      left:${Math.random()*100}%;top:${Math.random()*100}%;
+      background:${cols[~~(Math.random()*cols.length)]};
+      animation-duration:${1.5+Math.random()*3}s;
+      animation-delay:${Math.random()*3}s;
+    `;
+    document.body.appendChild(l);
+  }
+}
+
+// ──────────────────────── INIT ─
+buildWordBg();
+showSlide(0);
+</script>
+</body>
+</html>
